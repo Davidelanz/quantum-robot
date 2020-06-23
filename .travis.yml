@@ -1,23 +1,29 @@
-cache:
-  apt: true
-  directories:
-  - $HOME/.cache/pip
-  - $HOME/.ccache
+# https://docs.travis-ci.com/user/customizing-the-build
+
+dist: 
+- bionic
+- xenial
+
+git:
+  depth: false
 
 language: python
 python:
   - "3.6"
   - "3.7"
   - "3.8"
-  - "3.8-dev"
-  - "nightly"
+  - "pypy3"
 
 # command to install dependencies
 install:
   - pip install -r requirements.txt
-  - pip install -e .
+  - pip install -e . # install quantum-robot package
+  - pip install coverage # for CodeCov integration
 
 # command to run tests
 script:
-  - pytest
+  # - pytest # (without coverage)
+  - coverage run -m pytest # (with coverage)
 
+after_success:
+  bash <(curl -s https://codecov.io/bash)
