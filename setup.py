@@ -45,4 +45,13 @@ setuptools.setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
     python_requires='>=3.6',
+    install_requires=[
+        'pandas>=1.0.4'
+        'numpy>=1.18.5'
+        'qiskit>=0.19.3'
+        'pytest>=5.4.3'
+        'opencv-python>=4.2.0.34'
+        'imutils>=0.5.3'
+        'Matplotlib>=2.1.1'
+    ],
 )
