@@ -1,5 +1,7 @@
 # https://docs.travis-ci.com/user/customizing-the-build
 
+os: linux
+
 dist: 
 - bionic
 - xenial
@@ -12,7 +14,6 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
-  - "pypy3"
 
 # command to install dependencies
 install:
@@ -26,4 +27,4 @@ script:
   - coverage run -m pytest # (with coverage)
 
 after_success:
-  bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash)
