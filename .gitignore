@@ -2,3 +2,8 @@ README.temporary
 **.drawio
 .vscode/
 qrobot_env/
+Pipfile
+
+quantum_robot.egg-info/
+
+**/__pycache__/
