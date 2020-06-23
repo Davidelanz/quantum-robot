@@ -81,7 +81,16 @@ class AngularModel():
         return angle
 
     def measure(self, shots=1, backend=QASM_BACKEND):
-        """"""
+        """Measures the qubits using a IBMQ backend
+
+        Parameters:
+            shots (int): number of measurement shots 
+            backend : quantum backend (QASM simulator as default)
+
+        Returns: 
+            counts (dict): state occurrences counts {"state": count}
+        """
+
         # Apply barrier
         self.circ.barrier()
 
@@ -96,7 +105,7 @@ class AngularModel():
         return counts
 
     def decode(self):
-        """"""
+        """The decoding for the AngularModel is a single measurement"""
         return self.measure()
 
 
