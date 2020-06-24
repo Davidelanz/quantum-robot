@@ -35,7 +35,7 @@ The project was started in 2019 by Davide Lanza as a Master thesis research, wit
 
 It is currently maintained by Davide Lanza.
 
-Website: https://quantum-robot.org
+Website: http://quantum-robot.org
 
 
 ## Summary
@@ -71,6 +71,7 @@ After installation, you can launch the test suite from outside the source direct
 pytest qrobot
 ```
 
+Computation speed tests [available](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb).
 
 ## License[↑](#summary)
 
