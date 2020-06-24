@@ -62,6 +62,36 @@ def test_decode():
     assert model.decode() == {'010': 1}
 
 
+def test_query():
+    """Tests query on the input itself"""
+
+    # 3-dimensional model, 2-events time window
+    model = AngularModel(n=5, tau=1)
+
+    # Define an input data value (tau = 1)
+    input_data = [.1, .4, .5, .2, .1]
+
+    # Encode input_data
+    for dim in range(1, model.n):
+        model.encode(input_data[dim-1], dim)
+
+    # Apply a query on the input_data (to obtain an unambiguous result)
+    model.query(input_data)
+
+    # See if the actual output is the |00...0> state
+    assert model.decode() == {'00000': 1}
+
+    # Check the exception for wrong targets:
+    with pytest.raises(ValueError):
+        assert model.query([1, .2])  # size < n
+    with pytest.raises(ValueError):
+        assert model.query([1, .2, 0, 0, 0, 1, .2, 0])  # size > n
+
+    # Check the exception for wrong target elements:
+    with pytest.raises(ValueError):
+        assert model.query([.1, .4, 5, .2, .1])  # third element is a 5
+
+
 def test_plot():
     """Tests if the print and plot functions cause any error"""
     model = AngularModel(1, 1)
@@ -75,7 +105,7 @@ def test_workflow1():
     # 3-dimensional model, 2-events time window
     model = AngularModel(3, 2)
 
-    # Define an input data sequence
+    # Define an input data sequence (tau = 2)
     input_data = list()
     input_data.append([0.8, 0.8, 1])
     input_data.append([0.9, 0.6, .9])

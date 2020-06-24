@@ -33,6 +33,8 @@ class Model(ABC):
     -------
     encode(input, dim)
         encodes the input along a dimension in the correspondent qubit
+    query(target)
+        changes the basis of the quantum system choosing target as the |00...0> state
     decode()
         exploits the information encoded in the qubit (abstract class)
     """
@@ -91,6 +93,11 @@ class Model(ABC):
         return counts
 
     @abstractmethod
+    def query(self, target):
+        """Changes the basis of the quantum system choosing target as the |00...0> state"""
+        pass
+
+    @abstractmethod
     def decode(self):
         """Exploits the information encoded in the qubit (abstract class)"""
         pass
@@ -128,11 +135,12 @@ class AngularModel(Model):
         """Encodes the input in the correspondent qubit
 
         Parameters:
-            input (float): the input, must be a number between 0 and 1 inclusive
-            dim (int): the model dimension which the input belongs
+            input (float): the scalar input for a certain dimension,
+                must be a number between 0 and 1 inclusive.
+            dim (int): the model dimension which the input belongs.
 
         Returns:
-            angle (float): the rotation angle applied to the qubit
+            angle (float): the rotation angle applied to the qubit.
         """
 
         # Check the argument dim
@@ -150,6 +158,27 @@ class AngularModel(Model):
         # !!! Qubit index start at 0, dimensions at 1:
         self.circ.ry(angle, dim-1)
         return angle
+
+    def query(self, target):
+        """Changes the basis of the quantum system choosing target as the |00...0> state
+         
+        Parameters:
+            target (list of float): the target state, must be a list containing
+                n floats (between 0 and 1 inclusive).
+        """        
+        # Dimensionality check on the vector
+        if len(target) is not self.n:
+            raise ValueError(f"target must be a {self.n}-dimensional vector!")
+        for element in target:
+            if element > 1 or element < 0:
+                raise ValueError(f"target elements must be all between 0 and 1 inclusive!")
+
+        # Apply negative (inverse) rotations to the qubit in order to 
+        # have the target state as the new |00...0> state.
+        # Loop through all the dimensions:
+        for i in range(0, self.n):
+            angle = - np.pi*target[i]
+            self.circ.ry(angle, i)
 
     def decode(self):
         """The decoding for the AngularModel is a single measurement"""
