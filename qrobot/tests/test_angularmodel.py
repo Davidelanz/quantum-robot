@@ -3,7 +3,7 @@ from qrobot.models import AngularModel
 
 
 def test_init():
-    """test that exceptions are raised for n and tau not being correct"""
+    """Tests if exceptions are raised for n and tau not being correct"""
 
     # Testing wrong n
     with pytest.raises(TypeError):
@@ -21,7 +21,7 @@ def test_init():
 
 
 def test_encode():
-    """test that exceptions are raised for input and dimension not being correct"""
+    """Tests if exceptions are raised for input and dimension not being correct"""
 
     model = AngularModel(n=2, tau=2)
 
@@ -43,18 +43,59 @@ def test_encode():
         assert model.encode(.55, 4)
 
 
-def test_measure():
-    """test that a certain measurements is carried out correctly"""
+def test_decode():
+    """Tests decoding for unambiguous inputs"""
 
     model = AngularModel(n=1, tau=1)
-    # Encode a full input on the dimension 1
-    model.encode(1, 1)
-    # check the measurement
-    assert model.measure(shots=1) == {'1':1}
+    input_data = 1 # unambiguous input
+    model.encode(input_data, dim=1)
+    assert model.decode() == {'1': 1}
 
     model = AngularModel(n=1, tau=1)
-    assert model.measure(shots=1) == {'0':1}
+    input_data = 0 # unambiguous input
+    model.encode(input_data, dim=1)
+    assert model.decode() == {'0': 1}
 
     model = AngularModel(n=3, tau=1)
-    model.encode(1, 2)
-    assert model.measure(shots=1) == {'010':1}
+    input_data = 1 # unambiguous input
+    model.encode(input_data, dim=2)
+    assert model.decode() == {'010': 1}
+
+
+def test_plot():
+    """Tests if the print and plot functions cause any error"""
+    model = AngularModel(1,1)
+    model.print()
+    model.plot_state()
+
+def test_workflow1():
+    """Tests if a full encode-decode workflow is carried out correctly"""
+
+    # 3-dimensional model, 2-events time window
+    model = AngularModel(3, 2)
+
+    # Define an input data sequence
+    input_data = list()
+    input_data.append([0.8, 0.8, 1])
+    input_data.append([0.9, 0.6, .9])
+
+    # Encode the sequence in the model
+    for t in range(0, model.tau):
+        for dim in range(1, model.n+1):
+            model.encode(input_data[t][dim-1], dim)
+
+    # Check if at least 70% of the shots are 111 (coherent with the input)
+    shots = 10000
+    result = model.measure(shots)
+    assert result['111']/shots >= .7
+
+    # Check again for a different input
+    model = AngularModel(3, 2)
+    input_data = list()
+    input_data.append([0.1, 0.2, 1])
+    input_data.append([0.0, 0.1, .9])
+    for t in range(0, model.tau):
+        for dim in range(1, model.n+1):
+            model.encode(input_data[t][dim-1], dim)
+    result = model.measure(shots)
+    assert result['100']/shots >= .8
