@@ -9,3 +9,5 @@ quantum_robot.egg-info/
 **/__pycache__/
 
 dist/
+
+notebooks/.ipynb_checkpoints/

@@ -16,7 +16,7 @@
     <a href="#" alt="Python">
         <img src="https://img.shields.io/badge/python-3.6 | 3.7 | 3.8 -blue" />
     </a>
-    <a href="#" alt="PyPi version">
+    <a href="https://pypi.org/project/quantum-robot/" alt="PyPi version">
         <img src="https://badge.fury.io/py/quantum-robot.svg" />
     </a>
 
