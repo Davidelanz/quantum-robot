@@ -47,26 +47,27 @@ def test_decode():
     """Tests decoding for unambiguous inputs"""
 
     model = AngularModel(n=1, tau=1)
-    input_data = 1 # unambiguous input
+    input_data = 1  # unambiguous input
     model.encode(input_data, dim=1)
     assert model.decode() == {'1': 1}
 
     model = AngularModel(n=1, tau=1)
-    input_data = 0 # unambiguous input
+    input_data = 0  # unambiguous input
     model.encode(input_data, dim=1)
     assert model.decode() == {'0': 1}
 
     model = AngularModel(n=3, tau=1)
-    input_data = 1 # unambiguous input
+    input_data = 1  # unambiguous input
     model.encode(input_data, dim=2)
     assert model.decode() == {'010': 1}
 
 
 def test_plot():
     """Tests if the print and plot functions cause any error"""
-    model = AngularModel(1,1)
+    model = AngularModel(1, 1)
     model.print()
     model.plot_state()
+
 
 def test_workflow1():
     """Tests if a full encode-decode workflow is carried out correctly"""
