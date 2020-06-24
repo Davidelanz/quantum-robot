@@ -31,7 +31,7 @@
 
 `quantum-robot` is a Python package for quantum-like perception modeling for robotics. The package exploits [Qiksit](https://qiskit.org/) framework, implementing the models on quantum circuits which can be simulated on a classical computer or sent to a quantum backend (service provided by [IBM Quantum Experience](https://quantum-computing.ibm.com/)). A [ROS](https://www.ros.org/) implementation is provided, in order to easily adapt the framework for real-time applications in robotics.
 
-The project was started in 2019 by Davide Lanza as a Master thesis research, with the help of Fulvio Mastrogiovanni and Paolo Solinas.
+The project was started in 2019 by Davide Lanza as a Master thesis research, with the help of [Fulvio Mastrogiovanni](https://www.dibris.unige.it/mastrogiovanni-fulvio) and [Paolo Solinas](http://www.spin.cnr.it/index.php/people/46-researchers/49-solinas-paolo.html).
 
 It is currently maintained by Davide Lanza.
 
@@ -50,19 +50,10 @@ Website: https://quantum-robot.org
 
 ### Dependencies
 
-`quantum-robot` requires:
-- python >=3.6
-- pandas >= 1.0.4 
-- numpy >= 1.18.5 
-- qiskit>=0.19.3
-- pytest>=5.4.3
-- opencv-python >= 4.2.0.34
-- imutils >= 0.5.3
-
-`quantum-robot` plotting capabilities (i.e., functions start with plot_ and classes end with "Display") require:
-- Matplotlib >= 2.1.1
+[requirements.txt](https://github.com/Davidelanz/quantum-robot/blob/master/requirements.txt)
 
 ### User installation
+
 The easiest way to install `quantum-robot` is using `pip`:
 ```
 pip install -U quantum-robot
@@ -73,7 +64,7 @@ The package can be [installed from source](https://packaging.python.org/tutorial
 git clone https://github.com/Davidelanz/quantum-robot.git
 ```
 
-## Testing
+### Testing
 
 After installation, you can launch the test suite from outside the source directory (you will need to have `pytest` installed):
 ```
