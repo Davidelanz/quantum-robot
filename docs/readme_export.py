@@ -49,7 +49,6 @@ append_file("install.rst")
 append_string("""License\ `↑ <#summary>`__
 -------------------------
 
-`GNU
-GPL <https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE>`__
-
 """)
+
+append_file("license.rst")

@@ -1,5 +1,10 @@
-Documentation
+Quantum-Robot Python Package
 =========================================
+
+.. include:: summary.rst
+
+Documentation
+-----------------------------------------
 
 .. toctree::
     :maxdepth: 2
@@ -7,3 +12,7 @@ Documentation
     getting_started.rst
     models.rst
 
+License
+-------------------------------------
+
+.. include:: license.rst
