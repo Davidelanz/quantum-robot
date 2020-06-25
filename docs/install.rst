@@ -32,3 +32,4 @@ source directory (you will need to have ``pytest`` installed):
 
 Computation speed tests
 `available <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb>`__.
+

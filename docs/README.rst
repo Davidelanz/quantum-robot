@@ -55,7 +55,9 @@ Solinas <http://www.spin.cnr.it/index.php/people/46-researchers/49-solinas-paolo
 
 It is currently maintained by Davide Lanza.
 
-Website: http://quantum-robot.org Contents
+Website: http://quantum-robot.org
+
+ Contents
 --------
 
 -  `Install <#install>`__
@@ -96,7 +98,9 @@ source directory (you will need to have ``pytest`` installed):
     pytest qrobot
 
 Computation speed tests
-`available <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb>`__. License\ `↑ <#summary>`__
+`available <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb>`__.
+
+ License\ `↑ <#summary>`__
 -------------------------
 
 `GNU

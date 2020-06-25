@@ -25,3 +25,4 @@ the angle of the qubits’ Bloch sphere representations.
 
 .. autoclass:: qrobot.models.AngularModel
     :members:
+
