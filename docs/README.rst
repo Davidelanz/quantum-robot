@@ -69,7 +69,7 @@ Contents
 
 
 Install\ `↑ <#contents>`__
-------------------------------
+-----------------------------------------
 Dependencies
 ~~~~~~~~~~~~
 
@@ -107,7 +107,7 @@ Computation speed tests
 
  
 License\ `↑ <#contents>`__
--------------------------
+---------------------------------------
 
 `GNU GPL <https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE>`__
 

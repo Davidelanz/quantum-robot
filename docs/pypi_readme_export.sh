@@ -1,0 +1,1 @@
+pandoc README.rst -f rst -t markdown -o pypy_descr.md

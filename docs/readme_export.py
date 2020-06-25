@@ -41,7 +41,7 @@ Contents
 # Install heading
 append_string("""
 Install\ `↑ <#contents>`__
-------------------------------
+-----------------------------------------
 """)
 
 # Include install
@@ -50,7 +50,7 @@ append_file("install.rst")
 # License
 append_string("""
 License\ `↑ <#contents>`__
--------------------------
+---------------------------------------
 
 """)
 
