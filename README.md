@@ -2,7 +2,7 @@
 
 <p>    <!--align="center" -->
     <a href="https://travis-ci.com/github/Davidelanz/quantum-robot" alt="Build">
-        <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=master&status=failed" />
+        <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=master" />
     </a>
     <a href="https://codecov.io/gh/Davidelanz/quantum-robot" alt="Code coverage">
         <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU" />

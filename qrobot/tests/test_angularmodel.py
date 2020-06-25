@@ -121,7 +121,7 @@ def test_workflow1():
     assert result['111']/shots >= .7
 
     # Check again for a different input
-    model = AngularModel(3, 2)
+    model.clear()
     input_data = list()
     input_data.append([0.1, 0.2, 1])
     input_data.append([0.0, 0.1, .9])

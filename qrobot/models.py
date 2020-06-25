@@ -21,22 +21,6 @@ class Model(ABC):
         number of samples of the temporal window (greater than 0)
     circ : qiskit.QuantumCircuit
         the quantum circuit which implements the model
-
-    Methods
-    -------
-    print()
-        prints the quantum circuit on which the model is implemented
-    plot_state()
-        plots the state and density matrix of the quantum system
-
-    Abstract Methods
-    -------
-    encode(input, dim)
-        encodes the input along a dimension in the correspondent qubit
-    query(target)
-        changes the basis of the quantum system choosing target as the |00...0> state
-    decode()
-        exploits the information encoded in the qubit (abstract class)
     """
 
     def __init__(self, n, tau):
@@ -63,6 +47,10 @@ class Model(ABC):
         # Initialize the circuit
         self.circ = qiskit.QuantumCircuit(n, n)
 
+    def clear(self):
+        """Re-initialize the model with an empty circuit"""
+        self.circ = qiskit.QuantumCircuit(self.n, self.n)
+
     @abstractmethod
     def encode(self, input, dim):
         """Encodes the input in the correspondent qubit (abstract class)"""
@@ -71,12 +59,17 @@ class Model(ABC):
     def measure(self, shots=1, backend=QASM_BACKEND):
         """Measures the qubits using a IBMQ backend
 
-        Parameters:
-            shots (int): number of measurement shots 
-            backend : quantum backend (QASM simulator as default)
+        Parameters
+        ----------
+        shots : int
+            Number of measurement shots 
+        backend : 
+            Quantum backend for the execution (QASM simulator as default)
 
-        Returns: 
-            counts (dict): state occurrences counts {"state": count}
+        Returns
+        ----------
+        dict
+            State occurrences counts in the form {"state": count}
         """
 
         # Apply barrier
@@ -134,13 +127,17 @@ class AngularModel(Model):
     def encode(self, input, dim):
         """Encodes the input in the correspondent qubit
 
-        Parameters:
-            input (float): the scalar input for a certain dimension,
-                must be a number between 0 and 1 inclusive.
-            dim (int): the model dimension which the input belongs.
+        Parameters
+        ----------
+        input : float
+            The scalar input for a certain dimension, must be a number between 0 and 1 inclusive.
+        dim : int
+            The model dimension which the input belongs.
 
-        Returns:
-            angle (float): the rotation angle applied to the qubit.
+        Returns
+        ----------
+        float
+            The rotation angle applied to the qubit.
         """
 
         # Check the argument dim
@@ -161,19 +158,21 @@ class AngularModel(Model):
 
     def query(self, target):
         """Changes the basis of the quantum system choosing target as the |00...0> state
-         
-        Parameters:
-            target (list of float): the target state, must be a list containing
-                n floats (between 0 and 1 inclusive).
-        """        
+
+        Parameters
+        ----------
+        target : list
+            The target state, it must be a list containing n floats (between 0 and 1 inclusive).
+        """
         # Dimensionality check on the vector
         if len(target) is not self.n:
             raise ValueError(f"target must be a {self.n}-dimensional vector!")
         for element in target:
             if element > 1 or element < 0:
-                raise ValueError(f"target elements must be all between 0 and 1 inclusive!")
+                raise ValueError(
+                    f"target elements must be all between 0 and 1 inclusive!")
 
-        # Apply negative (inverse) rotations to the qubit in order to 
+        # Apply negative (inverse) rotations to the qubit in order to
         # have the target state as the new |00...0> state.
         # Loop through all the dimensions:
         for i in range(0, self.n):

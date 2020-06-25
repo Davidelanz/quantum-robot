@@ -11,3 +11,5 @@ quantum_robot.egg-info/
 dist/
 
 notebooks/.ipynb_checkpoints/
+
+docs/_**
