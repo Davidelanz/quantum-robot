@@ -34,7 +34,6 @@ quantum-robot
    :alt: License
 
 
-
 .. raw:: html
 
    <table align="center" style="width:70%; border: 1px solid black; margin-bottom:20px">
@@ -59,11 +58,13 @@ It is currently maintained by Davide Lanza.
 
 Website: http://quantum-robot.org
 
- Contents
+ 
+Contents
 --------
 
 -  `Install <#install>`__
 -  `License <#license>`__
+
 
 Install\ `↑ <#summary>`__
 ------------------------------
@@ -102,7 +103,8 @@ source directory (you will need to have ``pytest`` installed):
 Computation speed tests
 `available <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb>`__.
 
- License\ `↑ <#summary>`__
+ 
+License\ `↑ <#summary>`__
 -------------------------
 
 `GNU GPL <https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE>`__

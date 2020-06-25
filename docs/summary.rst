@@ -31,7 +31,6 @@
    :alt: License
 
 
-
 .. raw:: html
 
    <table align="center" style="width:70%; border: 1px solid black; margin-bottom:20px">

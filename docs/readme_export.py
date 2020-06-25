@@ -29,7 +29,8 @@ append_string("""quantum-robot
 append_file("summary.rst")
 
 # Contents
-append_string("""Contents
+append_string("""
+Contents
 --------
 
 -  `Install <#install>`__
@@ -38,7 +39,8 @@ append_string("""Contents
 """)
 
 # Install heading
-append_string("""Install\ `↑ <#summary>`__
+append_string("""
+Install\ `↑ <#summary>`__
 ------------------------------
 """)
 
@@ -46,7 +48,8 @@ append_string("""Install\ `↑ <#summary>`__
 append_file("install.rst")
 
 # License
-append_string("""License\ `↑ <#summary>`__
+append_string("""
+License\ `↑ <#summary>`__
 -------------------------
 
 """)
