@@ -7,6 +7,12 @@
     <a href="https://codecov.io/gh/Davidelanz/quantum-robot" alt="Code coverage">
         <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU" />
     </a>
+    <a href="https://lgtm.com/projects/g/Davidelanz/quantum-robot/context:python">
+        <img alt="Language grade: Python" src="https://img.shields.io/lgtm/grade/python/g/Davidelanz/quantum-robot.svg?logo=lgtm&logoWidth=18"/>
+    </a>
+    <a href="https://lgtm.com/projects/g/Davidelanz/quantum-robot/alerts/">
+        <img alt="Total alerts" src="https://img.shields.io/lgtm/alerts/g/Davidelanz/quantum-robot.svg?logo=lgtm&logoWidth=18"/>
+    </a>
     <a href="#" alt="Development Status">
         <img src="https://pypip.in/status/quantum-robot/badge.svg" />
     </a>
@@ -19,7 +25,9 @@
     <a href="https://pypi.org/project/quantum-robot/" alt="PyPi version">
         <img src="https://badge.fury.io/py/quantum-robot.svg" />
     </a>
-
+    <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE" alt="License">
+        <img src="https://img.shields.io/badge/license-GNU GPL-blue" />
+    </a>
 </p>
 
 <table align="center" style="width:80%; border: 1px solid black;">
@@ -36,7 +44,6 @@ The project was started in 2019 by Davide Lanza as a Master thesis research, wit
 It is currently maintained by Davide Lanza.
 
 Website: http://quantum-robot.org
-
 
 ## Summary
 
@@ -55,11 +62,13 @@ Website: http://quantum-robot.org
 ### User installation
 
 The easiest way to install `quantum-robot` is using `pip`:
+
 ```
 pip install -U quantum-robot
 ```
 
 The package can be [installed from source](https://packaging.python.org/tutorials/installing-packages/#id19) as well. You can check the latest sources with the command:
+
 ```
 git clone https://github.com/Davidelanz/quantum-robot.git
 ```
@@ -67,6 +76,7 @@ git clone https://github.com/Davidelanz/quantum-robot.git
 ### Testing
 
 After installation, you can launch the test suite from outside the source directory (you will need to have `pytest` installed):
+
 ```
 pytest qrobot
 ```

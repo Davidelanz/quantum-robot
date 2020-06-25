@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 from PIL import Image
-import qiskit
 
 
 class Plotter:
@@ -63,17 +62,17 @@ class Plotter:
         plt.figure(figsize=(15, 1), dpi=150)
 
         # Plot the input
-        ax = plt.subplot(1, 10,1)
+        ax = plt.subplot(1, 10, 1)
         ax.tick_params(axis='both',
-                           which='both',
-                           bottom=False,
-                           top=False,
-                           left=False,
-                           right=False,
-                           labelbottom=False,
-                           labeltop=False,
-                           labelleft=False,
-                           labelright=False)
+                       which='both',
+                       bottom=False,
+                       top=False,
+                       left=False,
+                       right=False,
+                       labelbottom=False,
+                       labeltop=False,
+                       labelleft=False,
+                       labelright=False)
         ax.set_title('Input')
         ax.set_xlabel('{}'.format(data))
         plt.imshow(self.data2img(data))
