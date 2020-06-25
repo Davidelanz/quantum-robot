@@ -10,9 +10,6 @@
     <a href="https://lgtm.com/projects/g/Davidelanz/quantum-robot/context:python">
         <img alt="Language grade: Python" src="https://img.shields.io/lgtm/grade/python/g/Davidelanz/quantum-robot.svg?logo=lgtm&logoWidth=18"/>
     </a>
-    <a href="https://lgtm.com/projects/g/Davidelanz/quantum-robot/alerts/">
-        <img alt="Total alerts" src="https://img.shields.io/lgtm/alerts/g/Davidelanz/quantum-robot.svg?logo=lgtm&logoWidth=18"/>
-    </a>
     <a href="#" alt="Development Status">
         <img src="https://pypip.in/status/quantum-robot/badge.svg" />
     </a>
