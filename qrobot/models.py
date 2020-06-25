@@ -7,20 +7,24 @@ QASM_BACKEND = qiskit.Aer.get_backend('qasm_simulator')
 
 
 class Model(ABC):
-    """ 
-    Model is an abstract class which embeds the general features
+    """ Model is an abstract class which embeds the general features
     needed in a model for QL perception.
 
-    ...
+    Parameters
+    ----------
+    n : int
+        Model's dimension ( must be greater than 0)
+    tau : int
+        Number of samples of the temporal window (must be greater than 0)
 
     Attributes
     ----------
     n : int
-        the model dimension (greater than 0)
+        Model's dimension.
     tau : int
-        number of samples of the temporal window (greater than 0)
+        Number of samples of the temporal window.
     circ : qiskit.QuantumCircuit
-        the quantum circuit which implements the model
+        Quantum circuit which implements the model.
     """
 
     def __init__(self, n, tau):
@@ -63,7 +67,7 @@ class Model(ABC):
         ----------
         shots : int
             Number of measurement shots 
-        backend : 
+        backend : qiskit backend
             Quantum backend for the execution (QASM simulator as default)
 
         Returns
@@ -87,7 +91,7 @@ class Model(ABC):
 
     @abstractmethod
     def query(self, target):
-        """Changes the basis of the quantum system choosing target as the |00...0> state"""
+        """Changes the basis of the quantum system choosing target as the \|00...0> state"""
         pass
 
     @abstractmethod
@@ -157,7 +161,7 @@ class AngularModel(Model):
         return angle
 
     def query(self, target):
-        """Changes the basis of the quantum system choosing target as the |00...0> state
+        """Changes the basis of the quantum system choosing target as the \|00...0> state
 
         Parameters
         ----------
