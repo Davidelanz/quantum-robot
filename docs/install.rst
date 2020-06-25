@@ -1,7 +1,7 @@
 Dependencies
 ~~~~~~~~~~~~
 
-`requirements.txt <https://github.com/Davidelanz/quantum-robot/blob/master/requirements.txt>`__
+See the `requirements <https://github.com/Davidelanz/quantum-robot/blob/master/requirements.txt>`__
 
 User installation
 ~~~~~~~~~~~~~~~~~
