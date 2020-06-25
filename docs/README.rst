@@ -68,7 +68,7 @@ Contents
 -  `License <#license>`__
 
 
-Install\ `↑ <#summary>`__
+Install\ `↑ <#contents>`__
 ------------------------------
 Dependencies
 ~~~~~~~~~~~~
@@ -106,7 +106,7 @@ Computation speed tests
 `available <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb>`__.
 
  
-License\ `↑ <#summary>`__
+License\ `↑ <#contents>`__
 -------------------------
 
 `GNU GPL <https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE>`__

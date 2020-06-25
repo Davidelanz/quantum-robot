@@ -40,7 +40,7 @@ Contents
 
 # Install heading
 append_string("""
-Install\ `↑ <#summary>`__
+Install\ `↑ <#contents>`__
 ------------------------------
 """)
 
@@ -49,7 +49,7 @@ append_file("install.rst")
 
 # License
 append_string("""
-License\ `↑ <#summary>`__
+License\ `↑ <#contents>`__
 -------------------------
 
 """)
