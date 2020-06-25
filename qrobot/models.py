@@ -52,12 +52,12 @@ class Model(ABC):
         self.circ = qiskit.QuantumCircuit(n, n)
 
     def clear(self):
-        """Re-initialize the model with an empty circuit"""
+        """Re-initialize the model with an empty circuit."""
         self.circ = qiskit.QuantumCircuit(self.n, self.n)
 
     @abstractmethod
     def encode(self, input, dim):
-        """Encodes the input in the correspondent qubit (abstract class)"""
+        """Encodes the input in the correspondent qubit."""
         pass
 
     def measure(self, shots=1, backend=QASM_BACKEND):
@@ -91,20 +91,20 @@ class Model(ABC):
 
     @abstractmethod
     def query(self, target):
-        """Changes the basis of the quantum system choosing target as the \|00...0> state"""
+        """Changes the basis of the quantum system choosing target as the \|00...0> state."""
         pass
 
     @abstractmethod
     def decode(self):
-        """Exploits the information encoded in the qubit (abstract class)"""
+        """Exploits the information encoded in the qubit (abstract class)/"""
         pass
 
     def print(self):
-        """Prints the quantum circuit on which the model is implemented"""
+        """Prints the quantum circuit on which the model is implemented/"""
         print(self.circ)
 
     def plot_state(self):
-        """Plots the state and density matrix of the quantum system"""
+        """Plots the state and density matrix of the quantum system."""
         plt.figure(figsize=(15, 4))
 
         # Plot the vector state
@@ -127,6 +127,9 @@ class Model(ABC):
 
 
 class AngularModel(Model):
+    """AngularModel is a kind of Model which encodes the perceptual information in the 
+    angle of the qubits' Bloch sphere representations
+    """
 
     def encode(self, input, dim):
         """Encodes the input in the correspondent qubit
@@ -184,5 +187,5 @@ class AngularModel(Model):
             self.circ.ry(angle, i)
 
     def decode(self):
-        """The decoding for the AngularModel is a single measurement"""
+        """The decoding for the AngularModel is a single measurement."""
         return self.measure()

@@ -2,18 +2,8 @@ Documentation
 =========================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
 
-Models
-==================
+    getting_started.rst
+    models.rst
 
-.. automodule:: qrobot.models
-    :members:
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
