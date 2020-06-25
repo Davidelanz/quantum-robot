@@ -17,11 +17,11 @@ quantum-robot
    :target: https://pypi.org/project/quantum-robot/
    :alt: Development Status
 
-.. image:: "https://img.shields.io/badge/linux-xenial | bionic-blue"
+.. image:: https://img.shields.io/badge/linux-xenial|bionic-blue
    :target: #
    :alt: Linux
 
-.. image:: "https://img.shields.io/badge/python-3.6 | 3.7 | 3.8 -blue"
+.. image:: https://img.shields.io/badge/python-3.6|3.7|3.8-blue
    :target: #
    :alt: Python
 
@@ -29,7 +29,7 @@ quantum-robot
    :target: https://pypi.org/project/quantum-robot/
    :alt: PyPi version
 
-.. image:: "https://img.shields.io/badge/license-GNU GPL-blue"
+.. image:: https://img.shields.io/badge/license-GNU_GPL-blue
    :target: https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE 
    :alt: License
 
@@ -37,7 +37,7 @@ quantum-robot
 
 .. raw:: html
 
-   <table align="center" style="width:80%; border: 1px solid black;">
+   <table align="center" style="width:70%; border: 1px solid black; margin-bottom:20px">
        <tr>
        <th> <b>BEWARE:</b> package still under developement. If you are not one of the developers, it is not suggested to install it yet.
        </tr>
