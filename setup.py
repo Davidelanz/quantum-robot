@@ -1,7 +1,7 @@
 import setuptools
 
 DISTNAME = 'quantum-robot'
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 DESCRIPTION = 'A set of python modules for quantum-like perception modelling'
 with open('README.rst') as f:
     LONG_DESCRIPTION = f.read()
