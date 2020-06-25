@@ -14,7 +14,7 @@ DOWNLOAD_URL = 'https://pypi.org/project/quantum-robot/#files'
 LICENSE = 'GNU GPL'
 PROJECT_URLS = {
     'Bug Tracker': 'https://github.com/Davidelanz/quantum-robot/issues',
-    #    'Documentation': 'https://scikit-learn.org/stable/documentation.html',
+    'Documentation': 'http://quantum-robot.org/docs',
     'Source Code': 'https://github.com/Davidelanz/quantum-robot'
 }
 

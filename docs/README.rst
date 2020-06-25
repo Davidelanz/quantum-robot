@@ -58,6 +58,8 @@ It is currently maintained by Davide Lanza.
 
 Website: http://quantum-robot.org
 
+Documentation: http://quantum-robot.org/docs
+
  
 Contents
 --------
