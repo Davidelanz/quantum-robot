@@ -33,4 +33,5 @@ jobs:
 workflows:
   build:
     jobs:
-      - build-and-test
+      - test
+      - docs-build
