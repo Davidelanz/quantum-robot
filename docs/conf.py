@@ -46,6 +46,7 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
     "sphinx_rtd_theme",
+    "sphinx.ext.inheritance_diagram",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -182,3 +183,6 @@ epub_exclude_files = ['search.html']
 
 
 # -- Extension configuration -------------------------------------------------
+
+inheritance_graph_attrs = dict(rankdir="LR", ratio='compress', fontsize=14)
+graphviz_output_format = "svg"

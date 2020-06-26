@@ -34,18 +34,27 @@ Contents
 --------
 
 -  `Install <#install>`__
+-  `Notebooks <#license>`__
 -  `License <#license>`__
 
 """)
 
-# Install heading
+# Install
 append_string("""
 Install\ `↑ <#contents>`__
 -----------------------------------------
 """)
 
-# Include install
 append_file("install.rst")
+
+# Notebooks
+append_string("""
+Notebooks\ `↑ <#contents>`__
+---------------------------------------
+
+""")
+
+append_file("notebooks.rst")
 
 # License
 append_string("""

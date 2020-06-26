@@ -56,15 +56,16 @@ Solinas <http://www.spin.cnr.it/index.php/people/46-researchers/49-solinas-paolo
 
 It is currently maintained by Davide Lanza.
 
-Website: http://quantum-robot.org
-
-Documentation: http://quantum-robot.org/docs
+- Website: http://quantum-robot.org
+- Repository: https://github.com/Davidelanz/quantum-robot/
+- Documentation: http://quantum-robot.org/docs
 
  
 Contents
 --------
 
 -  `Install <#install>`__
+-  `Notebooks <#license>`__
 -  `License <#license>`__
 
 
@@ -104,6 +105,18 @@ source directory (you will need to have ``pytest`` installed):
 
 Computation speed tests
 `available <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb>`__.
+
+ 
+Notebooks\ `↑ <#contents>`__
+---------------------------------------
+
+
+Several notebooks are availabe, to get started with the package and its capabilities:
+
+- `One-dimensional demo for the AngularModel <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/demo_angular.ipynb>`__.
+- `Three-dimensional demo for the AngularModel <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/demo_RGB.ipynb>`__.
+- `Computation speed analysis for the AngularModel <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb>`__.
+- `One-dimensional comparison between AngularModel and LinearModel <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb>`__.
 
  
 License\ `↑ <#contents>`__

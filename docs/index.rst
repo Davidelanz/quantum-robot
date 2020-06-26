@@ -12,6 +12,18 @@ Documentation
     getting_started.rst
     models.rst
 
+Package diagram:
+
+.. inheritance-diagram:: qrobot.models
+    :top-classes: qrobot.models.Model
+
+|
+
+Notebooks
+-------------------------------------
+
+.. include:: notebooks.rst
+
 License
 -------------------------------------
 

@@ -1,6 +1,12 @@
 Models
 =========================================
 
+Inheritance Diagram:
+
+.. inheritance-diagram:: qrobot.models
+   :top-classes: qrobot.models.Model
+
+|
 
 The ``Model`` abstract class
 ------------------------------------------------------
