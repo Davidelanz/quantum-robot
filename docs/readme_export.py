@@ -20,10 +20,10 @@ with open(README, "w") as f_out:
     f_out.write("")
 
 # Title
-append_string("""quantum-robot
-=============
-
-""")
+#append_string("""quantum-robot
+#=============
+#
+#""")
 
 # Include summary
 append_file("summary.rst")

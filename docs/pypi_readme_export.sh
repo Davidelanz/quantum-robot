@@ -1,1 +1,1 @@
-pandoc README.rst -f rst -t markdown -o pypy_descr.md
+pandoc README.rst -f rst -t markdown -o pypi_readme.md

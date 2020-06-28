@@ -101,8 +101,8 @@ def test_query():
 def test_plot():
     """Tests if the print and plot functions cause any error"""
     model = AngularModel(1, 1)
-    model.print()
-    model.plot_state()
+    model.print_circuit()
+    model.plot_state_mat()
 
 
 def test_workflow1():

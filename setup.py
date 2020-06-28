@@ -1,9 +1,9 @@
 import setuptools
 
 DISTNAME = 'quantum-robot'
-VERSION = "0.0.4"
+VERSION = "0.0.5"
 DESCRIPTION = 'A set of python modules for quantum-like perception modelling'
-with open('docs/pypy_readme.md') as f:
+with open('docs/pypi_readme.md') as f:
     LONG_DESCRIPTION = f.read()
 AUTHOR = 'Davide Lanza'
 AUTHOR_EMAIL = 'davidel96@hotmail.it'

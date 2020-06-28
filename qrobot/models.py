@@ -160,11 +160,6 @@ class Model(ABC):
             model.plot_state_mat()
 
 
-        Returns
-        ---------
-        matplotlib.figure.Figure
-            A figure containing the state vector's and density matrix's real parts. 
-
         Raises
         ----------
         OverflowError
@@ -179,18 +174,18 @@ class Model(ABC):
         # Plot the vector state
         ax = fig.add_subplot(121)
         state = pd.DataFrame(self.get_state().real)
-        sns.heatmap(state, annot=True, linewidths=.5, xticklabels="",
-                    ax=ax, cmap="coolwarm", vmin=-1, vmax=1)
+        ax = sns.heatmap(state, annot=True, linewidths=.5, xticklabels="",
+                         ax=ax, cmap="coolwarm", vmin=-1, vmax=1, fmt=".5g")
         ax.set_title("State vector (real part)")
 
         # Plot the density matrix
         ax = fig.add_subplot(122)
         matrix = pd.DataFrame(self.get_density().real)
-        sns.heatmap(matrix, annot=True, linewidths=.5,
-                    ax=ax,  cmap="coolwarm", vmin=-1, vmax=1)
+        ax = sns.heatmap(matrix, annot=True, linewidths=.5,
+                         ax=ax,  cmap="coolwarm", vmin=-1, vmax=1, fmt=".5g")
         ax.set_title("Density Matrix (real part)")
 
-        return fig
+        # return fig
 
 
 class AngularModel(Model):
