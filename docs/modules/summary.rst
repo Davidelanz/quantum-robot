@@ -1,5 +1,11 @@
 
-.. image:: https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=master
+.. raw:: html
+
+   <img src="https://raw.githubusercontent.com/Davidelanz/quantum-robot/master/docs/quantum-robot-logo.svg" style=" display: block; margin-left: auto; margin-right: auto; width: 50%;">
+
+
+
+.. image:: https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=massvg
    :target: https://travis-ci.com/github/Davidelanz/quantum-robot
    :alt: Build
 .. image:: https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU

@@ -1,15 +1,11 @@
-[![Build](https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=master)](https://travis-ci.com/github/Davidelanz/quantum-robot)
+<img src="https://raw.githubusercontent.com/Davidelanz/quantum-robot/master/docs/quantum-robot-logo.svg" style=" display: block; margin-left: auto; margin-right: auto; width: 50%;">
 
+[![Build](https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=massvg)](https://travis-ci.com/github/Davidelanz/quantum-robot)
 [![Code coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU)](https://codecov.io/gh/Davidelanz/quantum-robot)
-
 [![Maintainability](https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability)](https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability)
-
 [![Development Status](https://pypip.in/status/quantum-robot/badge.svg)](https://pypi.org/project/quantum-robot/)
-
 [![Python](https://img.shields.io/badge/python-3.6%7C3.7%7C3.8-blue)](#)
-
 [![PyPi version](https://badge.fury.io/py/quantum-robot.svg)](https://pypi.org/project/quantum-robot/)
-
 [![License](https://img.shields.io/badge/license-GNU_GPL_v3-blue)](https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE)
 
 <!-- table align="center" style="width:70%; border: 1px solid black; margin-bottom:20px">
