@@ -1,10 +1,12 @@
+************************************************
 Quantum-Robot Python Package
-=========================================
+************************************************
 
-.. include:: summary.rst
+.. include:: modules/summary.rst
+
 
 Documentation
------------------------------------------
+===============================================
 
 .. toctree::
     :maxdepth: 2
@@ -12,19 +14,30 @@ Documentation
     getting_started.rst
     models.rst
 
-Package diagram:
-
 .. inheritance-diagram:: qrobot.models
-    :top-classes: qrobot.models.Model
+   :top-classes: qrobot.models.Model
 
 |
 
 Notebooks
--------------------------------------
+===============================================
 
-.. include:: notebooks.rst
+.. include:: modules/notebooks.rst
+
+
+Contributing
+===============================================
+
+.. include:: modules/contributing.rst
+
+
+Citing
+===============================================
+
+.. include:: modules/citing.rst
+
 
 License
--------------------------------------
+===============================================
 
-.. include:: license.rst
+.. include:: modules/license.rst

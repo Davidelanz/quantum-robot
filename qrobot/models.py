@@ -253,9 +253,21 @@ class AngularModel(Model):
         return self.measure()
 
 
-class LinearModel(AngularModel):
-    """AngularModel is a kind of AngularModel which corrects the encoding, allowing
-    a linear decoding for single-event sequencies (i.e. tau=1).
+class LinearModel(Model):
+    """LinearModel corrects the AngularModel the encoding, allowing
+    a linear decoding for single-event sequencies (tau=1).
+
+    Notes
+    -----
+    The current implementation of LinearModel provides a linear
+    dependency between encoded input and decoding probabilities
+    only for tau = 1 (or for tau > 1 if and only if the input is always
+    the same one). For a time-varying sequencee (tau > 1)
+    the results obtained are again nonlinear, and similar to the 
+    one of AngularModel 
+    (see `this notebook <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb>`_
+    for more information)
+
     """
 
     def encode(self, input, dim):
@@ -289,3 +301,30 @@ class LinearModel(AngularModel):
         # !!! Qubit index start at 0, dimensions at 1:
         self.circ.ry(angle, dim-1)
         return angle
+
+    def query(self, target):
+        """Changes the basis of the quantum system choosing target as the \|00...0> state
+
+        Parameters
+        ----------
+        target : list
+            The target state, it must be a list containing n floats (between 0 and 1 inclusive).
+        """
+        # Dimensionality check on the vector
+        if len(target) is not self.n:
+            raise ValueError(f"target must be a {self.n}-dimensional vector!")
+        for element in target:
+            if element > 1 or element < 0:
+                raise ValueError(
+                    f"target elements must be all between 0 and 1 inclusive!")
+
+        # Apply negative (inverse) rotations to the qubit in order to
+        # have the target state as the new |00...0> state.
+        # Loop through all the dimensions:
+        for i in range(0, self.n):
+            angle = - np.pi*target[i]
+            self.circ.ry(angle, i)
+
+    def decode(self):
+        """The decoding for the LinearModel is a single measurement."""
+        return self.measure()

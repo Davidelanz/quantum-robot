@@ -6,28 +6,24 @@
 
 [![Development Status](https://pypip.in/status/quantum-robot/badge.svg)](https://pypi.org/project/quantum-robot/)
 
-[![Linux](https://img.shields.io/badge/linux-xenial%7Cbionic-blue)](#)
-
 [![Python](https://img.shields.io/badge/python-3.6%7C3.7%7C3.8-blue)](#)
 
 [![PyPi version](https://badge.fury.io/py/quantum-robot.svg)](https://pypi.org/project/quantum-robot/)
 
-[![License](https://img.shields.io/badge/license-GNU_GPL-blue)](https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/license-GNU_GPL_v3-blue)](https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE)
 
-<table align="center" style="width:70%; border: 1px solid black; margin-bottom:20px">
+<!-- table align="center" style="width:70%; border: 1px solid black; margin-bottom:20px">
     <tr>
     <th> <b>BEWARE:</b> package still under developement. If you are not one of the developers, it is not suggested to install it yet.
     </tr>
-</table>
+</table -->
 
 `quantum-robot` is a Python package for quantum-like perception modeling
 for robotics. The package exploits [Qiksit](https://qiskit.org/)
 framework, implementing the models on quantum circuits which can be
 simulated on a classical computer or sent to a quantum backend (service
 provided by [IBM Quantum
-Experience](https://quantum-computing.ibm.com/)). A
-[ROS](https://www.ros.org/) implementation is provided, in order to
-easily adapt the framework for real-time applications in robotics.
+Experience](https://quantum-computing.ibm.com/)).
 
 The project was started in 2019 by Davide Lanza as a Master thesis
 research, with the help of [Fulvio
@@ -45,7 +41,9 @@ Contents
 ========
 
 -   [Install](#install)
--   [Notebooks](#license)
+-   [Notebooks](#notebooks)
+-   [Contributing](#contributing)
+-   [Citing](#citing)
 -   [License](#license)
 
 Install[↑](#contents)
@@ -54,13 +52,13 @@ Install[↑](#contents)
 Dependencies
 ------------
 
-See the
-[requirements](https://github.com/Davidelanz/quantum-robot/blob/master/requirements.txt)
+See the required packages
+[here](https://github.com/Davidelanz/quantum-robot/blob/master/requirements.txt).
 
 User installation
 -----------------
 
-The easiest way to install `quantum-robot` is using `pip`:
+The easiest way to install *quantum-robot* is using `pip`:
 
     pip install -U quantum-robot
 
@@ -78,8 +76,8 @@ source directory (you will need to have `pytest` installed):
 
     pytest qrobot
 
-Computation speed tests
-[available](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb).
+See also the [Getting
+Started](http://www.quantum-robot.org/docs/getting_started.html). guide.
 
 Notebooks[↑](#contents)
 =======================
@@ -96,8 +94,35 @@ capabilities:
 -   [One-dimensional comparison between AngularModel and
     LinearModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb).
 
-License[↑](#contents)
+Contributing [↑](#contents)
+===========================
+
+If you are interested in the project, we welcome new contributors of all
+experience levels. For any question, [contact the
+maintainer](mailto:davidel96@hotmail.it).
+
+A module example with the docstring standard we adopted is available
+[here](https://github.com/Davidelanz/quantum-robot/blob/master/docs/example/qrobot_doc.py).
+
+Citing [↑](#contents)
 =====================
 
-[GNU
-GPL](https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE)
+If you use quantum-robot in a scientific publication, we would
+appreciate citations to the following paper:
+
+``` {.sourceCode .bibtex}
+@misc{lanza2020preliminary,
+    title={A Preliminary Study for a Quantum-like Robot Perception Model},
+    author={Davide Lanza and Paolo Solinas and Fulvio Mastrogiovanni},
+    year={2020},
+    eprint={2006.02771},
+    archivePrefix={arXiv},
+    primaryClass={cs.RO},
+    note={preprint at \url{https://arxiv.org/abs/2006.02771}},
+}
+```
+
+License [↑](#contents)
+======================
+
+[GNU-GPLv3](https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE)

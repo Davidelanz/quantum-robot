@@ -12,7 +12,8 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import sphinx_rtd_theme
+import sphinx_rtd_theme # ReadTheDocs theme
+import sphinx_bootstrap_theme  # Bootstrap theme
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
@@ -66,7 +67,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -82,14 +83,20 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'bizstyle'
+# html_theme = 'bizstyle'
 html_theme = 'sphinx_rtd_theme'
+# html_theme = 'bootstrap'
+# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+   'sticky_navigation': 'True',
+   'prev_next_buttons_location' : 'none',
+   'style_external_links': 'False',
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -186,3 +193,5 @@ epub_exclude_files = ['search.html']
 
 inheritance_graph_attrs = dict(rankdir="LR", ratio='compress', fontsize=14)
 graphviz_output_format = "svg"
+
+

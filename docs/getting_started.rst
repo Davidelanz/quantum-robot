@@ -1,8 +1,23 @@
+************************
 Getting Started
-==================================
+************************
 
 Install
-------------------------------
+==================================
 
-.. include:: install.rst
+.. include:: modules/install.rst
+
+
+
+References
+==================================
+
+.. include:: modules/references.rst
+
+
+
+Notebooks
+==================================
+
+.. include:: modules/notebooks.rst
 

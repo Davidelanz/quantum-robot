@@ -26,7 +26,7 @@ with open(README, "w") as f_out:
 #""")
 
 # Include summary
-append_file("summary.rst")
+append_file("modules/summary.rst")
 
 # Contents
 append_string("""
@@ -34,7 +34,9 @@ Contents
 --------
 
 -  `Install <#install>`__
--  `Notebooks <#license>`__
+-  `Notebooks <#notebooks>`__
+-  `Contributing <#contributing>`__
+-  `Citing <#citing>`__
 -  `License <#license>`__
 
 """)
@@ -45,7 +47,13 @@ Install\ `↑ <#contents>`__
 -----------------------------------------
 """)
 
-append_file("install.rst")
+append_file("modules/install.rst")
+
+append_string("""
+See also the `Getting Started <http://www.quantum-robot.org/docs/getting_started.html>`_.
+guide.
+
+""")
 
 # Notebooks
 append_string("""
@@ -54,13 +62,33 @@ Notebooks\ `↑ <#contents>`__
 
 """)
 
-append_file("notebooks.rst")
+append_file("modules/notebooks.rst")
 
-# License
+# Contributing
 append_string("""
-License\ `↑ <#contents>`__
+Contributing `↑ <#contents>`__
 ---------------------------------------
 
 """)
 
-append_file("license.rst")
+append_file("modules/contributing.rst")
+
+
+# Citing
+append_string("""
+Citing `↑ <#contents>`__
+---------------------------------------
+
+""")
+
+append_file("modules/citing.rst")
+
+
+# License
+append_string("""
+License `↑ <#contents>`__
+---------------------------------------
+
+""")
+
+append_file("modules/license.rst")
