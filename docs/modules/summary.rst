@@ -1,8 +1,9 @@
 
 .. raw:: html
 
-   <img src="https://raw.githubusercontent.com/Davidelanz/quantum-robot/master/docs/quantum-robot-logo.svg" style=" display: block; margin-left: auto; margin-right: auto; width: 50%;">
-
+   <div style=" display: block; margin-left: auto; margin-right: auto; width: 400px;">
+      <img src="https://raw.githubusercontent.com/Davidelanz/quantum-robot/master/docs/quantum-robot-logo.svg">
+   </div>
 
 
 .. image:: https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=massvg
