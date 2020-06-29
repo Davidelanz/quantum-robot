@@ -77,7 +77,7 @@ source directory (you will need to have `pytest` installed):
     pytest qrobot
 
 See also the [Getting
-Started](http://www.quantum-robot.org/docs/getting_started.html). guide.
+Started](http://www.quantum-robot.org/docs/getting_started.html) guide.
 
 Notebooks[↑](#contents)
 =======================
@@ -101,7 +101,7 @@ If you are interested in the project, we welcome new contributors of all
 experience levels. For any question, [contact the
 maintainer](mailto:davidel96@hotmail.it).
 
-A module example with the docstring standard we adopted is available
+An example module with the docstring standard we adopted is available
 [here](https://github.com/Davidelanz/quantum-robot/blob/master/docs/example/qrobot_doc.py).
 
 Citing [↑](#contents)

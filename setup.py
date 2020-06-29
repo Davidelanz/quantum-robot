@@ -3,7 +3,7 @@ import setuptools
 DISTNAME = 'quantum-robot'
 VERSION = "0.0.5"
 DESCRIPTION = 'A set of python modules for quantum-like perception modelling'
-with open('docs/pypi_readme.md') as f:
+with open('docs/README_PYPI.md') as f:
     LONG_DESCRIPTION = f.read()
 AUTHOR = 'Davide Lanza'
 AUTHOR_EMAIL = 'davidel96@hotmail.it'
@@ -17,6 +17,8 @@ PROJECT_URLS = {
     'Documentation': 'http://quantum-robot.org/docs',
     'Source Code': 'https://github.com/Davidelanz/quantum-robot'
 }
+with open('requirements.txt') as f:
+    REQUIREMENTS = f.read()
 
 
 setuptools.setup(
@@ -45,13 +47,5 @@ setuptools.setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
     python_requires='>=3.6',
-    install_requires=[
-        'pandas>=1.0.4'
-        'numpy>=1.18.5'
-        'qiskit>=0.19.3'
-        'pytest>=5.4.3'
-        'opencv-python>=4.2.0.34'
-        'imutils>=0.5.3'
-        'Matplotlib>=2.1.1'
-    ],
+    install_requires=REQUIREMENTS,
 )

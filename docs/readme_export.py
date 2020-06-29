@@ -50,7 +50,7 @@ Install\ `↑ <#contents>`__
 append_file("modules/install.rst")
 
 append_string("""
-See also the `Getting Started <http://www.quantum-robot.org/docs/getting_started.html>`_.
+See also the `Getting Started <http://www.quantum-robot.org/docs/getting_started.html>`__
 guide.
 
 """)
