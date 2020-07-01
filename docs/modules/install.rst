@@ -1,8 +1,7 @@
 Dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-See the required packages `here <https://github.com/Davidelanz/quantum-robot/blob/master/requirements.txt>`_.
+Check the required packages `here <https://github.com/Davidelanz/quantum-robot/blob/master/requirements.txt>`_.
 
 
 User installation
