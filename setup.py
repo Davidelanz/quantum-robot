@@ -1,7 +1,7 @@
 import setuptools
 
 DISTNAME = 'quantum-robot'
-VERSION = "0.0.5"
+VERSION = "0.1"
 DESCRIPTION = 'A set of python modules for quantum-like perception modelling'
 with open('docs/README_PYPI.md') as f:
     LONG_DESCRIPTION = f.read()
@@ -40,7 +40,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Science/Research",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",

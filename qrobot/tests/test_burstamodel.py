@@ -1,5 +1,5 @@
 import pytest
-from qrobot.models import AngularModel
+from qrobot.models import BurstAModel
 
 
 def test_init():
@@ -7,23 +7,23 @@ def test_init():
 
     # Testing wrong n
     with pytest.raises(TypeError):
-        assert AngularModel(n=1.2, tau=2)
+        assert BurstAModel(n=1.2, tau=2)
     with pytest.raises(ValueError):
-        assert AngularModel(n=-1, tau=3)
+        assert BurstAModel(n=-1, tau=3)
     with pytest.raises(ValueError):
-        assert AngularModel(n=0, tau=2)
+        assert BurstAModel(n=0, tau=2)
 
     # Testing wrong tau
     with pytest.raises(TypeError):
-        assert AngularModel(n=1, tau=1.2)
+        assert BurstAModel(n=1, tau=1.2)
     with pytest.raises(ValueError):
-        assert AngularModel(n=5, tau=0)
+        assert BurstAModel(n=5, tau=0)
 
 
 def test_encode():
     """Tests if exceptions are raised for input and dimension not being correct"""
 
-    model = AngularModel(n=2, tau=2)
+    model = BurstAModel(n=2, tau=2)
 
     # Testing correct way of use encode
     model.encode(.55, 1)
@@ -50,27 +50,42 @@ def test_encode():
 def test_decode():
     """Tests decoding for unambiguous inputs"""
 
-    model = AngularModel(n=1, tau=1)
+    model = BurstAModel(n=1, tau=1)
     input_data = 1  # unambiguous input
     model.encode(input_data, dim=1)
-    assert model.decode() == {'1': 1}
+    # the measure is {'1': 1} -> decode should be 1/1
+    assert round(model.decode(), 10) == round(1/1, 10)
 
-    model = AngularModel(n=1, tau=1)
+    model = BurstAModel(n=1, tau=1)
     input_data = 0  # unambiguous input
     model.encode(input_data, dim=1)
-    assert model.decode() == {'0': 1}
+    # the measure is {'0': 1}
+    assert round(model.decode(), 10) == round(0/1, 10)
 
-    model = AngularModel(n=3, tau=1)
+    model = BurstAModel(n=3, tau=1)
     input_data = 1  # unambiguous input
     model.encode(input_data, dim=2)
-    assert model.decode() == {'010': 1}
+    # the measure is {'010': 1}
+    assert round(model.decode(), 10) == round(1/3, 10)
+
+    model = BurstAModel(n=5, tau=3)
+    # prepare the input
+    input_data = list()
+    for t in range(0, model.tau):
+        input_data.append([1, 0, 1, 0, 1])
+    # encode it
+    for t in range(0, model.tau):
+        for dim in range(1, model.n+1):
+            model.encode(input_data[t][dim-1], dim)
+    # decode it
+    assert round(model.decode(), 10) == round(3/5, 10)
 
 
 def test_query():
     """Tests query on the input itself"""
 
     # 3-dimensional model, 2-events time window
-    model = AngularModel(n=5, tau=2)
+    model = BurstAModel(n=5, tau=2)
 
     # Define an input data value
     input_data = [.1, .4, .5, .2, .1]
@@ -84,12 +99,7 @@ def test_query():
     model.query(input_data)
 
     # See if the actual output is the |00...0> state or a close one (ar most one zero)
-    assert model.decode() == {'00000': 1} or\
-                             {'10000': 1} or\
-                             {'01000': 1} or\
-                             {'00100': 1} or\
-                             {'00010': 1} or\
-                             {'00001': 1}
+    assert round(model.decode(), 10) == round(0/5, 10) or round(1/5, 10)
 
     # Check the exception for wrong targets:
     with pytest.raises(ValueError):
@@ -104,7 +114,7 @@ def test_query():
 
 def test_plot():
     """Tests if the print and plot functions cause any error"""
-    model = AngularModel(1, 1)
+    model = BurstAModel(1, 1)
     model.print_circuit()
     model.plot_state_mat()
 
@@ -113,7 +123,7 @@ def test_probabilities():
     """Tests aggregated probabilities for multiple measurementr in a workflow."""
 
     # 3-dimensional model, 2-events time window
-    model = AngularModel(3, 2)
+    model = BurstAModel(3, 2)
     # Define an input data sequence (tau = 2)
     input_data = list()
     input_data.append([0.8, 0.8, 1])

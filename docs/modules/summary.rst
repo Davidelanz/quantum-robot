@@ -7,29 +7,32 @@
       </a>
    </div>
 
-|
+   <div align="center" style="align:center; padding:20px">
+      <a href="https://travis-ci.com/github/Davidelanz/quantum-robot" alt="Build">
+         <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=massvg"/>
+      </a>
+      <a href="https://codecov.io/gh/Davidelanz/quantum-robot" alt="Code coverage">
+         <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU"/>
+      </a>
+      <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability" alt="Maintainability">
+         <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability"/>
+      </a>
+      <a href="https://pypi.org/project/quantum-robot/" alt="Development Status">
+         <img src="https://pypip.in/status/quantum-robot/badge.svg"/>
+      </a>
+      <a href="" alt="Python">
+         <img src="https://img.shields.io/badge/python-3.6|3.7|3.8-blue"/>
+      </a>
+      <a href="https://pypi.org/project/quantum-robot/" alt="PyPi version">
+         <img src="https://badge.fury.io/py/quantum-robot.svg"/>
+      </a>
+      <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE" alt="License">
+         <img src="https://img.shields.io/badge/license-GNU_GPL_v3-blue"/>
+      </a>
+   </div>
 
-.. image:: https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=massvg
-   :target: https://travis-ci.com/github/Davidelanz/quantum-robot
-   :alt: Build 
-.. image:: https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU
-   :target: https://codecov.io/gh/Davidelanz/quantum-robot
-   :alt: Code coverage
-.. image:: https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability
-   :target: https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability
-   :alt: Maintainability
-.. image:: https://pypip.in/status/quantum-robot/badge.svg
-   :target: https://pypi.org/project/quantum-robot/
-   :alt: Development Status
-.. image:: https://img.shields.io/badge/python-3.6|3.7|3.8-blue
-   :target: #
-   :alt: Python
-.. image:: https://badge.fury.io/py/quantum-robot.svg
-   :target: https://pypi.org/project/quantum-robot/
-   :alt: PyPi version
-.. image:: https://img.shields.io/badge/license-GNU_GPL_v3-blue
-   :target: https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE 
-   :alt: License
+
+
 
 
 .. raw:: html

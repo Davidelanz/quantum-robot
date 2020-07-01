@@ -14,8 +14,8 @@ Documentation
     getting_started.rst
     models.rst
 
-.. inheritance-diagram:: qrobot.models
-   :top-classes: qrobot.models.Model
+
+.. include:: modules/models_diagram.rst
 
 |
 

@@ -12,4 +12,6 @@ dist/
 
 notebooks/.ipynb_checkpoints/
 
+build/
+
 docs/_**

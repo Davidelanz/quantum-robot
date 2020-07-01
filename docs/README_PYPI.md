@@ -3,23 +3,31 @@
       <img width="300" src="https://raw.githubusercontent.com/Davidelanz/quantum-robot/master/docs/quantum-robot-logo.svg">
    </a>
 </div>
-
-| 
-
-[![Build](https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=massvg)](https://travis-ci.com/github/Davidelanz/quantum-robot)
-
-[![Code coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU)](https://codecov.io/gh/Davidelanz/quantum-robot)
-
-[![Maintainability](https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability)](https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability)
-
-[![Development Status](https://pypip.in/status/quantum-robot/badge.svg)](https://pypi.org/project/quantum-robot/)
-
-[![Python](https://img.shields.io/badge/python-3.6%7C3.7%7C3.8-blue)](#)
-
-[![PyPi version](https://badge.fury.io/py/quantum-robot.svg)](https://pypi.org/project/quantum-robot/)
-
-[![License](https://img.shields.io/badge/license-GNU_GPL_v3-blue)](https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE)
-
+<br>
+<div align="center" style="align:center; padding:20px">
+   <a href="https://travis-ci.com/github/Davidelanz/quantum-robot" alt="Build">
+      <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=massvg"/>
+   </a>
+   <a href="https://codecov.io/gh/Davidelanz/quantum-robot" alt="Code coverage">
+      <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU"/>
+   </a>
+   <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability" alt="Maintainability">
+      <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability"/>
+   </a>
+   <a href="https://pypi.org/project/quantum-robot/" alt="Development Status">
+      <img src="https://pypip.in/status/quantum-robot/badge.svg"/>
+   </a>
+   <a href="" alt="Python">
+      <img src="https://img.shields.io/badge/python-3.6|3.7|3.8-blue"/>
+   </a>
+   <a href="https://pypi.org/project/quantum-robot/" alt="PyPi version">
+      <img src="https://badge.fury.io/py/quantum-robot.svg"/>
+   </a>
+   <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE" alt="License">
+      <img src="https://img.shields.io/badge/license-GNU_GPL_v3-blue"/>
+   </a>
+</div>
+<br>
 <!-- table align="center" style="width:70%; border: 1px solid black; margin-bottom:20px">
     <tr>
     <th> <b>BEWARE:</b> package still under developement. If you are not one of the developers, it is not suggested to install it yet.
@@ -48,13 +56,13 @@ It is currently maintained by Davide Lanza.
 Contents
 ========
 
--   [Install](#install)
--   [Notebooks](#notebooks)
--   [Contributing](#contributing)
--   [Citing](#citing)
--   [License](#license)
+-   Install
+-   Notebooks
+-   Contributing
+-   Citing
+-   License
 
-Install[↑](#contents)
+Install
 =====================
 
 Dependencies
@@ -87,22 +95,8 @@ source directory (you will need to have `pytest` installed):
 See also the [Getting
 Started](http://www.quantum-robot.org/docs/getting_started.html) guide.
 
-Notebooks[↑](#contents)
-=======================
 
-Several notebooks are availabe, to get started with the package and its
-capabilities:
-
--   [One-dimensional demo for the
-    AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/demo_angular_dim1.ipynb).
--   [Three-dimensional demo for the
-    AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/demo_angular_dim3_RGB.ipynb).
--   [Computation speed analysis for the
-    AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb).
--   [One-dimensional comparison between AngularModel and
-    LinearModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb).
-
-Contributing [↑](#contents)
+Contributing
 ===========================
 
 If you are interested in the project, we welcome new contributors of all
@@ -112,25 +106,8 @@ maintainer](mailto:davidel96@hotmail.it).
 An example module with the docstring standard we adopted is available
 [here](https://github.com/Davidelanz/quantum-robot/blob/master/docs/example/qrobot_doc.py).
 
-Citing [↑](#contents)
-=====================
 
-If you use quantum-robot in a scientific publication, we would
-appreciate citations to the following paper:
-
-``` {.sourceCode .bibtex}
-@misc{lanza2020preliminary,
-    title={A Preliminary Study for a Quantum-like Robot Perception Model},
-    author={Davide Lanza and Paolo Solinas and Fulvio Mastrogiovanni},
-    year={2020},
-    eprint={2006.02771},
-    archivePrefix={arXiv},
-    primaryClass={cs.RO},
-    note={preprint at \url{https://arxiv.org/abs/2006.02771}},
-}
-```
-
-License [↑](#contents)
+License
 ======================
 
 [GNU-GPLv3](https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE)

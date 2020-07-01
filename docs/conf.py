@@ -13,7 +13,6 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import sphinx_rtd_theme # ReadTheDocs theme
-import sphinx_bootstrap_theme  # Bootstrap theme
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
@@ -85,8 +84,6 @@ pygments_style = None
 #
 # html_theme = 'bizstyle'
 html_theme = 'sphinx_rtd_theme'
-# html_theme = 'bootstrap'
-# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -191,7 +188,9 @@ epub_exclude_files = ['search.html']
 
 # -- Extension configuration -------------------------------------------------
 
-inheritance_graph_attrs = dict(rankdir="LR", ratio='compress', fontsize=14)
 graphviz_output_format = "svg"
 
+inheritance_graph_attrs = dict(rankdir="LR", ratio='compress', fontsize=14)
 
+#inheritance_node_attrs = dict(shape='ellipse', fontsize=14, height=0.75,
+#                              color='dodgerblue1', style='filled')

@@ -2,10 +2,7 @@
 Models
 ************
 
-
-.. inheritance-diagram:: qrobot.models
-   :top-classes: qrobot.models.Model
-
+.. include:: modules/models_diagram.rst
 
 |
 
@@ -29,7 +26,7 @@ It is used to define custom models as a child classes::
 The ``AngularModel`` class
 =========================================
 
-This is a custom model provided by the package. This model encodes the perceptual information in 
+This is a custom ``Model`` provided by the package. This model encodes the perceptual information in 
 the angle of the qubits’ Bloch sphere representations.
 
 .. autoclass:: qrobot.models.AngularModel
@@ -41,12 +38,38 @@ the angle of the qubits’ Bloch sphere representations.
 The ``LinearModel`` class
 =========================================
 
-This is a custom model derived from `AngularModel`, which corrects it with a nonlinear encoding. 
+This is a custom model derived from ``AngularModel``, which corrects it with a nonlinear encoding. 
 By means of its nonlinear encoding, this model provides a linear decoding 
 (a `notebook <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb>`_ 
-is provided in order to illustrate the difference between this model and the Angular one).
+is provided in order to illustrate the difference between this and the angular one).
 
 .. autoclass:: qrobot.models.LinearModel
+    :members:
+
+
+|
+
+The ``BurstAModel`` class
+=========================================
+
+This is a modified ``AngularModel`` which provides a burst instead of a 
+dictionary as decoding, which is the ration of qubits recorded in a \|0> state 
+out of the dimension of the mode:
+
+.. code-block:: python
+
+    >>> AngularModel.decode(model)
+    {"state" = 1}
+    >>> BurstAModel.decode(model)
+    float
+
+    # E.g.
+    >>> AngularModel.decode(model)
+    {"111100" = 1}
+    >>> BurstAModel.decode(model)
+    2/6 = 0.2
+
+.. autoclass:: qrobot.models.BurstAModel
     :members:
 
 
@@ -55,5 +78,5 @@ is provided in order to illustrate the difference between this model and the Ang
 Module variables
 =========================================
 
-.. automodule:: qrobot.models
+.. automodule:: qrobot.models.model
     :members: QASM_BACKEND

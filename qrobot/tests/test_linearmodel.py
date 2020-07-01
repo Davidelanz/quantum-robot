@@ -29,6 +29,10 @@ def test_encode():
     model.encode(.55, 1)
 
     # Testing wrong input
+    with pytest.raises(TypeError):
+        assert model.encode([.1,.2], 2)
+    with pytest.raises(TypeError):
+        assert model.encode("a", 2)
     with pytest.raises(ValueError):
         assert model.encode(1.1, 2)
     with pytest.raises(ValueError):
@@ -105,22 +109,19 @@ def test_plot():
     model.plot_state_mat()
 
 
-def test_workflow1():
-    """Tests if a full encode-decode workflow is carried out correctly"""
+def test_probabilities():
+    """Tests aggregated probabilities for multiple measurementr in a workflow."""
 
     # 3-dimensional model, 2-events time window
     model = LinearModel(3, 2)
-
     # Define an input data sequence (tau = 2)
     input_data = list()
     input_data.append([0.92, 0.91, 0.92])
     input_data.append([0.91, 0.92, 0.93])
-
     # Encode the sequence in the model
     for t in range(0, model.tau):
         for dim in range(1, model.n+1):
             model.encode(input_data[t][dim-1], dim)
-
     # Check if at least 70% of the shots are 111 (coherent with the input)
     shots = 10000
     result = model.measure(shots)
@@ -129,11 +130,14 @@ def test_workflow1():
 
     # Check again for a different input
     model.clear()
+    # Define an input data sequence (tau = 2)
     input_data = list()
     input_data.append([0.1, 0.2, 1])
     input_data.append([0.0, 0.1, .9])
+    # Encode the sequence in the model
     for t in range(0, model.tau):
         for dim in range(1, model.n+1):
             model.encode(input_data[t][dim-1], dim)
+    # Check if at least 70% of the shots are 111 (coherent with the input)
     result = model.measure(shots)
     assert result['100']/shots >= .8
