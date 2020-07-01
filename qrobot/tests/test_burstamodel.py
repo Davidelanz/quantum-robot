@@ -53,20 +53,20 @@ def test_decode():
     model = BurstAModel(n=1, tau=1)
     input_data = 1  # unambiguous input
     model.encode(input_data, dim=1)
-    # the measure is {'1': 1} -> decode should be 1/1
-    assert round(model.decode(), 10) == round(1/1, 10)
+    # the measure is {'1': 1} -> decode should be 0/1
+    assert round(model.decode(), 10) == round(0/1, 10)
 
     model = BurstAModel(n=1, tau=1)
     input_data = 0  # unambiguous input
     model.encode(input_data, dim=1)
     # the measure is {'0': 1}
-    assert round(model.decode(), 10) == round(0/1, 10)
+    assert round(model.decode(), 10) == round(1/1, 10)
 
     model = BurstAModel(n=3, tau=1)
     input_data = 1  # unambiguous input
     model.encode(input_data, dim=2)
     # the measure is {'010': 1}
-    assert round(model.decode(), 10) == round(1/3, 10)
+    assert round(model.decode(), 10) == round(2/3, 10)
 
     model = BurstAModel(n=5, tau=3)
     # prepare the input
@@ -78,7 +78,7 @@ def test_decode():
         for dim in range(1, model.n+1):
             model.encode(input_data[t][dim-1], dim)
     # decode it
-    assert round(model.decode(), 10) == round(3/5, 10)
+    assert round(model.decode(), 10) == round(2/5, 10)
 
 
 def test_query():

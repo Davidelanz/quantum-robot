@@ -67,7 +67,7 @@ out of the dimension of the mode:
     >>> AngularModel.decode(model)
     {"111100" = 1}
     >>> BurstAModel.decode(model)
-    2/6 = 0.2
+    2/6 = 0.3333333333333333
 
 .. autoclass:: qrobot.models.BurstAModel
     :members:

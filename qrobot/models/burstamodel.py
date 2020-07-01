@@ -11,7 +11,7 @@ class BurstAModel(AngularModel):
         """The decoding for the ``BurstAModel`` is \"burst\" between 0 and 1,
         which corresponds to the sum of the "zeros" in the measured state 
         divided by the dimension n of the model. For example, if  
-        the measure is {"11100" = 1} the decoded burst is 2/6 = 0.333333333333
+        the measure is {"111100" = 1} the decoded burst is 2/6 = 0.333333333333
 
 
         Returns
