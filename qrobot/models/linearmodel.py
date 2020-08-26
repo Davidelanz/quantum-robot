@@ -65,4 +65,6 @@ class LinearModel(Model):
 
     def decode(self):
         """The decoding for the ``LinearModel`` is a single measurement."""
-        return self.measure()
+        dict =  self.measure()
+        # Return the most measured state (only one measurement though)
+        return max(dict, key=dict.get)

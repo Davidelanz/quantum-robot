@@ -1,5 +1,5 @@
 import pytest
-from qrobot.models import LinearModel
+from ..models import LinearModel
 
 
 def test_init():
@@ -69,20 +69,27 @@ def test_decode():
 def test_query():
     """Tests query on the input itself"""
 
-    # 3-dimensional model, 2-events time window
-    model = LinearModel(n=5, tau=2)
-
+    # 1-dimensional model
+    model = LinearModel(n=1, tau=1)
     # Define an input data value
-    input_data = [.1, .4, .5, .2, .1]
-
-    # Encode input_data two times (tau = 1)
-    for t in range(1, model.tau):
-        for dim in range(1, model.n):
-            model.encode(input_data[dim-1], dim)
-
+    input_data = 1
+    # Encode input_data one time (tau = 1)
+    model.encode(input_data, dim=1)
     # Apply a query on the input_data (to obtain an unambiguous result)
     model.query(input_data)
+    # See if the actual output is the |00...0> state
+    assert model.decode() == {'0': 1}
 
+    # 3-dimensional model, 2-events time window
+    model = LinearModel(n=5, tau=2)
+    # Define an input data value
+    input_data = [.1, .4, .5, .2, .1]
+    # Encode input_data two times (tau = 1)
+    for _ in range(1, model.tau):
+        for dim in range(1, model.n):
+            model.encode(input_data[dim-1], dim)
+    # Apply a query on the input_data (to obtain an unambiguous result)
+    model.query(input_data)
     # See if the actual output is the |00...0> state
     assert model.decode() == {'00000': 1} or\
                              {'10000': 1} or\

@@ -2,8 +2,9 @@ import numpy as np
 
 from .model import Model
 
+
 class AngularModel(Model):
-    """``AngularModel`` is a kind of ``Model`` which encodes the perceptual 
+    """``AngularModel`` is a kind of ``Model`` which encodes the perceptual
     information in the angle of the qubits' Bloch sphere representations
     """
 
@@ -13,7 +14,7 @@ class AngularModel(Model):
         Parameters
         ----------
         input : float
-            The scalar input for a certain dimension, must be a number 
+            The scalar input for a certain dimension, must be a number
             between 0 and 1 inclusive.
         dim : int
             The model's dimension which the input belongs.
@@ -46,15 +47,18 @@ class AngularModel(Model):
         return angle
 
     def query(self, target):
-        """Changes the basis of the quantum system choosing target as 
+        """Changes the basis of the quantum system choosing target as
         the basis state \|00...0>
 
         Parameters
         ----------
         target : list
-            The target state, it must be a list containing n floats 
+            The target state, it must be a list containing n floats
             (between 0 and 1 inclusive).
         """
+        # If target is a single number, convert it in a single-element vector
+        if isinstance(target, int) or isinstance(target, float):
+            target = [target]
         # Dimensionality check on the vector
         if len(target) is not self.n:
             raise ValueError(f"target must be a {self.n}-dimensional vector!")
@@ -72,5 +76,7 @@ class AngularModel(Model):
 
     def decode(self):
         """The decoding for the ``AngularModel`` is a single measurement."""
-        return self.measure()
+        dict =  self.measure()
+        # Return the most measured state (only one measurement though)
+        return max(dict, key=dict.get)
 
