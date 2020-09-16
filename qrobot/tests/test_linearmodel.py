@@ -30,7 +30,7 @@ def test_encode():
 
     # Testing wrong input
     with pytest.raises(TypeError):
-        assert model.encode([.1,.2], 2)
+        assert model.encode([.1, .2], 2)
     with pytest.raises(TypeError):
         assert model.encode("a", 2)
     with pytest.raises(ValueError):
@@ -126,9 +126,9 @@ def test_probabilities():
     input_data.append([0.92, 0.91, 0.92])
     input_data.append([0.91, 0.92, 0.93])
     # Encode the sequence in the model
-    for t in range(0, model.tau):
+    for i in range(0, model.tau):
         for dim in range(1, model.n+1):
-            model.encode(input_data[t][dim-1], dim)
+            model.encode(input_data[i][dim-1], dim)
     # Check if at least 70% of the shots are 111 (coherent with the input)
     shots = 10000
     result = model.measure(shots)
@@ -142,9 +142,9 @@ def test_probabilities():
     input_data.append([0.1, 0.2, 1])
     input_data.append([0.0, 0.1, .9])
     # Encode the sequence in the model
-    for t in range(0, model.tau):
+    for i in range(0, model.tau):
         for dim in range(1, model.n+1):
-            model.encode(input_data[t][dim-1], dim)
+            model.encode(input_data[i][dim-1], dim)
     # Check if at least 70% of the shots are 111 (coherent with the input)
     result = model.measure(shots)
     assert result['100']/shots >= .8

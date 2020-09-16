@@ -3,8 +3,6 @@ from PIL import Image
 
 
 class Plotter:
-    """
-    """
 
     def __init__(self):
 
