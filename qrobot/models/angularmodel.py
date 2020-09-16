@@ -35,20 +35,20 @@ class AngularModel(Model):
         return angle
 
     def query(self, target_vector):
-        r"""Changes the basis of the quantum system choosing target as
+        r"""Changes the basis of the quantum system choosing target_vector as
         the basis state \|00...0>
 
         Parameters
         ----------
-        target : list
-            The target state, it must be a list containing n floats
+        target_vector : list
+            The target_vector state, it must be a list containing n floats
             (between 0 and 1 inclusive).
         """
         # Check the arguments
         target_vector = self.target_vector_check(target_vector)
 
         # Apply negative (inverse) rotations to the qubit in order to
-        # have the target state as the new |00...0> state.
+        # have the target_vector state as the new |00...0> state.
         # Loop through all the dimensions:
         for i in range(0, self.n):
             angle = - np.pi*target_vector[i]

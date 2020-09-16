@@ -181,19 +181,21 @@ class Model(ABC):
         list
             The `target_vector`
         """
-        # If target is a single number, convert it in a single-element vector
-        if isinstance(target, (float, int)):
-            target = [target]
+        # If target_vector is a single number, convert it in a single-element vector
+        if isinstance(target_vector, (float, int)):
+            target_vector = [target_vector]
         # Dimensionality check on the vector
-        if len(target) is not self.n:
-            raise ValueError(f"target must be a {self.n}-dimensional vector!")
-        for element in target:
+        if len(target_vector) is not self.n:
+            raise ValueError(f"target_vector must be a {self.n}\
+                             -dimensional vector!")
+        for element in target_vector:
             if not isinstance(element, (float, int)):
                 raise TypeError(
-                    "target elements must be all integers or floats!")
+                    "target_vector elements must be all integers or floats!")
             if element > 1 or element < 0:
                 raise ValueError(
-                    "target elements must be all between 0 and 1 inclusive!")
+                    "target_vector elements must be all between \
+                    0 and 1 inclusive!")
         return target_vector
 
     @abstractmethod
