@@ -9,9 +9,9 @@ class BurstAModel(AngularModel):
 
     def decode(self):
         r"""The decoding for the ``BurstAModel`` is \"burst\" between 0 and 1,
-        which corresponds to the sum of the "ones" in the measured state 
+        which corresponds to the sum of the "zeros" in the measured state 
         divided by the dimension n of the model. For example, if  
-        the measure is {"110000" = 1} the decoded burst is 2/6 = 0.333333333333
+        the measure is {"110101" = 1} the decoded burst is 2/6 = 0.333333333333
 
 
         Returns
@@ -27,6 +27,6 @@ class BurstAModel(AngularModel):
         state = max(measure.items(), key=operator.itemgetter(1))[0]
 
         # Number ones / total number chars
-        output = state.count('1')/len(state)
+        output = state.count('0')/len(state)
 
         return output
