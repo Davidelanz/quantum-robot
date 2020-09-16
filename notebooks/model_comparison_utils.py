@@ -34,7 +34,7 @@ def test_input(model, input_samples, tau=1, x_label="input", ):
         except KeyError:
             counts["1"]= 0
         df = df.append(counts, ignore_index=True)
-    
+   
     print("                        ")
     return df
 
@@ -64,7 +64,7 @@ def test_tau_up(model, intensity=1, x_label="tau_up"):
         except KeyError:
             counts["1"]= 0
         df = df.append(counts, ignore_index=True)
-    
+   
     print("                        ")
     return df
 
@@ -74,7 +74,7 @@ def test_query(model, query_samples, x_label="query"):
     shots = 1000000
 
     queries = [s/query_samples for s in range(0,query_samples+1)]
-    
+   
     for query in queries:
 
         print(f"Query = {query}  ", end="\r")
@@ -98,7 +98,7 @@ def test_query(model, query_samples, x_label="query"):
         except KeyError:
             counts["1"]= 0
         df = df.append(counts, ignore_index=True)
-    
+   
     print("                        ")
     return df
 

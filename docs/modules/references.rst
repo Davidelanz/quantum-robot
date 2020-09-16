@@ -8,7 +8,7 @@ provide a high level abstraction, it is suggested to read the related research
 - `Multi-sensory Integration in a Quantum-Like Robot Perception Model <https://arxiv.org/abs/2006.16404>`__.
 
 .. note::
-    A ROS package -- currently **under development** -- is linked to the research and provide 
+    A ROS package -- currently **under development** -- is linked to the research and provide
     simulations and tools for real-time testing on robotic hardware, and will be released soon.
 
 

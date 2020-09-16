@@ -9,9 +9,9 @@ Models
 The ``Model`` abstract class
 =========================================
 
-This class is the parent class which defines the general features a perception model has to implement. 
+This class is the parent class which defines the general features a perception model has to implement.
 It is used to define custom models as a child classes::
-    
+   
     from qrobot.models import Model
 
     class myModel(Model):
@@ -26,7 +26,7 @@ It is used to define custom models as a child classes::
 The ``AngularModel`` class
 =========================================
 
-This is a custom ``Model`` provided by the package. This model encodes the perceptual information in 
+This is a custom ``Model`` provided by the package. This model encodes the perceptual information in
 the angle of the qubits’ Bloch sphere representations.
 
 .. autoclass:: qrobot.models.AngularModel
@@ -38,9 +38,9 @@ the angle of the qubits’ Bloch sphere representations.
 The ``LinearModel`` class
 =========================================
 
-This is a custom model derived from ``AngularModel``, which corrects it with a nonlinear encoding. 
-By means of its nonlinear encoding, this model provides a linear decoding 
-(a `notebook <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb>`_ 
+This is a custom model derived from ``AngularModel``, which corrects it with a nonlinear encoding.
+By means of its nonlinear encoding, this model provides a linear decoding
+(a `notebook <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb>`_
 is provided in order to illustrate the difference between this and the angular one).
 
 .. autoclass:: qrobot.models.LinearModel
@@ -52,8 +52,8 @@ is provided in order to illustrate the difference between this and the angular o
 The ``BurstAModel`` class
 =========================================
 
-This is a modified ``AngularModel`` which provides a burst instead of a 
-dictionary as decoding, which is the ration of qubits recorded in a \|0> state 
+This is a modified ``AngularModel`` which provides a burst instead of a
+dictionary as decoding, which is the ration of qubits recorded in a \|0> state
 out of the dimension of the mode:
 
 .. code-block:: python

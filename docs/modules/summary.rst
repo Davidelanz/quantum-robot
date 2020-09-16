@@ -47,9 +47,9 @@
    </table -->
 
 
-``quantum-robot`` is a Python package for quantum-like perception modeling for robotics. 
+``quantum-robot`` is a Python package for quantum-like perception modeling for robotics.
 The package exploits `Qiksit <https://qiskit.org/>`__ framework, implementing the models on
-quantum circuits which can be simulated on a classical computer or sent to a quantum 
+quantum circuits which can be simulated on a classical computer or sent to a quantum
 backend (service provided by `IBM Quantum Experience <https://quantum-computing.ibm.com/>`__).
 
 The project was started in 2019 by Davide Lanza as a Master thesis research, with the help

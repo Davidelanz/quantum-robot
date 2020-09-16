@@ -50,9 +50,9 @@
    </table -->
 
 
-``quantum-robot`` is a Python package for quantum-like perception modeling for robotics. 
+``quantum-robot`` is a Python package for quantum-like perception modeling for robotics.
 The package exploits `Qiksit <https://qiskit.org/>`__ framework, implementing the models on
-quantum circuits which can be simulated on a classical computer or sent to a quantum 
+quantum circuits which can be simulated on a classical computer or sent to a quantum
 backend (service provided by `IBM Quantum Experience <https://quantum-computing.ibm.com/>`__).
 
 The project was started in 2019 by Davide Lanza as a Master thesis research, with the help
@@ -65,7 +65,7 @@ It is currently maintained by Davide Lanza.
 - Repository: https://github.com/Davidelanz/quantum-robot/
 - Documentation: http://quantum-robot.org/docs
 
- 
+
 Contents
 --------
 
@@ -110,7 +110,7 @@ source directory (you will need to have ``pytest`` installed):
 
     pytest qrobot
 
- 
+
 See also the `Getting Started <http://www.quantum-robot.org/docs/getting_started.html>`__
 guide.
 
@@ -126,18 +126,18 @@ Several notebooks are availabe, to get started with the package and its capabili
 - `Computation speed analysis for the AngularModel <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb>`__.
 - `One-dimensional comparison between AngularModel and LinearModel <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb>`__.
 
- 
+
 Contributing `↑ <#contents>`__
 ---------------------------------------
 
 
-If you are interested in the project, we welcome new contributors 
-of all experience levels. 
+If you are interested in the project, we welcome new contributors
+of all experience levels.
 For any question, `contact the maintainer <mailto:davidel96@hotmail.it>`_.
 
-An example module with the docstring standard we adopted is available 
+An example module with the docstring standard we adopted is available
 `here <https://github.com/Davidelanz/quantum-robot/blob/master/docs/example/qrobot_doc.py>`_.
- 
+
 Citing `↑ <#contents>`__
 ---------------------------------------
 
@@ -156,10 +156,10 @@ If you use quantum-robot in a scientific publication, we would appreciate citati
         note={preprint at \url{https://arxiv.org/abs/2006.16404}},
     }
 
- 
+
 License `↑ <#contents>`__
 ---------------------------------------
 
 
 `GNU-GPLv3 <https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE>`__
- 
+
