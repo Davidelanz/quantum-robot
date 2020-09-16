@@ -7,7 +7,7 @@ dist:
   - xenial
   - bionic
   - focal
- 
+
 git:
   depth: false
 
@@ -24,7 +24,7 @@ install:
   # install quantum-robot package:
   - pip install -e .
   # for CodeCov integration:
-  - pip install coverage 
+  - pip install coverage
 
 # command to run tests
 script:

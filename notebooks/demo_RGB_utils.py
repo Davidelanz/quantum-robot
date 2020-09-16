@@ -9,12 +9,12 @@ class Plotter:
     def __init__(self):
 
         self.color_list = (
-            (0,   0,   0),  # Black
-            (255,   0,   0),  # Red
-            (0, 255,   0),  # Green
-            (255, 255,   0),  # Yellow
-            (0,   0, 255),  # Blue
-            (255,   0, 255),  # Violet
+            (0, 0, 0),  # Black
+            (255, 0, 0),  # Red
+            (0, 255, 0),  # Green
+            (255, 255, 0),  # Yellow
+            (0, 0, 255),  # Blue
+            (255, 0, 255),  # Violet
             (0, 255, 255),  # Cyan
             (255, 255, 255),  # White
         )
@@ -62,35 +62,35 @@ class Plotter:
         plt.figure(figsize=(15, 1), dpi=150)
 
         # Plot the input
-        ax = plt.subplot(1, 10, 1)
-        ax.tick_params(axis='both',
-                       which='both',
-                       bottom=False,
-                       top=False,
-                       left=False,
-                       right=False,
-                       labelbottom=False,
-                       labeltop=False,
-                       labelleft=False,
-                       labelright=False)
-        ax.set_title('Input')
-        ax.set_xlabel('{}'.format(data))
+        axis = plt.subplot(1, 10, 1)
+        axis.tick_params(axis='both',
+                         which='both',
+                         bottom=False,
+                         top=False,
+                         left=False,
+                         right=False,
+                         labelbottom=False,
+                         labeltop=False,
+                         labelleft=False,
+                         labelright=False)
+        axis.set_title('Input')
+        axis.set_xlabel('{}'.format(data))
         plt.imshow(self.data2img(data))
 
         # Plot all the probabilities
         for i in range(0, 8):
-            ax = plt.subplot(1, 10, i+2)
-            ax.set_title("{}".format(self.states_dict[i+1]))
-            ax.tick_params(axis='both',
-                           which='both',
-                           bottom=False,
-                           top=False,
-                           left=False,
-                           right=False,
-                           labelbottom=False,
-                           labeltop=False,
-                           labelleft=False,
-                           labelright=False)
-            ax.set_xlabel(f"{counts[self.states_dict[i+1]]/shots:%}")
+            axis = plt.subplot(1, 10, i+2)
+            axis.set_title("{}".format(self.states_dict[i+1]))
+            axis.tick_params(axis='both',
+                             which='both',
+                             bottom=False,
+                             top=False,
+                             left=False,
+                             right=False,
+                             labelbottom=False,
+                             labeltop=False,
+                             labelleft=False,
+                             labelright=False)
+            axis.set_xlabel(f"{counts[self.states_dict[i+1]]/shots:%}")
             img = Image.new("RGB", (10, 10), self.color_list[i])
             plt.imshow(img)

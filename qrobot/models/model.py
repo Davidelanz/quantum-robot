@@ -122,7 +122,7 @@ class Model(ABC):
         float
             The `scalar_input`
         """
-        if not (isinstance(scalar_input, int) or isinstance(scalar_input, float)):
+        if not isinstance(scalar_input, (float, int)):
             raise TypeError(
                 f"input must be an scalar number, not a {type(scalar_input)}!")
         if scalar_input > 1 or scalar_input < 0:
@@ -182,13 +182,13 @@ class Model(ABC):
             The `target_vector`
         """
         # If target is a single number, convert it in a single-element vector
-        if isinstance(target, int) or isinstance(target, float):
+        if isinstance(target, (float, int)):
             target = [target]
         # Dimensionality check on the vector
         if len(target) is not self.n:
             raise ValueError(f"target must be a {self.n}-dimensional vector!")
         for element in target:
-            if not(isinstance(element, int) or isinstance(element, float)):
+            if not isinstance(element, (float, int)):
                 raise TypeError(
                     "target elements must be all integers or floats!")
             if element > 1 or element < 0:

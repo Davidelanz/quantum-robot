@@ -38,5 +38,5 @@ def get_specs():
         ["Number of cores", multiprocessing.cpu_count()],
         ["Python version", platform.python_version()],
     ]
-    df = pd.DataFrame(table, columns=["Spec", "Value"])
-    display(HTML(df.to_html(index=False)))
+    dataframe = pd.DataFrame(table, columns=["Spec", "Value"])
+    display(HTML(dataframe.to_html(index=False)))
