@@ -53,17 +53,17 @@ def test_decode():
     model = AngularModel(n=1, tau=1)
     input_data = 1  # unambiguous input
     model.encode(input_data, dim=1)
-    assert model.decode() == {'1': 1}
+    assert model.decode() == '1'
 
     model = AngularModel(n=1, tau=1)
     input_data = 0  # unambiguous input
     model.encode(input_data, dim=1)
-    assert model.decode() == {'0': 1}
+    assert model.decode() == '0'
 
     model = AngularModel(n=3, tau=1)
     input_data = 1  # unambiguous input
     model.encode(input_data, dim=2)
-    assert model.decode() == {'010': 1}
+    assert model.decode() == '010'
 
 
 def test_query():
@@ -78,7 +78,7 @@ def test_query():
     # Apply a query on the input_data (to obtain an unambiguous result)
     model.query(input_data)
     # See if the actual output is the |00...0> state
-    assert model.decode() == {'0': 1}
+    assert model.decode() == '0'
 
     # 3-dimensional model, 2-events time window
     model = AngularModel(n=5, tau=2)
@@ -91,12 +91,12 @@ def test_query():
     # Apply a query on the input_data (to obtain an unambiguous result)
     model.query(input_data)
     # See if the actual output is the |00...0> state or a close one (ar most one zero)
-    assert model.decode() == {'00000': 1} or\
-                             {'10000': 1} or\
-                             {'01000': 1} or\
-                             {'00100': 1} or\
-                             {'00010': 1} or\
-                             {'00001': 1}
+    assert model.decode() == '00000' or\
+                             '10000' or\
+                             '01000' or\
+                             '00100' or\
+                             '00010' or\
+                             '00001'
 
     # Check the exception for wrong targets:
     with pytest.raises(ValueError):
