@@ -9,7 +9,7 @@
 
    <div align="center" style="align:center; padding:20px">
       <a href="https://travis-ci.com/github/Davidelanz/quantum-robot">
-         <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?token=BnWGyPSEGJoK3Kmq8jGJ&branch=massvg" alt="Build"/>
+         <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?branch=master" alt="Build"/>
       </a>
       <a href="https://codecov.io/gh/Davidelanz/quantum-robot" >
          <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU" alt="Code coverage"/>
