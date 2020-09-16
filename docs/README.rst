@@ -14,6 +14,9 @@
       <a href="https://codecov.io/gh/Davidelanz/quantum-robot" >
          <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU" alt="Code coverage"/>
       </a>
+      <a href="https://frontend.code-inspector.com/public/project/13599/quantum-robot/dashboard">
+         <img src="https://www.code-inspector.com/project/13599/score/svg" alt="Code Quality"/>
+      </a>
       <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability">
          <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability" alt="Maintainability"/>
       </a>
