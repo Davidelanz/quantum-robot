@@ -20,14 +20,14 @@
       <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability">
          <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability" alt="Maintainability"/>
       </a>
-      <a href="https://pypi.org/project/quantum-robot/">
-         <img src="https://pypip.in/status/quantum-robot/badge.svg" alt="Development Status"/>
-      </a>
       <a>
          <img src="https://img.shields.io/badge/python-3.6|3.7|3.8-blue" alt="Python"/>
       </a>
       <a href="https://pypi.org/project/quantum-robot/">
          <img src="https://badge.fury.io/py/quantum-robot.svg" alt="PyPi version"/>
+      </a>
+      <a href="https://pypi.org/project/quantum-robot/">
+         <img src="https://pypip.in/status/quantum-robot/badge.svg" alt="Development Status"/>
       </a>
       <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE">
          <img src="https://img.shields.io/badge/license-GNU_GPL_v3-blue" alt="License"/>
