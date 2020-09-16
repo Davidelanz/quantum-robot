@@ -65,7 +65,7 @@ It is currently maintained by Davide Lanza.
 - Repository: https://github.com/Davidelanz/quantum-robot/
 - Documentation: http://quantum-robot.org/docs
 
-
+ 
 Contents
 --------
 
@@ -110,7 +110,7 @@ source directory (you will need to have ``pytest`` installed):
 
     pytest qrobot
 
-
+ 
 See also the `Getting Started <http://www.quantum-robot.org/docs/getting_started.html>`__
 guide.
 
@@ -126,7 +126,7 @@ Several notebooks are availabe, to get started with the package and its capabili
 - `Computation speed analysis for the AngularModel <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb>`__.
 - `One-dimensional comparison between AngularModel and LinearModel <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb>`__.
 
-
+ 
 Contributing `↑ <#contents>`__
 ---------------------------------------
 
@@ -138,6 +138,19 @@ For any question, `contact the maintainer <mailto:davidel96@hotmail.it>`_.
 An example module with the docstring standard we adopted is available
 `here <https://github.com/Davidelanz/quantum-robot/blob/master/docs/example/qrobot_doc.py>`_.
 
+.. note::
+    The documentation build workflow is the following one:
+    
+    1.  Modify the ``.rst`` modules in the ``docs/modules`` folder
+        of the Github repository, or the high-level ``.rst`` modules 
+        in the ``docs`` folder 
+        (``getting_started.rst``, ``index.rst``, ``models.rst``)
+    2.  Build the ``README.rst`` file with the ``readme_export.py``
+        Python 3 script in the ``docs`` folder
+    3.  Build the ``README_PYPI.md`` file with the ``readme_pypi_export.sh``
+        bash script
+    4.  Run the ``make html`` Sphinx command to build the documentation 
+        HTML files 
 Citing `↑ <#contents>`__
 ---------------------------------------
 
@@ -156,10 +169,10 @@ If you use quantum-robot in a scientific publication, we would appreciate citati
         note={preprint at \url{https://arxiv.org/abs/2006.16404}},
     }
 
-
+ 
 License `↑ <#contents>`__
 ---------------------------------------
 
 
 `GNU-GPLv3 <https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE>`__
-
+ 
