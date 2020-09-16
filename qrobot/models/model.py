@@ -1,12 +1,11 @@
+from abc import ABC, abstractmethod
+
 import qiskit
 import numpy as np
 import pandas as pd
-import operator
 
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-from abc import ABC, abstractmethod
 
 
 QASM_BACKEND = qiskit.Aer.get_backend('qasm_simulator')
@@ -66,8 +65,8 @@ class Model(ABC):
         self.circ = qiskit.QuantumCircuit(self.n, self.n)
 
     @abstractmethod
-    def encode(self, input, dim):
-        """Encodes the input in the correspondent qubit.
+    def encode(self, scalar_input, dim):
+        """Encodes the scalar input in the correspondent qubit.
 
         Example
         -------
@@ -79,7 +78,56 @@ class Model(ABC):
 
 
         """
-        pass
+
+    def dim_index_check(self, dim):
+        """This method ensures that a dimension index `dim`
+        is an integer between 1 and `n`, where `n` is the dimension
+        of the model.
+
+        Raises
+        ---------
+        TypeError
+            `dim` is not an integer `int`
+        ValueError
+            `dim` is not greater than 0
+        IndexError
+            `dim` is greater than the model dimension `n`
+
+        Returns
+        --------
+        int
+            The dimension index `dim`
+        """
+        if not isinstance(dim, int):
+            raise TypeError("dim must be an integer!")
+        if dim < 1:
+            raise ValueError("dim must be greater than 0!")
+        if dim > self.n:
+            raise IndexError(f"dim out of bounds (dimensions = {self.n})!")
+        return dim
+
+    def scalar_input_check(self, scalar_input):
+        """This method ensures that a `scalar_input` for the model
+        is an integer or a float between 0 and 1 (inclusive).
+
+        Raises
+        ---------
+        TypeError:
+            `scalar_input` is nor a `int` or a `float`
+        ValueError
+            `scalar_input` is not between 0 and 1 inclusive
+
+        Returns
+        --------
+        float
+            The `scalar_input`
+        """
+        if not (isinstance(scalar_input, int) or isinstance(scalar_input, float)):
+            raise TypeError(
+                f"input must be an scalar number, not a {type(scalar_input)}!")
+        if scalar_input > 1 or scalar_input < 0:
+            raise ValueError("scalar_input must be between 0 and 1 inclusive!")
+        return scalar_input
 
     def measure(self, shots=1, backend=QASM_BACKEND):
         """Measures the qubits using a IBMQ backend
@@ -111,15 +159,46 @@ class Model(ABC):
         return counts
 
     @abstractmethod
-    def query(self, target):
-        """Changes the basis of the quantum system choosing target 
+    def query(self, target_vector):
+        r"""Changes the basis of the quantum system choosing `target_vector`
         as the basis state \|00...0>."""
-        pass
+
+    def target_vector_check(self, target_vector):
+        """This method ensures that a `target_vector` for the model
+        is an `n`-dimensional vector (where `n` is the model's dimension).
+
+        Raises
+        ---------
+        TypeError
+            `target_vector` elements are not all integers or floats
+        ValueError
+            `target_vector` dimension does not match model's dimension `n`
+        ValueError
+            `target_vector` elements are not not all between 0 and 1 inclusive
+
+        Returns
+        ----------
+        list
+            The `target_vector`
+        """
+        # If target is a single number, convert it in a single-element vector
+        if isinstance(target, int) or isinstance(target, float):
+            target = [target]
+        # Dimensionality check on the vector
+        if len(target) is not self.n:
+            raise ValueError(f"target must be a {self.n}-dimensional vector!")
+        for element in target:
+            if not(isinstance(element, int) or isinstance(element, float)):
+                raise TypeError(
+                    "target elements must be all integers or floats!")
+            if element > 1 or element < 0:
+                raise ValueError(
+                    "target elements must be all between 0 and 1 inclusive!")
+        return target_vector
 
     @abstractmethod
     def decode(self):
         """Exploits the information encoded in the qubit (abstract class)."""
-        pass
 
     def get_state(self):
         """Returns the simulated state vector of the model.
@@ -150,7 +229,7 @@ class Model(ABC):
         print(self.circ)
 
     def plot_state_mat(self):
-        """Plots the state and density matrix of the quantum system 
+        """Plots the state and density matrix of the quantum system
         (just the real parts).
 
         Example
@@ -169,7 +248,7 @@ class Model(ABC):
         Raises
         ----------
         OverflowError
-            If the dimension of the model is 6 or greater, plotting fails 
+            If the dimension of the model is 6 or greater, plotting fails
             due to the high number of basis states.
         """
         if self.n >= 6:  # avoid matrices too big to be useful
@@ -180,18 +259,17 @@ class Model(ABC):
         fig = plt.figure(figsize=(15, 4))
 
         # Plot the vector state
-        ax = fig.add_subplot(121)
+        axis = fig.add_subplot(121)
         state = pd.DataFrame(self.get_state().real)
-        ax = sns.heatmap(state, annot=True, linewidths=.5, xticklabels="",
-                         ax=ax, cmap="coolwarm", vmin=-1, vmax=1, fmt=".5g")
-        ax.set_title("State vector (real part)")
+        axis = sns.heatmap(state, annot=True, linewidths=.5, xticklabels="",
+                           ax=axis, cmap="coolwarm", vmin=-1, vmax=1, fmt=".5g")
+        axis.set_title("State vector (real part)")
 
         # Plot the density matrix
-        ax = fig.add_subplot(122)
+        axis = fig.add_subplot(122)
         matrix = pd.DataFrame(self.get_density().real)
-        ax = sns.heatmap(matrix, annot=True, linewidths=.5,
-                         ax=ax,  cmap="coolwarm", vmin=-1, vmax=1, fmt=".5g")
-        ax.set_title("Density Matrix (real part)")
+        axis = sns.heatmap(matrix, annot=True, linewidths=.5,
+                           ax=axis, cmap="coolwarm", vmin=-1, vmax=1, fmt=".5g")
+        axis.set_title("Density Matrix (real part)")
 
         # return fig
-
