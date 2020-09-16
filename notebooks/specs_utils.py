@@ -14,18 +14,20 @@ from IPython.display import display, HTML
 def get_cpu_model(spec="model name"):
     if platform.system() == "Windows":
         return platform.processor()
-    elif platform.system() == "Darwin":
+    if platform.system() == "Darwin":
         os.environ['PATH'] = os.environ['PATH'] + os.pathsep + '/usr/sbin'
         command = "sysctl -n machdep.cpu.brand_string"
         return subprocess.check_output(command).strip()
-    elif platform.system() == "Linux":
+    if platform.system() == "Linux":
         command = "cat /proc/cpuinfo"
-        all_info = str(subprocess.check_output(command, shell=True).strip())
-        all_info = all_info.split("\\n")
+        stream = os.popen(command)
+        all_info = stream.read()
+        all_info.strip()
+        all_info = all_info.split("\n")
+        #all_info = str(subprocess.check_output(command, shell=True).strip())
         for line in all_info:
             if spec in line:
                 return re.sub(f".*{spec}.*: ", "", line, 1)
-    return ""
 
 
 def get_specs():
