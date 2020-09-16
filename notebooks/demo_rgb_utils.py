@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 
+def data2img(data):
+    """Converts normalized input data to a 10x10 color image representation"""
+    rgb = [round(d*255) for d in data]
+    return Image.new("RGB", (10, 10), tuple(rgb))
+
+
 class Plotter:
 
     def __init__(self):
@@ -28,11 +34,6 @@ class Plotter:
             8: "111",
         }
 
-    def data2img(self, data):
-        """Converts normalized input data to a 10x10 color image representation"""
-        rgb = [round(d*255) for d in data]
-        return Image.new("RGB", (10, 10), tuple(rgb))
-
     def plot_data(self, data):
         """Plots normalized data in 3d space with the correspondant color representation"""
         fig = plt.figure(figsize=(17, 3))
@@ -53,7 +54,7 @@ class Plotter:
         # Plot the actual input color
         ax2 = plt.subplot(1, 5, 4)
         ax2.set_title('Data = {}\n'.format(data))
-        plt.imshow(self.data2img(data))
+        plt.imshow(data2img(data))
 
     def plot_result(self, data, counts, shots):
         """Plots the % obtained from the simulation for each basis states"""
@@ -73,7 +74,7 @@ class Plotter:
                          labelright=False)
         axis.set_title('Input')
         axis.set_xlabel('{}'.format(data))
-        plt.imshow(self.data2img(data))
+        plt.imshow(data2img(data))
 
         # Plot all the probabilities
         for i in range(0, 8):
