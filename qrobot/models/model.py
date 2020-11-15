@@ -22,7 +22,7 @@ class Model(ABC):
     Parameters
     ----------
     n : int
-        Model's dimension ( must be greater than 0)
+        Model's dimension (must be greater than 0)
     tau : int
         Number of samples of the temporal window (must be greater than 0)
 
@@ -72,10 +72,9 @@ class Model(ABC):
         -------
         To encode a `sequence` of input vectors, given `tau` and `n`::
 
-            for t in range(0,model.tau): # loop through time
-                for dim in range(1, model.n + 1): # loop through dimensions
-                    model.encode(sequence[t][dim-1], dim)
-
+            for t in range(model.tau): # loop through time
+                for dim in range(model.n): # loop through dimensions
+                    model.encode(sequence[t][dim], dim)
 
         """
 
@@ -100,10 +99,10 @@ class Model(ABC):
         """
         if not isinstance(dim, int):
             raise TypeError("dim must be an integer!")
-        if dim < 1:
-            raise ValueError("dim must be greater than 0!")
-        if dim > self.n:
-            raise IndexError(f"dim out of bounds (dimensions = {self.n})!")
+        if dim < 0:
+            raise ValueError("dim must be greater or equal to 0!")
+        if dim >= self.n:
+            raise IndexError(f"dim must be less than {self.n}!")
         return dim
 
     def scalar_input_check(self, scalar_input):
@@ -200,7 +199,7 @@ class Model(ABC):
 
     @abstractmethod
     def decode(self):
-        """Exploits the information encoded in the qubit (abstract class)."""
+        """Exploits the information encoded in the qubit."""
 
     def get_state(self):
         """Returns the simulated state vector of the model.
@@ -241,7 +240,7 @@ class Model(ABC):
             model = Model(n, tau) # change Model with the desired child class
 
             for t in range(0,model.tau): # loop through time
-                for dim in range(1, model.n + 1): # loop through dimensions
+                for dim in range(model.n): # loop through dimensions
                     model.encode(.5, dim)
 
             model.plot_state_mat()

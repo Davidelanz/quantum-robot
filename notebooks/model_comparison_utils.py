@@ -19,7 +19,7 @@ def test_input(model, input_samples, tau=1, x_label="input", ):
 
         # Encode the input and measure
         for _ in range(0, tau):
-            model.encode(i, dim=1)
+            model.encode(i, dim=0)
         counts = model.measure(shots)
 
         # Store in the dataset (normalizing probabilities)
@@ -49,7 +49,7 @@ def test_tau_up(model, intensity=1, x_label="tau_up"):
 
         # Encode the tau_up events
         for _ in range(0, tau_up):
-            model.encode(intensity, dim=1)
+            model.encode(intensity, dim=0)
         counts = model.measure(shots)
 
         # Store in the dataset (normalizing probabilities)
@@ -80,7 +80,7 @@ def test_query(model, query_samples, x_label="query"):
         model.clear()
 
         # Encode always .5 events
-        model.encode(.5, dim=1)
+        model.encode(.5, dim=0)
         # then apply the query
         model.query([query])
         # and measure

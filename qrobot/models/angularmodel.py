@@ -17,7 +17,8 @@ class AngularModel(Model):
             The scalar input for a certain dimension, must be a number
             between 0 and 1 inclusive.
         dim : int
-            The model's dimension which the input belongs.
+            The model's dimension which the input belongs (values 
+            between ``0`` and ``n-1``)
 
         Returns
         ----------
@@ -30,8 +31,7 @@ class AngularModel(Model):
 
         # Apply rotation to the qubit
         angle = np.pi*scalar_input/self.tau
-        # !!! Qubit index start at 0, dimensions at 1:
-        self.circ.ry(angle, dim-1)
+        self.circ.ry(angle, dim)
         return angle
 
     def query(self, target_vector):
@@ -55,7 +55,14 @@ class AngularModel(Model):
             self.circ.ry(angle, i)
 
     def decode(self):
-        """The decoding for the ``AngularModel`` is a single measurement."""
+        """The decoding for the ``AngularModel`` is a single measurement.
+        
+        Returns
+        --------
+        str 
+            The string label corresponding to the decoded state
+        
+        """
         measure_dict = self.measure()
         # Return the most measured state (only one measurement though)
         return max(measure_dict, key=measure_dict.get)

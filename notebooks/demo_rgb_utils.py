@@ -90,6 +90,9 @@ class Plotter:
                              labeltop=False,
                              labelleft=False,
                              labelright=False)
-            axis.set_xlabel(f"{counts[self.states_dict[i+1]]/shots:%}")
+            try:
+                axis.set_xlabel(f"{counts[self.states_dict[i+1]]/shots:%}")
+            except KeyError:
+                axis.set_xlabel(f"{0:%}")
             img = Image.new("RGB", (10, 10), self.color_list[i])
             plt.imshow(img)
