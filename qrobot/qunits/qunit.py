@@ -28,6 +28,10 @@ class QUnit():
         If present, contains the target state for the model queries
     """
 
+    def __repr__(self) -> str:
+        return f"QUnit \"{self.name}\" | name={self.name} | n={self.n} | " +\
+            "tau={self.tau} | Ts={self.Ts} | query={self.query}"
+
     def __init__(self, name: str, model: Model, burst: Burst,
                  Ts: float, query: list = None) -> None:
         """[__init__]
@@ -54,16 +58,14 @@ class QUnit():
         self.tau = model.tau
         self.Ts = Ts
         self.query = query
-        self._logger.debug(f"qUnit properties: name={self.name} - " +
-                           f"n={self.n} - tau={self.tau} - Ts={self.Ts} - " +
-                           f"query={self.query}")
+        self._logger.debug(str(self))
 
         # Initialize input data accumulator
         self._in_data = [.0]*self.n
 
         # Initialize background thread
         self.thread = Thread(target=self._loop)
-        self._do_run = False # Flag for threading
+        self._do_run = False  # Flag for threading
 
         # Initialize the ROS node
         rospy.init_node(self.id, anonymous=False)
@@ -120,7 +122,7 @@ class QUnit():
                 # Loop through the dimensions to encode data
                 for dim in range(self.model.n):
                     self._logger.debug(f"Encoding {self._in_data[dim]} " +
-                                      f"in dimension {dim}")
+                                       f"in dimension {dim}")
                     self.model.encode(self._in_data[dim], dim)
                 # wait for the next input in the time window
                 rate.sleep()
