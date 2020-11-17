@@ -11,12 +11,21 @@ def test_qunit():
 
     model = AngularModel(1, 1)
     burst = ZeroBurst()
-    unit = QUnit("nome", model, burst, 0.1)
+    unit1 = QUnit("first_unit", model, burst, 0.1)
+    unit2 = QUnit("second_unit", model, burst, 0.1)
 
-    unit.start()
+    unit1.start()
     sleep(5)
-    unit.stop()
+    unit1.stop()
 
+    unit1.start()
+    unit2.start()
+    sleep(5)
+    unit1.stop()
+    sleep(3)
+    unit2.stop()
+
+    roscore.terminate()
 
 if __name__ == "__main__":
     test_qunit()

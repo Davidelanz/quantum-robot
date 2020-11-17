@@ -1,4 +1,4 @@
-from threading import Thread
+import multiprocessing
 from uuid import uuid4  # unique identifier generator
 
 import rospy
@@ -45,7 +45,7 @@ class QUnit():
 
         """
         # Create a instance unique identifier
-        self.id = str(__name__) + "_" + name + "_" + str(uuid4())
+        self.id = name + "_" + str(uuid4())
         # use it for log
         self._logger = get_logger(self.id)
         self._logger.debug(f"Initializing qUnit {self.id}")
@@ -64,9 +64,33 @@ class QUnit():
         self._in_data = [.0]*self.n
 
         # Initialize background thread
-        self.thread = Thread(target=self._loop)
-        self._do_run = False  # Flag for threading
+        self.process = None
 
+    def _input_callback(self, msg, i: int) -> None:
+        """ROS callback for input data. The parameter ``i`` refers to the
+        ``i``-th topic subscribed (same callback for all the subscribers)
+        """
+        self._in_data[i] = msg.data
+
+    def start(self) -> None:
+        """Runs the qUnit in a background thread"""
+        self._logger.debug(f"Starting qUnit {self.id}")
+        # New instance of a process
+        self._process = multiprocessing.Process(target=self._loop)
+        # Start looping
+        self._process.start()
+
+    def stop(self) -> None:
+        """Stops the qUnit background thread"""
+        if self._process is None:
+            self._logger.warning(
+                "Trying to stop qUnit, but it is not running")
+        else:
+            self._logger.info("Stopping qUnit process")
+            self._process.terminate()
+
+    def _loop(self) -> None:
+        """The main loop of the qUnit"""
         # Initialize the ROS node
         rospy.init_node(self.id, anonymous=False)
         self._logger.debug(f"Rospy node started")
@@ -86,33 +110,9 @@ class QUnit():
             f"/{self.id}/burst", Float32, queue_size=2)
         self._logger.debug(f"publishing on {self._burst_pub.name}")
 
-    def _input_callback(self, msg, i: int) -> None:
-        """ROS callback for input data. The parameter ``i`` refers to the
-        ``i``-th topic subscribed (same callback for all the subscribers)
-        """
-        self._in_data[i] = msg.data
-
-    def start(self) -> None:
-        """Runs the qUnit in a background thread"""
-        self._logger.debug(f"Starting node {self.id}")
-        # Activate loop condition
-        self._do_run = True
-        # Start looping
-        self.thread.start()
-
-    def stop(self) -> None:
-        """Stops the qUnit background thread"""
-        self._logger.debug(f"Stopping node {self.id}")
-        # Deactivate loop condition
-        self._do_run = False
-        # Close thread
-        self.thread.join()
-
-    def _loop(self) -> None:
-        """The main loop of the qUnit"""
         # Main loop of the ROS node:
         rate = rospy.Rate(1/self.Ts)
-        while self._do_run:
+        while True:
             self._logger.debug(f"Initializing a new temporal window")
             self.model.clear()
             # Encode events in the time window
