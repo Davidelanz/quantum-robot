@@ -1,6 +1,8 @@
 README.temporary
 #**.drawio
 .vscode/
+.pytest_cache
+.qrobot_logs
 qrobot_env/
 Pipfile
 
