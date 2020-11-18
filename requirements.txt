@@ -4,6 +4,3 @@ numpy >= 1.18.5
 Matplotlib >= 2.1.1
 seaborn>=0.10.1
 pytest>=5.4.3
-flask_classful>=0.14.2
-rospkg
-catkin-pkg

@@ -25,32 +25,27 @@ class Core(object, metaclass=Singleton):
         # Initialize qunits list
         self._qunits = {}
 
-        # make routings
-        @self._app.route('/')
-        def index():
-            return 'Welcome at the Quantum Robot core'
-
-        # the root page
-        @self._app.route('/qunits/')
-        def qunits():
-            return str(self._qunits)
 
     def start(self) -> None:
         """Start the Core in a background thread"""
-        self._logger.info(f"Starting Core process")
-        # New instance of a process
-        self._process = multiprocessing.Process(target=self._app.run)
-        # Start looping
-        self._process.start()
+        if self._process is None:
+            # New instance of a process
+            self._process = multiprocessing.Process(target=self.__run)
+        if not self._process.is_alive():
+            self._logger.info(f"Starting Core process")
+            self._process.start()
+        else:
+            # Do nothing if the Core is already running
+            pass
 
     def stop(self) -> None:
         """Stops the Core background thread"""
         if self._process is None:
-            self._logger.warning(
-                "Trying to stop Core, but Core is not running")
+            self._logger.warning("Trying to stop Core, but it's not running")
         else:
             self._logger.info("Stopping Core process")
             self._process.terminate()
+            self._process = None
 
     def add_qunit(self, qunit) -> None:
         self._qunits[qunit.id] = qunit
@@ -78,3 +73,16 @@ class Core(object, metaclass=Singleton):
             pass
 
         return app
+
+    def __run(self):
+        # make routings
+        @self._app.route('/')
+        def index():
+            return 'Welcome at the Quantum Robot core'
+
+        # the root page
+        @self._app.route('/qunits/')
+        def qunits():
+            return str(self._qunits)
+        
+        self._app.run()

@@ -36,7 +36,7 @@ class Model(ABC):
         Quantum circuit which implements the model.
     """
 
-    def __init__(self, n, tau):
+    def __init__(self, n, tau) -> None:
         """Initialize the class"""
 
         # Check the argument n
@@ -60,12 +60,12 @@ class Model(ABC):
         # Initialize the circuit
         self.circ = qiskit.QuantumCircuit(n, n)
 
-    def clear(self):
+    def clear(self) -> None:
         """Re-initialize the model with an empty circuit."""
         self.circ = qiskit.QuantumCircuit(self.n, self.n)
 
     @abstractmethod
-    def encode(self, scalar_input, dim):
+    def encode(self, scalar_input, dim) -> None:
         """Encodes the scalar input in the correspondent qubit.
 
         Example
@@ -78,7 +78,7 @@ class Model(ABC):
 
         """
 
-    def dim_index_check(self, dim):
+    def dim_index_check(self, dim) -> int:
         """This method ensures that a dimension index `dim`
         is an integer between 1 and `n`, where `n` is the dimension
         of the model.
@@ -105,7 +105,7 @@ class Model(ABC):
             raise IndexError(f"dim must be less than {self.n}!")
         return dim
 
-    def scalar_input_check(self, scalar_input):
+    def scalar_input_check(self, scalar_input) -> float:
         """This method ensures that a `scalar_input` for the model
         is an integer or a float between 0 and 1 (inclusive).
 
@@ -126,9 +126,9 @@ class Model(ABC):
                 f"input must be an scalar number, not a {type(scalar_input)}!")
         if scalar_input > 1 or scalar_input < 0:
             raise ValueError("scalar_input must be between 0 and 1 inclusive!")
-        return scalar_input
+        return float(scalar_input)
 
-    def measure(self, shots=1, backend=QASM_BACKEND):
+    def measure(self, shots=1, backend=QASM_BACKEND) -> dict:
         """Measures the qubits using a IBMQ backend
 
         Parameters
@@ -158,11 +158,11 @@ class Model(ABC):
         return counts
 
     @abstractmethod
-    def query(self, target_vector):
+    def query(self, target_vector) -> None:
         r"""Changes the basis of the quantum system choosing `target_vector`
         as the basis state \|00...0>."""
 
-    def target_vector_check(self, target_vector):
+    def target_vector_check(self, target_vector) -> list:
         """This method ensures that a `target_vector` for the model
         is an `n`-dimensional vector (where `n` is the model's dimension).
 
@@ -198,10 +198,10 @@ class Model(ABC):
         return target_vector
 
     @abstractmethod
-    def decode(self):
+    def decode(self) -> str:
         """Exploits the information encoded in the qubit."""
 
-    def get_state(self):
+    def get_state(self) -> np.ndarray:
         """Returns the simulated state vector of the model.
 
         Returns
@@ -213,7 +213,7 @@ class Model(ABC):
         simulation = qiskit.execute(self.circ, state_simulator).result()
         return simulation.get_statevector(self.circ)
 
-    def get_density(self):
+    def get_density(self) -> np.ndarray:
         """Returns the simulated density matrix of the model.
 
         Returns
@@ -225,11 +225,11 @@ class Model(ABC):
         simulation = qiskit.execute(self.circ, matrix_simulator).result()
         return simulation.get_unitary(self.circ)
 
-    def print_circuit(self):
+    def print_circuit(self) -> None:
         """Prints the quantum circuit on which the model is implemented."""
         print(self.circ)
 
-    def plot_state_mat(self):
+    def plot_state_mat(self) -> None:
         """Plots the state and density matrix of the quantum system
         (just the real parts).
 
@@ -272,5 +272,3 @@ class Model(ABC):
         axis = sns.heatmap(matrix, annot=True, linewidths=.5,
                            ax=axis, cmap="coolwarm", vmin=-1, vmax=1, fmt=".5g")
         axis.set_title("Density Matrix (real part)")
-
-        # return fig
