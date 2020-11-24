@@ -1,14 +1,12 @@
-import multiprocessing
-from uuid import uuid4
 import ctypes
+import multiprocessing
+from time import sleep
+from uuid import uuid4
 
-from matplotlib.pyplot import sca  # unique identifier generator
-
-from ..bursts import Burst
 from ..core import Core
+from ..bursts import Burst
 from ..logs import get_logger
 from ..models import Model
-from time import sleep
 
 
 class QUnit():
@@ -51,7 +49,7 @@ class QUnit():
         # Store the qUnits name and properties
         self.name = name
         self.model = model
-        self.burst = burst
+        self._burst = burst
         self.n = model.n
         self.tau = model.tau
         self.Ts = Ts
@@ -59,13 +57,11 @@ class QUnit():
         if query is None:
             query = [.0]*(self.n)
 
-        # https://stackoverflow.com/questions/21290960/how-to-share-a-string-amongst-multiple-processes-using-managers-in-python
-        #
         # Initialize multiprocessing variables (common to all threads while
         # being modified)
         manager = multiprocessing.Manager()
 
-        self.query = manager.Array('d', query)
+        self._query = manager.Array('d', query)
         # Initialize input data accumulator
         self._in_data = manager.Array('d', [.0]*(self.n))
         # Initialize output accumulators
@@ -80,34 +76,45 @@ class QUnit():
 
     def __repr__(self) -> str:
         return f"QUnit \"{self.name}\" | name={self.name} | n={self.n} | " +\
-            f"tau={self.tau} | Ts={self.Ts} | query={self.query}"
+            f"tau={self.tau} | Ts={self.Ts} | query={self._query}"
+    
+    def __dict__(self) -> str:
+        return {
+            "name" : self.name, 
+            "n" : self.n,
+            "tau" : self.tau,
+            "Ts" : self.Ts
+        }
+
+    def query(self, query) -> str:
+        self._logger.debug(f"Changing query from {self._query} to {query}")
+        for i, q in enumerate(query):
+            self._query[i] = q
+        self._logger.debug(f"_query={self._query}")
 
     def input(self, scalar_input, dim) -> None:
         self._logger.debug(f"Input {scalar_input} on dim={dim}")
         self._in_data[dim] = scalar_input
         self._logger.debug(f"_in_data={self._in_data}")
 
-    def burst(self) -> float: return self._out_burst
+    def burst(self) -> float: return self._out_burst.value
 
     def start(self) -> None:
         """Loads qunit on the Core"""
         self._logger.debug(f"Loading qUnit on Core")
-        core = Core()
-        core.add_qunit(self)
-        core.start()
-
-        self._logger.debug(f"Starting qUnit")
+        Core().add_qunit(self)
+        self._logger.info(f"Starting qUnit")
         self._process = multiprocessing.Process(target=self.__loop)
         self._process.start()
 
     def stop(self) -> None:
         """Stops the qUnit background thread"""
         if self._process is None:
-            self._logger.warning(
-                "Trying to stop qUnit, but qUnit is not running")
+            self._logger.warning("qUnit is already stopped")
         else:
-            self._logger.info("Stopping qUnit process")
+            self._logger.info("Stopping qUnit")
             self._process.terminate()
+            Core().remove_qunit(self)
 
     def __loop(self) -> None:
         while True:
@@ -125,11 +132,10 @@ class QUnit():
                 # wait for the next input in the time window
                 sleep(self.Ts)
             # After the time window, apply the query
-            if self.query is not None:
-                self._logger.debug(f"Querying for state {self.query}")
-                self.model.query(self.query)
+            self._logger.debug(f"Querying for state {self._query}")
+            self.model.query(self._query)
             # Store decoding in accumulators
-            self._out_state = self.model.decode()
-            self._logger.debug(f"Decoded state: {self._out_state}")
-            self._out_burst = self.burst(self._out_state)
-            self._logger.debug(f"Burst: {self._out_burst}")
+            self._out_state.value = self.model.decode()
+            self._logger.debug(f"Decoded state: {self._out_state.value}")
+            self._out_burst.value = self._burst(self._out_state.value)
+            self._logger.debug(f"Burst: {self._out_burst.value}")

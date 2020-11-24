@@ -3,11 +3,14 @@ import json
 import multiprocessing
 import os
 
-from flask import Flask
+from flask import Flask, render_template
 
-from .logs import get_logger
+from ..logs import get_logger
 from .singleton import Singleton
 
+FILE_DIR = os.path.dirname(os.path.realpath(__file__))
+STATIC_DIR = os.path.join(FILE_DIR, "static")
+TEMPLATES_DIR = os.path.join(FILE_DIR, "templates")
 
 class Core(object, metaclass=Singleton):
     """
@@ -17,14 +20,17 @@ class Core(object, metaclass=Singleton):
 
     def __init__(self) -> None:
         # Initialize logger
-        self._logger = get_logger(__file__)
+        self._logger = get_logger("core")
         # Initialize flask app
         self._app = self.__app_init()
         # Initialize correspondent thread
         self._process = None
-        # Initialize qunits list
-        self._qunits = {}
 
+        # Initialize multiprocessing variables (common to all threads while
+        # being modified)
+        manager = multiprocessing.Manager()
+        # Initialize qunits dictionary
+        self._qunits = manager.dict()
 
     def start(self) -> None:
         """Start the Core in a background thread"""
@@ -50,10 +56,15 @@ class Core(object, metaclass=Singleton):
     def add_qunit(self, qunit) -> None:
         self._qunits[qunit.id] = qunit
 
+    def remove_qunit(self, qunit) -> None:
+        self._qunits.pop(qunit.id)
+
     @staticmethod
     def __app_init(test_config=None):
         # create and configure the app
-        app = Flask("qrobot", instance_relative_config=True)
+        app = Flask("qrobot",
+                    instance_relative_config=True,
+                    static_url_path=TEMPLATES_DIR)
         app.config.from_mapping(
             SECRET_KEY='dev',
             DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
@@ -78,11 +89,11 @@ class Core(object, metaclass=Singleton):
         # make routings
         @self._app.route('/')
         def index():
-            return 'Welcome at the Quantum Robot core'
+            return render_template('index.html', name="name")
 
         # the root page
         @self._app.route('/qunits/')
         def qunits():
             return str(self._qunits)
-        
+
         self._app.run()
