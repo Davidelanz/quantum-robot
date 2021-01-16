@@ -60,6 +60,19 @@ class Model(ABC):
         # Initialize the circuit
         self.circ = qiskit.QuantumCircuit(n, n)
 
+    def __dict__(self) -> str:
+        return {
+            "model": self.__class__.__name__,
+            "n": self.n,
+            "tau": self.tau,
+        }
+
+    def __repr__(self) -> str:
+        out_str = "["
+        for k, v in self.__dict__().items():
+            out_str += f"{k}: {v}, "
+        return out_str[:-2] + "]"
+
     def clear(self) -> None:
         """Re-initialize the model with an empty circuit."""
         self.circ = qiskit.QuantumCircuit(self.n, self.n)
@@ -80,7 +93,7 @@ class Model(ABC):
 
     def dim_index_check(self, dim) -> int:
         """This method ensures that a dimension index `dim`
-        is an integer between 1 and `n`, where `n` is the dimension
+        is an integer between 0 and `n-1`, where `n` is the dimension
         of the model.
 
         Raises
