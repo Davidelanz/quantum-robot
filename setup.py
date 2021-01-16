@@ -3,12 +3,12 @@ import setuptools
 DISTNAME = 'quantum-robot'
 VERSION = "0.1"
 DESCRIPTION = 'A set of python modules for quantum-like perception modelling'
-with open('docs/README_PYPI.md') as f:
+with open('README.md') as f:
     LONG_DESCRIPTION = f.read()
 AUTHOR = 'Davide Lanza'
-AUTHOR_EMAIL = 'davidel96@hotmail.it'
+AUTHOR_EMAIL = 'lanza.davide.it@gmail.com'
 MAINTAINER = 'Davide Lanza'
-MAINTAINER_EMAIL = 'davidel96@hotmail.it'
+MAINTAINER_EMAIL = 'lanza.davide.it@gmail.com'
 URL = 'http://quantum-robot.org'
 DOWNLOAD_URL = 'https://pypi.org/project/quantum-robot/#files'
 LICENSE = 'GNU GPL'

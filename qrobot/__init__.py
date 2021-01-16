@@ -1,5 +1,4 @@
-from . import bursts, models, dashboard
-from .qunit import QUnit
+from . import bursts, models, dashboard, qunits
 from .core import Core
 
-__all__ = ['Core', 'QUnit', 'models', 'bursts', 'dashboard']
+__all__ = ['Core', 'models', 'bursts', 'qunits', 'dashboard']

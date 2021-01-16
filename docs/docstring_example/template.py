@@ -5,6 +5,7 @@ serve as a template for quantum-robot docstrings.
 Adapted from https://gist.github.com/jakevdp/3808292
 """
 
+
 def qrobot_template(X, y, a=1, flag=True, f=None, **kwargs):
     """This is where a short one-line description goes
 
@@ -29,7 +30,7 @@ def qrobot_template(X, y, a=1, flag=True, f=None, **kwargs):
     flag : bool (optional, default=True)
         If true, then do one thing.
         If false, then do another thing.
-   
+
     f : callable (optional, default=None)
         Call-back function.  If not specified, then some other function
         will be used
@@ -70,7 +71,7 @@ def qrobot_template(X, y, a=1, flag=True, f=None, **kwargs):
         import pylab as pl
         x = np.arange(10)
         y = np.sin(x)
-       
+
         pl.plot(x, y)
 
     We use a code block for a pylab example, because plotting does not

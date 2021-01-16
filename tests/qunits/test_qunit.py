@@ -1,6 +1,7 @@
 from time import sleep
 
-from qrobot import Core, QUnit
+from qrobot import Core
+from qrobot.qunits import QUnit
 from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
 

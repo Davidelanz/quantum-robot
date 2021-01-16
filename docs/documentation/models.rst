@@ -2,7 +2,12 @@
 Models
 ************
 
-.. include:: modules/models_diagram.rst
+``qrobot.models`` module class diagram:
+
+.. inheritance-diagram:: qrobot.models.Model qrobot.models.AngularModel qrobot.models.LinearModel
+   :top-classes: qrobot.models.model.Model
+   :parts: 1
+
 
 |
 
@@ -45,33 +50,6 @@ is provided in order to illustrate the difference between this and the angular o
 
 .. autoclass:: qrobot.models.LinearModel
     :members:
-
-
-|
-
-The ``BurstAModel`` class
-=========================================
-
-This is a modified ``AngularModel`` which provides a burst instead of a
-dictionary as decoding, which is the ration of qubits recorded in a \|0> state
-out of the dimension of the mode:
-
-.. code-block:: python
-
-    >>> AngularModel.decode(model)
-    {"state" = 1}
-    >>> BurstAModel.decode(model)
-    float
-
-    # E.g.
-    >>> AngularModel.decode(model)
-    {"111100" = 1}
-    >>> BurstAModel.decode(model)
-    2/6 = 0.3333333333333333
-
-.. autoclass:: qrobot.models.BurstAModel
-    :members:
-
 
 |
 
