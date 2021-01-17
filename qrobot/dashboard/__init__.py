@@ -1,4 +1,3 @@
-from .frontend import app as _app
+from .frontend import run_dashboard
 
-def run_dashboard():
-    _app.run_server(debug=False)
+__all__ = ['run_dashboard']

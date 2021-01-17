@@ -86,3 +86,12 @@ def update_interval_rate(refresh_value):
               state=[State('refresh-slider', 'value')])
 def update_refresh_interval(n_intervals, refresh_value):
     return f"Refresh: {refresh_value*1000}ms"
+
+
+def run_dashboard():
+    """Run dashboard at ``http://localhost:8050``.
+    To shutdown the dashboard, go to
+    ``http://localhost:8050/shutdown``.
+
+    """
+    app.run_server(debug=False)

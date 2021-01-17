@@ -18,9 +18,9 @@ DEFAULT_INPUT = 0.0
 """ float: Default scalar input value when qunit does not have an available one
 """
 
-REDIS_PORT = 6379
-""" int : TCP port for redis database
-"""
+
+def _get_redis():
+    return redis.Redis(host='localhost', port=6379, db=0)
 
 
 def redis_status() -> dict:
@@ -30,16 +30,16 @@ def redis_status() -> dict:
     Returns:
         dict: Redis current status
     """
-    r = redis.StrictRedis(host='localhost', port=REDIS_PORT, db=0)
+    r = _get_redis()
     status = {}
     for key in r.scan_iter():
-        status[key] = r.get(key)
+        status[key.decode("ascii")] = r.get(key).decode("ascii")
     return status
 
 
 def flush_redis() -> None:
     """Flush the redis database"""
-    r = redis.StrictRedis(host='localhost', port=REDIS_PORT, db=0)
+    r = _get_redis()
     r.flushdb()
 
 
@@ -114,6 +114,10 @@ class QUnit():
         # Initialize threads
         self._loop_thread = multiprocessing.Process(target=self._loop)
 
+    def __del__(self):
+        self._logger.info(f"Destroying qunit {self.id}")
+        self.stop()
+
     # ========================================================
     # PROPERTIES
     # ========================================================
@@ -174,7 +178,7 @@ class QUnit():
         """
         input_vector = [DEFAULT_INPUT] * self.model.n
         for dim, qunit_id in self._in_qunits.items():
-            r = redis.Redis(host='localhost', port=REDIS_PORT, db=0)
+            r = _get_redis()
             val = r.get(qunit_id)
             if val is not None:
                 input_vector[dim] = float(val)
@@ -191,8 +195,8 @@ class QUnit():
         return {
             "name": self.name,
             "id": self.id,
-            "model_info": str(self.model),
-            "burst_info": str(self.burst),
+            "model": str(self.model),
+            "burst": str(self.burst.__class__),
             "query": self.query,
             "Ts": self.Ts,
         }
@@ -242,7 +246,7 @@ class QUnit():
         except AssertionError:
             self._logger.warning("qUnit is not running")
         # Delete outputs from redis
-        r = redis.StrictRedis(host='localhost', port=REDIS_PORT, db=0)
+        r = _get_redis()
         r.delete(self.id)
         r.delete(self.id + " state")
 
@@ -309,7 +313,7 @@ class QUnit():
 
             # Write output on Redis database
             self._logger.debug("Writing output on redis")
-            r = redis.Redis(host='localhost', port=REDIS_PORT, db=0)
+            r = _get_redis()
             if not (r.mset({self.id + " state": out_state}) and
                     r.mset({self.id: self.burst(out_state)})):
                 raise Exception(
