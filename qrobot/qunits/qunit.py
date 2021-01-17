@@ -114,10 +114,6 @@ class QUnit():
         # Initialize threads
         self._loop_thread = multiprocessing.Process(target=self._loop)
 
-    def __del__(self):
-        self._logger.info(f"Destroying qunit {self.id}")
-        self.stop()
-
     # ========================================================
     # PROPERTIES
     # ========================================================

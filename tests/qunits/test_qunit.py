@@ -1,5 +1,6 @@
 from time import sleep
 
+import qrobot
 from qrobot.qunits import QUnit
 from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
@@ -7,41 +8,49 @@ from qrobot.models import AngularModel
 
 def test_qunit():
 
-    model = AngularModel(n=2, tau=10)
-    burst = ZeroBurst()
+    # Layer 0
+    l0_unit0 = QUnit(
+        name="lo_unit0",
+        model=AngularModel(n=2, tau=10),
+        burst=ZeroBurst(),
+        Ts=0.1,
+        query=[0.1, 0.5],  # Query target initialized
+        # No input
+    )
 
     # Layer 1
     l1_unit0 = QUnit(
         name="l1_unit0",
-        model=model,
-        burst=burst,
-        Ts=0.01)
-    # Will receive Input from l0_unit0, dim 0
-
-    l1_unit1 = QUnit("l1_unit1", model, burst, 0.01)
-    # Will receive input from l0_unit0, dim 1
-
-    # Layer 0
-    l0_unit0 = QUnit(
-        "l0_unit0", model, burst, 0.01,
-        query=[0.1, 0.5],  # Query target initialized
-        out_qunits={
-            l1_unit0: 0,  # Output in l1_unit0, dim 0
-            l1_unit1: 1,  # Output in l1_unit1, dim 1
-        }
+        model=AngularModel(n=1, tau=3),
+        burst=ZeroBurst(),
+        Ts=1,
+        in_qunits={0: l0_unit0.id}  # Will receive Input from l0_unit0, dim 0
     )
+
+    l1_unit1 = QUnit(
+        name="l1_unit1",
+        model=AngularModel(n=1, tau=5),
+        burst=ZeroBurst(),
+        Ts=1,
+        in_qunits={0: l0_unit0.id}  # Will receive input from l0_unit0, dim 1
+    )
+
+    print(l0_unit0)
+    print(l1_unit0)
+    print(l1_unit1)
+    print(l0_unit0.in_qunits)
+    print(l1_unit0.in_qunits)
+    print(l1_unit1.in_qunits)
 
     l0_unit0.start()
     l1_unit0.start()
     l1_unit1.start()
-
-    sleep(1)
-    l0_unit0.set_input(.6, 0)
-    sleep(3)
-
+    sleep(2)
     l0_unit0.stop()
     l1_unit0.stop()
     l1_unit1.stop()
+
+    qrobot.qunits.qunit.flush_redis()
 
 
 if __name__ == "__main__":
