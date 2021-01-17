@@ -44,8 +44,6 @@ CONTAINERS, ROWS, WIDTHS
 .container {
   display: block;
   margin: auto;
-  padding-top: 1%;
-  padding-bottom: 1%;
 }
 
 .width90 {
@@ -62,8 +60,6 @@ CONTAINERS, ROWS, WIDTHS
 
 .row {
   display: flex;
-  padding-top: 0.5%;
-  padding-bottom: 0.5%;
 }
 
 /*
@@ -96,17 +92,17 @@ CONTROL PANEL
 ===================================
 */
 
-#slider-refresh{
+#refresh-slider {
   width: 60%;
   margin: auto;
-  padding: inherit;
+  padding: auto;
 }
 
-#slider-refresh-out {
+#refresh-slider-text {
   width: 40%;
   margin: auto;
   margin-left: 5%;
-  padding: inherit;
+  padding: auto;
 }
 
 /*
@@ -115,9 +111,7 @@ GRAPHS & PREDICTIONS
 ===================================
 */
 
+.loading,
 .graph {
-  display: inline-block;
-  width: 50%;
-  padding: inherit;
-  height: 40vh;
+  width: 100%;
 }

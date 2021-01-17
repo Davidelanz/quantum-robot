@@ -4,7 +4,7 @@ from pathlib import Path
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from flask import Flask, request
 
 from .plots import bar_all_bursts
@@ -35,41 +35,54 @@ app.layout = html.Div(children=[
         html.H1(children='Quantum-robot Dashboard'),
         html.Div(className="row", children=[
             dcc.Slider(
-                id='slider-refresh',
+                id='refresh-slider',
                 min=0,
                 max=1,
                 step=0.001,
                 value=1,
             ),
-            html.Div(id='slider-refresh-output')
+            html.Div(id='refresh-slider-text')
         ]),
         html.H2(children="Bursts"),
         html.Div(className="row", children=[
             dcc.Loading(
-                className="graph",
-                id="loading-bar-all-bursts",
+                className="loading",
+                id="loading-bursts-bar",
                 type="default",
                 fullscreen=False,
-                children=[dcc.Graph(id='bar-all-bursts')],
+                children=[
+                    dcc.Graph(
+                        className="graph",
+                        id='bursts-bar'
+                    )],
             ),
         ]),
     ]),
     dcc.Interval(
-        id='interval-component',
+        id='refresh-interval',
         interval=1,  # (in milliseconds)
         n_intervals=0
     )
 ])
 
 
-@app.callback(Output('bar-all-bursts', 'figure'),
-              Input('interval-component', 'n_intervals'))
-def update_bar_all_bursts(in1):
+@app.callback(
+    Output('bursts-bar', 'figure'),
+    [Input('refresh-interval', 'n_intervals')])
+def update_bar_all_bursts(n_intervals):
     figure = bar_all_bursts()
     return figure
 
 
-@app.callback(Output('interval-component', 'interval'),
-              [Input('slider-refresh', 'value')])
+@app.callback(
+    Output('refresh-interval', 'interval'),
+    [Input('refresh-slider', 'value')])
 def update_interval_rate(refresh_value):
-    return refresh_value*1000
+    return refresh_value*1000  # seconds to milliseconds
+
+
+@app.callback(Output('refresh-slider-text', 'children'),
+              [Input('refresh-interval', 'n_intervals')],
+              state=[State('refresh-slider', 'value')])
+def update_refresh_interval(n_intervals, refresh_value):
+    return f"Refresh: {refresh_value*1000}ms"
