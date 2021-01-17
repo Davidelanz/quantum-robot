@@ -1,0 +1,123 @@
+/*
+===================================
+FONTS
+===================================
+*/
+
+@import url("https://fonts.googleapis.com/css?family=Poppins|Lato");
+
+/*
+===================================
+BODY, HEADERS
+===================================
+*/
+
+body {
+  margin: 0px;
+  padding: 0px;
+  background-color: #f0f0f0;
+  font-family: "Poppins";
+  color: #595959;
+  text-align: center;
+  align-content: center;
+  box-sizing: border-box;
+}
+
+h1 {
+  margin-bottom: 2%;
+  margin-top: 4%;
+}
+
+h2,
+h3,
+h4 {
+  margin-bottom: 2%;
+  margin-top: 2%;
+}
+
+/*
+===================================
+CONTAINERS, ROWS, WIDTHS
+===================================
+*/
+
+.container {
+  display: block;
+  margin: auto;
+  padding-top: 1%;
+  padding-bottom: 1%;
+}
+
+.width90 {
+  width: 90%;
+}
+
+.width80 {
+  width: 80%;
+}
+
+.width60 {
+  width: 60%;
+}
+
+.row {
+  display: flex;
+  padding-top: 0.5%;
+  padding-bottom: 0.5%;
+}
+
+/*
+===================================
+PLACEHOLDERS
+===================================
+*/
+
+::-webkit-input-placeholder {
+  text-align: center;
+}
+
+:-moz-placeholder {
+  /* Firefox 18- */
+  text-align: center;
+}
+
+::-moz-placeholder {
+  /* Firefox 19+ */
+  text-align: center;
+}
+
+:-ms-input-placeholder {
+  text-align: center;
+}
+
+/*
+===================================
+CONTROL PANEL
+===================================
+*/
+
+#slider-refresh{
+  width: 60%;
+  margin: auto;
+  padding: inherit;
+}
+
+#slider-refresh-out {
+  width: 40%;
+  margin: auto;
+  margin-left: 5%;
+  padding: inherit;
+}
+
+/*
+===================================
+GRAPHS & PREDICTIONS
+===================================
+*/
+
+.graph {
+  display: inline-block;
+  width: 50%;
+  padding: inherit;
+  height: 40vh;
+}

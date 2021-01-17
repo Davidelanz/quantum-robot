@@ -2,7 +2,7 @@
 https://stackoverflow.com/questions/23211695/modifying-content-width-of-the-sphinx-theme-read-the-docs
 */
 .wy-nav-content {
-  max-width: 90%;
+  max-width: 85%;
 }
 .wy-nav-side {
   background: #505050;
