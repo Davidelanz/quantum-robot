@@ -6,10 +6,13 @@
       </a>
    </div>
 
-   <div align="center" style="align:center; padding:20px">
+   <div align="center" style="align:center; padding:20px; line-height:2;">
       <a href="https://travis-ci.com/github/Davidelanz/quantum-robot">
          <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?branch=master" alt="Build"/>
       </a>
+      <a href='http://docs.quantum-robot.org/en/latest/?badge=latest'>
+        <img src='https://readthedocs.org/projects/quantum-robot/badge/?version=latest' alt='Documentation Status' />
+      </a> 
       <a href="https://frontend.code-inspector.com/public/project/13599/quantum-robot/dashboard">
          <img src="https://www.code-inspector.com/project/13599/score/svg" alt="Code Quality"/>
       </a>
