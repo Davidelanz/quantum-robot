@@ -1,7 +1,5 @@
 Dashboard
 =========================================
 
-``qrobot.dashboard`` module class diagram:
-
-.. automodule:: qrobot.dashboard
+.. automodule:: qrobot.dashboard.run_dashboard
     :members:

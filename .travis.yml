@@ -3,22 +3,23 @@
 
 os: linux
 
-dist:
-  - xenial
-  - bionic
-  - focal
+dist: focal
 
 git:
   depth: false
 
 language: python
 python:
-  - "3.6"
   - "3.7"
   - "3.8"
+  - "3.9"
 
 # command to install dependencies
 install:
+  # install redis
+  - sudo add-apt-repository ppa:redislabs/redis
+  - sudo apt-get update
+  - sudo apt-get install redis
   # install the required packages:
   - pip install -r requirements.txt
   # install quantum-robot package:
@@ -28,9 +29,11 @@ install:
 
 # command to run tests
 script:
-  # Run tests without coverage:
+  # start redis server
+  - service redis-server start
+  # run tests without coverage:
   # - pytest
-  # Run tests with coverage:
+  # run tests with coverage:
   - coverage run -m pytest
 
 after_success:
