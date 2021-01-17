@@ -56,7 +56,7 @@ quantum circuits which can be simulated on a classical computer or sent to a qua
 backend (service provided by `IBM Quantum Experience <https://quantum-computing.ibm.com/>`__).
 
 The project was started in 2019 by 
-`Davide Lanza <https://scholar.google.com/citations?user=Lqx6VqEAAAAJ>`__.
+`Davide Lanza <https://scholar.google.com/citations?user=Lqx6VqEAAAAJ>`__
 as a Master thesis research, with the help
 of `Fulvio Mastrogiovanni <https://www.dibris.unige.it/mastrogiovanni-fulvio>`__ and `Paolo
 Solinas <http://www.spin.cnr.it/index.php/people/46-researchers/49-solinas-paolo.html>`__.
