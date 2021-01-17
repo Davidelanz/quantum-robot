@@ -17,9 +17,9 @@ python:
 # command to install dependencies
 install:
   # install redis
-  - sudo add-apt-repository ppa:redislabs/redis
-  - sudo apt-get update
-  - sudo apt-get install redis
+  - sudo add-apt-repository ppa:redislabs/redis  -y
+  - sudo apt-get update -y
+  - sudo apt-get install redis  -y
   # install the required packages:
   - pip install -r requirements.txt
   # install quantum-robot package:

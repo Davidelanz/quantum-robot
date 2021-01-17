@@ -16,11 +16,11 @@
     <a href="https://codecov.io/gh/Davidelanz/quantum-robot" >
         <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU" alt="Code coverage"/>
     </a>
-    <!--a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability">
+    <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability">
         <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability" alt="Maintainability"/>
-    </a-->
+    </a>
     <a>
-        <img src="https://img.shields.io/badge/python-3.6|3.7|3.8-blue" alt="Python"/>
+        <img src="https://img.shields.io/badge/python-&#8805;3.7-blue" alt="Python"/>
     </a>
     <a href="https://pypi.org/project/quantum-robot/">
         <img src="https://badge.fury.io/py/quantum-robot.svg" alt="PyPi version"/>
@@ -43,9 +43,11 @@ simulated on a classical computer or sent to a quantum backend (service
 provided by [IBM Quantum
 Experience](https://quantum-computing.ibm.com/)).
 
-The project was started in 2019 by Davide Lanza as a Master thesis
+The project was started in 2019 by
+[Davide Lanza](https://scholar.google.com/citations?user=Lqx6VqEAAAAJ)
+as a Master thesis
 research, with the help of
-[Fulvio Mastrogiovanni](https://www.dibris.unige.it/mastrogiovanni-fulvio) 
+[Fulvio Mastrogiovanni](https://www.dibris.unige.it/mastrogiovanni-fulvio)
 and
 [Paolo Solinas](http://www.spin.cnr.it/index.php/people/46-researchers/49-solinas-paolo.html).
 
@@ -53,7 +55,7 @@ It is currently maintained by [Davide Lanza](https://scholar.google.com/citation
 
 - Website: <http://quantum-robot.org>
 - Repository: <https://github.com/Davidelanz/quantum-robot/>
-- Documentation: <http://quantum-robot.org/docs>
+- Documentation: <http://docs.quantum-robot.org/en/latest/>
 
 ## Contents
 
