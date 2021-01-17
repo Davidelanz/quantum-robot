@@ -2,7 +2,15 @@
 Quantum-Robot Python Package
 ************************************************
 
-.. include:: modules/summary.rst
+.. include:: info.rst
+
+Getting Started
+===============================================
+
+.. toctree::
+    :maxdepth: 2
+
+    getting_started/getting_started.rst
 
 
 Documentation
@@ -11,33 +19,13 @@ Documentation
 .. toctree::
     :maxdepth: 2
 
-    getting_started.rst
-    models.rst
+    documentation/documentation.rst
 
 
-.. include:: modules/models_diagram.rst
-
-|
-
-Notebooks
+About
 ===============================================
 
-.. include:: modules/notebooks.rst
+.. toctree::
+    :maxdepth: 2
 
-
-Contributing
-===============================================
-
-.. include:: modules/contributing.rst
-
-
-Citing
-===============================================
-
-.. include:: modules/citing.rst
-
-
-License
-===============================================
-
-.. include:: modules/license.rst
+    about/about.rst

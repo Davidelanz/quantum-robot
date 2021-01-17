@@ -12,7 +12,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import sphinx_rtd_theme # ReadTheDocs theme
+import sphinx_rtd_theme  # ReadTheDocs theme
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
@@ -90,16 +90,32 @@ html_theme = 'sphinx_rtd_theme'
 # documentation.
 #
 html_theme_options = {
-   'sticky_navigation': 'True',
-   'prev_next_buttons_location' : 'none',
-   'style_external_links': 'False',
+    'logo_only': True,
+    'display_version': True,
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': False,
+    'style_nav_header_background': 'white',
+    # Toc options
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
 }
+
+html_logo = "./quantum-robot-logo.png"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
-html_static_path = []
+# html_static_path = []
+html_static_path = ['_static']
+
+
+def setup(app):
+    app.add_stylesheet('theme_overrides.css')
+
+
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 #
@@ -192,5 +208,5 @@ graphviz_output_format = "svg"
 
 inheritance_graph_attrs = dict(rankdir="LR", ratio='compress', fontsize=14)
 
-#inheritance_node_attrs = dict(shape='ellipse', fontsize=14, height=0.75,
+# inheritance_node_attrs = dict(shape='ellipse', fontsize=14, height=0.75,
 #                              color='dodgerblue1', style='filled')

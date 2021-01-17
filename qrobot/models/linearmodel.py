@@ -7,8 +7,8 @@ class LinearModel(AngularModel):
     """``LinearModel`` corrects the ``AngularModel`` the encoding, allowing
     a linear decoding for single-event sequencies (tau=1).
 
-    Notes
-    -----
+    Warning
+    ----------
     The current implementation of ``LinearModel`` provides a linear
     dependency between encoded input and decoding probabilities
     only for tau = 1 (or for tau > 1 if and only if the input is always
