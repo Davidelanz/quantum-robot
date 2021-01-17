@@ -20,7 +20,8 @@
          <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability" alt="Maintainability"/>
       </a>
       <a>
-         <img src="https://img.shields.io/badge/python-&#8805;3.7-blue" alt="Python"/>
+         <!--python-&#8805;3.7-->
+         <img src="https://img.shields.io/badge/python-3.7 | 3.8-blue" alt="Python"/>
       </a>
       <a href="https://pypi.org/project/quantum-robot/">
          <img src="https://badge.fury.io/py/quantum-robot.svg" alt="PyPi version"/>
