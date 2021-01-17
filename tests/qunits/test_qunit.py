@@ -1,6 +1,5 @@
 from time import sleep
 
-from qrobot import Core
 from qrobot.qunits import QUnit
 from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
@@ -8,32 +7,41 @@ from qrobot.models import AngularModel
 
 def test_qunit():
 
-    Core().start()
-
-    model = AngularModel(2, 10)
+    model = AngularModel(n=2, tau=10)
     burst = ZeroBurst()
 
-    unit1 = QUnit("first_unit", model, burst, 1)
-    unit2 = QUnit("second_unit", model, burst, 1)
+    # Layer 1
+    l1_unit0 = QUnit(
+        name="l1_unit0",
+        model=model,
+        burst=burst,
+        Ts=0.01)
+    # Will receive Input from l0_unit0, dim 0
 
-    unit1.input(.6, 0)
+    l1_unit1 = QUnit("l1_unit1", model, burst, 0.01)
+    # Will receive input from l0_unit0, dim 1
 
-    unit1.start()
-    unit2.start()
+    # Layer 0
+    l0_unit0 = QUnit(
+        "l0_unit0", model, burst, 0.01,
+        query=[0.1, 0.5],  # Query target initialized
+        out_qunits={
+            l1_unit0: 0,  # Output in l1_unit0, dim 0
+            l1_unit1: 1,  # Output in l1_unit1, dim 1
+        }
+    )
+
+    l0_unit0.start()
+    l1_unit0.start()
+    l1_unit1.start()
 
     sleep(1)
-    unit2.stop()
+    l0_unit0.set_input(.6, 0)
+    sleep(3)
 
-    sleep(1)
-    unit1.query([0.1, 0.3])
-
-    sleep(1)
-    unit1.input(.7, 1)
-
-    sleep(1)
-    unit1.query([0.3, 0.2])
-
-    Core().stop()
+    l0_unit0.stop()
+    l1_unit0.stop()
+    l1_unit1.stop()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,5 @@
-************
 Bursts
-************
+=========================================
 
 ``qrobot.bursts`` module class diagram:
 
@@ -11,7 +10,7 @@ Bursts
 |
 
 The ``Burst`` abstract class
-=========================================
+-------------------------------------
 
 .. autoclass:: qrobot.bursts.Burst
     :members:
@@ -20,7 +19,7 @@ The ``Burst`` abstract class
 |
 
 The ``ZeroBurst`` abstract class
-=========================================
+-------------------------------------
 
 .. autoclass:: qrobot.bursts.ZeroBurst
     :members:
@@ -28,7 +27,7 @@ The ``ZeroBurst`` abstract class
 |
 
 The ``OneBurst`` abstract class
-=========================================
+-------------------------------------
 
 .. autoclass:: qrobot.bursts.OneBurst
     :members:

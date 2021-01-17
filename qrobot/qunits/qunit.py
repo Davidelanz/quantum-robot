@@ -1,49 +1,90 @@
+from __future__ import annotations
+
 import multiprocessing
 from time import sleep
 from uuid import uuid4
-import ctypes
-import json
 
-from pynng import Pub0, Sub0
+import redis
 
 from ..bursts import Burst
-from ..core import Core
 from ..logs import get_logger
 from ..models import Model
 
+MIN_TS = 0.01
+""" float: Minimum sampling period allowed (in seconds).
+"""
+
+DEFAULT_INPUT = 0.0
+""" float: Default scalar input value when qunit does not have an available one
+"""
+
+REDIS_PORT = 6379
+""" int : TCP port for redis database
+"""
+
+
+def redis_status() -> dict:
+    """Returns the current redis database status in the for of a dictionary
+    with {db_key : db_value} mapping.
+
+    Returns:
+        dict: Redis current status
+    """
+    r = redis.StrictRedis(host='localhost', port=REDIS_PORT, db=0)
+    status = {}
+    for key in r.scan_iter():
+        status[key] = r.get(key)
+    return status
+
+
+def flush_redis() -> None:
+    """Flush the redis database"""
+    r = redis.StrictRedis(host='localhost', port=REDIS_PORT, db=0)
+    r.flushdb()
+
 
 class QUnit():
-    """ [QUnit]
+    """ [QUnit description]
+
+    Parameters
+    ------------
+    name : str
+        The qUnit name
+    model : qrobot.models.Model
+        The model the qUnit implements
+    burst : qrobot.bursts.Burst
+        The burst the qUnit implements
+    Ts : float
+        The sampling time with wich the qUnit reads the input
+    query : list, optional
+        The target state for the model queries. Defaults to ``None``
+    in_units : dict[int, str], optional
+        Dictionary containing {``dim`` : ``qunit_id``} inputs
+        couplings, i.e. ``qunit_id`` output is the input for dimension
+        ``dim``. Defaults to ``{}``.
 
     Attributes
     ----------
     id : str
         The unique instance identifier of the qUnit
-    model : qrobot.Model
+    name : str
+        The unique instance identifier of the qUnit
+    model : qrobot.models.Model
         The model which the qUnit implements
-    n : int
-        The model dimension
-    tau : int
-        The number of events in the qUnit's temporal window
+    burst : qrobot.bursts.Burst
+            The burst the qUnit implements
     Ts : float
         The sampling period for which the qUnit samples an event
-    query : list
-        If present, contains the target state for the model queries
     """
 
-    def __init__(self, name: str, model: Model, burst: Burst,
-                 Ts: float, query: list = None) -> None:
-        """[__init__]
+    # ========================================================
+    # CONSTRUCTOR
+    # ========================================================
 
-        Args:
-            name (str): The qUnit name
-            model (qrobot.models.Model): The model the qUnit implements
-            model (qrobot.bursts.Burst): The burst the qUnit implements
-            Ts (float): The sampling time with wich the qUnit reads the input
-            query (list): The target state for the model queries.
-                Defaults to None
+    def __init__(self, name: str,
+                 model: Model, burst: Burst, Ts: float, query: list = None,
+                 in_qunits: dict[int, str] = {}) -> None:
 
-        """
         # Create a instance unique identifier
         self.id = name + "-" + str(uuid4())[:6]
         # use it for log
@@ -53,50 +94,105 @@ class QUnit():
         # Store the qUnits name and properties
         self.name = name
         self.model = model
-        self._burst = burst
-        self.Ts = self.period_check(Ts)
+        self.burst = burst
+        self.Ts = self._period_check(Ts)
 
         if query is None:
             query = [.0]*(self.model.n)
 
         # Initialize multiprocessing variables
-        # (common to all threads while # being modified)
+        # (common to all threads while being modified)
         manager = multiprocessing.Manager()
-        self._query = manager.Array('d', query)
-        # Initialize input data accumulator
-        self._in_data = manager.Array('d', [.0]*(self.model.n))
-        # Initialize output accumulators
-        self._out_state = manager.Value(ctypes.c_char_p, "")
-        self._out_burst = manager.Value('d', 0)
-
-        # Initialize subscribers dict
-        # https://docs.python.org/3/library/multiprocessing.html#proxy-objects
-        self._subs = manager.dict({i: None for i in range(model.n)})
-
-        # Initialize publisher
-        # (does not need to be managed by multiprocessing, it does not change)
-        self._pub = Pub0(listen=Core().address)
-
-        # Initialize threads
-        self._loop_thread = None
-        self._update_thread = None
+        # Query array variable
+        self._query = manager.list(query)
+        # Output unit dictionary
+        self._in_qunits = manager.dict(in_qunits)
 
         # Log properties
         self._logger.debug(f"Properties: {self}")
 
-    @property
-    def subscribers(self) -> dict:
-        return {dim: sub for dim, sub in self._subs.items()}
+        # Initialize threads
+        self._loop_thread = multiprocessing.Process(target=self._loop)
+
+    # ========================================================
+    # PROPERTIES
+    # ========================================================
 
     @property
-    def query(self) -> list: return list(self._query)
+    def query(self) -> list[float]:
+        """Current target state for the model queries
+
+        Returns
+        -------
+        list
+            The query target state array in the computational basis
+        """
+        return list(self._query)
+
+    @query.setter
+    def query(self, query: list) -> None:
+        """Set a new query state for the qunit
+
+        Parameters
+        -----------
+        query : list
+            The query target state array in the computational basis
+        """
+        # Check arguments
+        query = self.model.target_vector_check(query)
+        # Update accumulator
+        self._logger.debug(f"Changing query from {self._query} to {query}")
+        for i, q in enumerate(query):
+            self._query[i] = q
+        self._logger.debug(f"_query={self._query}")
+
+    @property
+    def in_qunits(self) -> dict[int, str]:
+        """Current output {``dim`` : ``qunit_id``} couplings
+
+        Returns
+        -------
+        dict
+            The current output {``dim`` : ``qunit_id``} couplings dictionary
+        """
+        in_qunits = {}
+        for dim in range(self.model.n):
+            try:
+                in_qunits[dim] = self._in_qunits[dim]
+            except KeyError:
+                in_qunits[dim] = None
+        return in_qunits
+
+    @property
+    def input_vector(self) -> list[float]:
+        """The current input vector of the unit
+
+        Returns
+        -------
+        list
+            The current input vector
+        """
+        input_vector = [DEFAULT_INPUT] * self.model.n
+        for dim, qunit_id in self._in_qunits.items():
+            r = redis.Redis(host='localhost', port=REDIS_PORT, db=0)
+            val = r.get(qunit_id)
+            if val is not None:
+                input_vector[dim] = float(val)
+            else:
+                self._logger.info(f"Unable to read {qunit_id} input")
+                input_vector[dim] = DEFAULT_INPUT
+        return input_vector
+
+    # ========================================================
+    # BUILT-IN
+    # ========================================================
 
     def __dict__(self) -> str:
         return {
             "name": self.name,
             "id": self.id,
-            "model": str(self.model),
-            "subs": self.subscribers,
+            "model_info": str(self.model),
+            "burst_info": str(self.burst),
             "query": self.query,
             "Ts": self.Ts,
         }
@@ -107,43 +203,57 @@ class QUnit():
             out_str += f"\n     {k}:\t{v}"
         return out_str
 
-    def set_query(self, query) -> str:
-        self._logger.debug(f"Changing query from {self._query} to {query}")
-        for i, q in enumerate(query):
-            self._query[i] = q
-        self._logger.debug(f"_query={self._query}")
+    # ========================================================
+    # METHODS
+    # ========================================================
 
-    def subscribe(self, qunit_id: str, dim: int):
+    def set_input(self, dim: int, qunit_id: str) -> None:
+        """Set a new input qunit for the desired dimension
+
+        Parameters
+        -----------
+        dim : int
+            The input dimension index
+        qunit_id : str
+            The input qunit id
+        """
+        # Check arguments
         dim = self.model.dim_index_check(dim)
-        self._logger.debug(f"Subscribing to {qunit_id} for dim {dim}")
-        self._subs[dim] = qunit_id
-        self._logger.debug(f"_subs = {repr(self._subs)}")
+        # Update accumulator
+        self._logger.debug(
+            f"Changing dim {dim} input from " +
+            f"{self.in_qunits[dim]} to {qunit_id}")
+        self._in_qunits[dim] = qunit_id
+        self._logger.debug(f"_in_qunits={self._in_qunits}")
 
     def start(self) -> None:
         """Starts the qUnit background threads"""
-        if self._process is not None:
-            self._logger.warning("qUnit is already started")
-        else:
+        try:
+            self._loop_thread.start()
             self._logger.info("Starting qUnit")
-            self._loop_thread = multiprocessing.Process(target=self._loop)
-            self._update_thread = multiprocessing.Process(target=self._update)
-            self._update_thread.start()
-            # Core().add_qunit(self)
+        except AssertionError:
+            self._logger.warning("qUnit is already started")
 
     def stop(self) -> None:
         """Stops the qUnit background threads"""
-        if self._process is None:
-            self._logger.warning("qUnit is already stopped")
-        else:
-            self._logger.info("Stopping qUnit")
+        try:
             self._loop_thread.terminate()
-            self._update_thread.terminate()
-            # Core().remove_qunit(self)
+            self._logger.info("Stopping qUnit")
+        except AssertionError:
+            self._logger.warning("qUnit is not running")
+        # Delete outputs from redis
+        r = redis.StrictRedis(host='localhost', port=REDIS_PORT, db=0)
+        r.delete(self.id)
+        r.delete(self.id + " state")
 
-    def period_check(self, Ts) -> float:
+    # ========================================================
+    # PRIVATE METHODS
+    # ========================================================
+
+    @staticmethod
+    def _period_check(Ts) -> float:
         """This method ensures that a `Ts` for the qUnit
-        is an integer or a float greater than the global update
-        period of the Core.
+        is an integer or a float greater than the minimum allowed.
 
         Raises
         ---------
@@ -160,35 +270,13 @@ class QUnit():
         if not isinstance(Ts, (float, int)):
             raise TypeError(
                 f"Ts must be an scalar number, not a {type(Ts)}!")
-        if Ts < Core().T:
-            raise ValueError("Ts must not be lower than " +
-                             f"Core's period {Core().T}!")
+        if Ts < MIN_TS:
+            raise ValueError(f"Ts must not be lower than {MIN_TS}!")
         return float(Ts)
 
-    def _update(self) -> None:
-        # Loop through all dimensions
-        for dim, qunit_id in self.subscribers.items():
-            if qunit_id is None:
-                # Store default in vector input
-                self._in_data[dim] = 0
-            else:
-                # Create a subscriber to read what qunit_id is publishing
-                sub0 = Sub0(
-                    dial=Core().address,
-                    recv_timeout=(self.model.tau * self.Ts)
-                )
-                sub0.subscribe(qunit_id)
-
-                # Read what qunit_id is publishing
-                recv_string = sub0.recv()
-                recv_dict = json.loads(recv_string.split("#")[-1])
-                scalar_input = recv_dict["burst"]
-                self._logger.debug(f"Input {scalar_input} on dim={dim}")
-
-                # Store it in the vector input
-                self._in_data[dim] = scalar_input
-
-        self._logger.debug(f"_in_data={self._in_data}")
+    # ========================================================
+    # THREADS
+    # ========================================================
 
     def _loop(self) -> None:
         while True:
@@ -201,13 +289,13 @@ class QUnit():
                 self._logger.debug("Temporal window event " +
                                    f"{t+1}/{self.model.tau}")
 
-                # Read input
-                self.update_in_data()
-                self._logger.debug(f"_in_data={self._in_data}")
+                # Get input
+                input_vector = self.input_vector
+                self._logger.debug(f"input_vector={input_vector}")
 
                 # Loop through the dimensions to encode data
                 for dim in range(self.model.n):
-                    self.model.encode(self._in_data[dim], dim)
+                    self.model.encode(input_vector[dim], dim)
 
                 # wait for the next input in the time window
                 sleep(self.Ts)
@@ -216,11 +304,14 @@ class QUnit():
             self._logger.debug(f"Querying for state {self._query}")
             self.model.query(self._query)
 
-            # Publish decoding
+            # Decode
             out_state = self.model.decode()
-            out_dict = {
-                "state": out_state,
-                "burst": self._burst(out_state)
-            }
-            self._logger.debug(f"Output: {out_dict}")
-            self._pub.send(f"{self.id}#{out_dict}")
+
+            # Write output on Redis database
+            self._logger.debug("Writing output on redis")
+            r = redis.Redis(host='localhost', port=REDIS_PORT, db=0)
+            if not (r.mset({self.id + " state": out_state}) and
+                    r.mset({self.id: self.burst(out_state)})):
+                raise Exception(
+                    f"Problem in writing qunit {self.id} " +
+                    "output on Redis database!")

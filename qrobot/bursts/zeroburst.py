@@ -2,24 +2,25 @@ from .burst import Burst
 
 
 class ZeroBurst(Burst):
-    """When called ``Burst`` converts a measured state into 
-    a float number which is (number of **zeroes** for the state in
-    the computational base)/(state dimension)
+    """When called, ``ZeroBurst`` converts a measured state into
+    a float number which is:
+
+    .. math::
+
+        \\frac{
+            \\text{Number of 0s for the state in the computational base}
+        }{
+            \\text{State dimension}
+        }
+
+    For example, for ``"00100100"`` we have :math:`\\frac{6}{8}`:
+
+    >>> from qrobot.bursts import ZeroBurst
+    >>> state = "00100100"
+    >>> ZeroBurst(state)
+    0.75
+
     """
 
     def __call__(self, state: str) -> float:
-        """ Given a basis state in computational basis
-        returns a float number which is the number of **zeroes** for the state
-        in the computational base divided by the dimension of the state.
-
-        Parameters
-        -----------
-        state : str
-            The state string representaton in computational basis (e.g. "01010")
-
-        Returns
-        ---------
-        float
-            The burst based on the input state
-        """
         return state.count('0')/len(state)

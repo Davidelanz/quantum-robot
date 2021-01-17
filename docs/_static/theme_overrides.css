@@ -1,0 +1,23 @@
+/* 
+https://stackoverflow.com/questions/23211695/modifying-content-width-of-the-sphinx-theme-read-the-docs
+*/
+.wy-nav-content {
+  max-width: 90%;
+}
+.wy-nav-side {
+  background: #505050;
+}
+.wy-side-nav-search {
+  border-right: 1px solid #e1e4e5;
+}
+.wy-menu-vertical li.toctree-l1.current {
+  border-right: 1px solid #c9c9c9;
+}
+h2 {
+  margin-top: 2em;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e1e4e5;
+}
+.py {
+  background-color: #eff8ff;
+}

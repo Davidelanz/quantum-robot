@@ -1,11 +1,5 @@
-Dependencies
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Check the required packages `here <https://github.com/Davidelanz/quantum-robot/blob/master/requirements.txt>`_.
-
-
-User installation
-~~~~~~~~~~~~~~~~~~~~~~~~
+Install quantum-robot
+------------------------
 
 The easiest way to install *quantum-robot* is using ``pip``::
 
@@ -21,7 +15,8 @@ as well. You can check the latest sources with the command::
 
 
 Testing
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
+
 
 After installation, you can launch the test suite from outside the
 source directory (you will need to have ``pytest`` installed):

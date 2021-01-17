@@ -44,12 +44,12 @@ provided by [IBM Quantum
 Experience](https://quantum-computing.ibm.com/)).
 
 The project was started in 2019 by Davide Lanza as a Master thesis
-research, with the help of [Fulvio
-Mastrogiovanni](https://www.dibris.unige.it/mastrogiovanni-fulvio) and
-[Paolo
-Solinas](http://www.spin.cnr.it/index.php/people/46-researchers/49-solinas-paolo.html).
+research, with the help of
+[Fulvio Mastrogiovanni](https://www.dibris.unige.it/mastrogiovanni-fulvio) 
+and
+[Paolo Solinas](http://www.spin.cnr.it/index.php/people/46-researchers/49-solinas-paolo.html).
 
-It is currently maintained by Davide Lanza.
+It is currently maintained by [Davide Lanza](https://scholar.google.com/citations?user=Lqx6VqEAAAAJ).
 
 - Website: <http://quantum-robot.org>
 - Repository: <https://github.com/Davidelanz/quantum-robot/>

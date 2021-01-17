@@ -1,6 +1,5 @@
-************
 QUnits
-************
+=========================================
 
 ``qrobot.qunits`` module class diagram:
 
@@ -11,8 +10,15 @@ QUnits
 |
 
 The ``QUnit`` class
-=========================================
+-------------------------------------
 
 .. autoclass:: qrobot.qunits.QUnit
     :members:
 
+|
+
+Module variables
+-------------------------------------
+
+.. automodule:: qrobot.qunits.qunit
+    :members: MIN_TS, DEFAULT_INPUT, redis_status, REDIS_PORT, flush_redis
