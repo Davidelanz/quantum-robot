@@ -72,7 +72,7 @@ It is currently maintained by [Davide Lanza](https://scholar.google.com/citation
 ## Install[↑](#contents)
 
 Check the
-[Getting Started](http://www.quantum-robot.org/docs/getting_started.html)
+[Getting Started](http://docs.quantum-robot.org/en/latest/getting_started/getting_started.html)
 section of the Documentation
 
 ## Notebooks[↑](#contents)
