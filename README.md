@@ -57,9 +57,9 @@ The project was started in 2019 by
 [Davide Lanza](https://scholar.google.com/citations?user=Lqx6VqEAAAAJ)
 as a Master thesis
 research, with the help of
-[Fulvio Mastrogiovanni](https://www.dibris.unige.it/mastrogiovanni-fulvio)
+[Fulvio Mastrogiovanni](https://scholar.google.it/citations?user=9dRRzV0AAAAJ&hl=en)
 and
-[Paolo Solinas](http://www.spin.cnr.it/index.php/people/46-researchers/49-solinas-paolo.html).
+[Paolo Solinas](https://rubrica.unige.it/personale/UkNHWllv).
 
 It is currently maintained by [Davide Lanza](https://scholar.google.com/citations?user=Lqx6VqEAAAAJ).
 
