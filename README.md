@@ -83,17 +83,18 @@ section of the Documentation
 
 ## Notebooks[↑](#contents)
 
-Several notebooks are availabe, to get started with the package and its
+Several [notebooks](https://github.com/Davidelanz/quantum-robot/tree/master/notebooks) are availabe, to get started with the package and its
 capabilities:
 
 - [One-dimensional demo for the
   AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/demo_angular_dim1.ipynb).
 - [Three-dimensional demo for the
-  AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/demo_angular_dim3_RGB.ipynb).
+  AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/demo_angular_dim3_rgb.ipynb).
 - [Computation speed analysis for the
   AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb).
 - [One-dimensional comparison between AngularModel and
   LinearModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb).
+- [Tutorial: how to use QUnits](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/tutorial_qunits.ipynb) (in progress)
 
 ## Contributing [↑](#contents)
 
