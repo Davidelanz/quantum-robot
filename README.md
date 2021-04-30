@@ -10,6 +10,9 @@
     <a href="https://travis-ci.com/github/Davidelanz/quantum-robot">
         <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?branch=master" alt="Build"/>
     </a>
+    <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/python-package.yml">
+        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/python-package.yml/badge.svg"/>
+    </a>
     <a href='http://docs.quantum-robot.org/en/latest/?badge=latest'>
         <img src='https://readthedocs.org/projects/quantum-robot/badge/?version=latest' alt='Documentation Status' />
     </a>
@@ -21,6 +24,9 @@
     </a>
     <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability">
         <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability" alt="Maintainability"/>
+    </a>
+    <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml">
+        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg" alt="Maintainability"/>
     </a>
     <a>
         <!--python-&#8805;3.7-->
