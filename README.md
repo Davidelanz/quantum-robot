@@ -10,6 +10,9 @@
     <a href="https://travis-ci.com/github/Davidelanz/quantum-robot">
         <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?branch=master" alt="Build"/>
     </a>
+    <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/python-package.yml">
+        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/python-package.yml/badge.svg"/>
+    </a>
     <a href='http://docs.quantum-robot.org/en/latest/?badge=latest'>
         <img src='https://readthedocs.org/projects/quantum-robot/badge/?version=latest' alt='Documentation Status' />
     </a>
@@ -21,6 +24,9 @@
     </a>
     <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability">
         <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability" alt="Maintainability"/>
+    </a>
+    <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml">
+        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg" alt="Maintainability"/>
     </a>
     <a>
         <!--python-&#8805;3.7-->
@@ -51,9 +57,9 @@ The project was started in 2019 by
 [Davide Lanza](https://scholar.google.com/citations?user=Lqx6VqEAAAAJ)
 as a Master thesis
 research, with the help of
-[Fulvio Mastrogiovanni](https://www.dibris.unige.it/mastrogiovanni-fulvio)
+[Fulvio Mastrogiovanni](https://scholar.google.it/citations?user=9dRRzV0AAAAJ&hl=en)
 and
-[Paolo Solinas](http://www.spin.cnr.it/index.php/people/46-researchers/49-solinas-paolo.html).
+[Paolo Solinas](https://rubrica.unige.it/personale/UkNHWllv).
 
 It is currently maintained by [Davide Lanza](https://scholar.google.com/citations?user=Lqx6VqEAAAAJ).
 
@@ -72,22 +78,23 @@ It is currently maintained by [Davide Lanza](https://scholar.google.com/citation
 ## Install[↑](#contents)
 
 Check the
-[Getting Started](http://www.quantum-robot.org/docs/getting_started.html)
+[Getting Started](http://docs.quantum-robot.org/en/latest/getting_started/getting_started.html)
 section of the Documentation
 
 ## Notebooks[↑](#contents)
 
-Several notebooks are availabe, to get started with the package and its
+Several [notebooks](https://github.com/Davidelanz/quantum-robot/tree/master/notebooks) are availabe, to get started with the package and its
 capabilities:
 
 - [One-dimensional demo for the
   AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/demo_angular_dim1.ipynb).
 - [Three-dimensional demo for the
-  AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/demo_angular_dim3_RGB.ipynb).
+  AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/demo_angular_dim3_rgb.ipynb).
 - [Computation speed analysis for the
   AngularModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/computation_speed.ipynb).
 - [One-dimensional comparison between AngularModel and
   LinearModel](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb).
+- [Tutorial: how to use QUnits](https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/tutorial_qunits.ipynb) (in progress)
 
 ## Contributing [↑](#contents)
 
