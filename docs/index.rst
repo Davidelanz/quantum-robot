@@ -4,6 +4,7 @@ Quantum-Robot Python Package
 
 .. include:: info.rst
 
+
 Getting Started
 ===============================================
 
@@ -12,6 +13,15 @@ Getting Started
 
     getting_started/getting_started.rst
 
+
+Notebooks
+===============================================
+
+.. toctree::
+    :maxdepth: 2
+
+    notebooks/notebooks.rst
+    
 
 Documentation
 ===============================================
