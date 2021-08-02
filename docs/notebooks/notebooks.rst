@@ -1,3 +1,6 @@
+Notebooks
+----------
+
 Several notebooks are availabe, to get started with the package and its capabilities:
 
 
