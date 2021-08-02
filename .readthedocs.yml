@@ -19,3 +19,4 @@ python:
    install:
    - requirements: docs/docs_requirements.txt
    - requirements: requirements.txt
+   system_packages: true

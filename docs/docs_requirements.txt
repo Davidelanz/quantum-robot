@@ -1,3 +1,4 @@
 sphinx>=4.1.2
 sphinx_rtd_theme>=0.5.0
+ipykernel
 nbsphinx>=0.8.6
