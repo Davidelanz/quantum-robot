@@ -13,6 +13,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import sphinx_rtd_theme  # ReadTheDocs theme
+import nbsphinx
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
@@ -45,8 +46,9 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
-    "sphinx_rtd_theme",
     "sphinx.ext.inheritance_diagram",
+    "sphinx_rtd_theme",
+    "nbsphinx",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -113,7 +115,7 @@ html_static_path = ['_static']
 
 
 def setup(app):
-    app.add_stylesheet('theme_overrides.css')
+    app.add_css_file('theme_overrides.css')
 
 
 # Custom sidebar templates, must be a dictionary that maps document names

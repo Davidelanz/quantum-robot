@@ -104,14 +104,20 @@ If you use quantum-robot in a scientific publication, we would
 appreciate citations to the following paper:
 
 ```{.sourceCode .bibtex}
-@misc{lanza2020preliminary,
-    title={Multi-sensory Integration in a Quantum-Like Robot Perception Model},
-    author={Davide Lanza and Paolo Solinas and Fulvio Mastrogiovanni},
-    year={2020},
-    eprint={2006.16404},
-    archivePrefix={arXiv},
-    primaryClass={cs.RO},
-    note={preprint at \url{https://arxiv.org/abs/2006.16404}},
+@InProceedings{10.1007/978-3-030-71151-1_44,
+    author="Lanza, Davide
+        and Solinas, Paolo
+        and Mastrogiovanni, Fulvio",
+    editor="Siciliano, Bruno
+        and Laschi, Cecilia
+        and Khatib, Oussama",
+    title="Multi-sensory Integration in a Quantum-Like Robot Perception Model",
+    booktitle="Experimental Robotics",
+    year="2021",
+    publisher="Springer International Publishing",
+    address="Cham",
+    pages="502--509",
+    isbn="978-3-030-71151-1"
 }
 ```
 
