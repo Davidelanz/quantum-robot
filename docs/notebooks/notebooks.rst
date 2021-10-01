@@ -1,4 +1,4 @@
-Several notebooks are availabe, to get started with the package and its capabilities:
+Several notebooks are available to get started with the package and its capabilities:
 
 
 .. toctree::
