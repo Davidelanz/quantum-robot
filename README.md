@@ -33,9 +33,6 @@
          <img src="https://img.shields.io/badge/python-3.7|3.8-blue" alt="Python"/>
     </a>
     <a href="https://pypi.org/project/quantum-robot/">
-        <img src="https://badge.fury.io/py/quantum-robot.svg" alt="PyPi version"/>
-    </a>
-    <a href="https://pypi.org/project/quantum-robot/">
         <img src="https://pypip.in/status/quantum-robot/badge.svg" alt="Development Status"/>
     </a>
     <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE">
@@ -43,6 +40,9 @@
     </a>
     <a href="https://zenodo.org/badge/latestdoi/274185290">
         <img src="https://zenodo.org/badge/274185290.svg" alt="DOI">
+    </a>
+    <a href="https://snyk.io/advisor/python/quantum-robot">
+        <img src="https://snyk.io/advisor/python/quantum-robot/badge.svg" alt="snyk">
     </a>
 </div>
 
