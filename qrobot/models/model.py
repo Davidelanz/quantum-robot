@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-QASM_BACKEND = qiskit.Aer.get_backend('qasm_simulator')
+AER_BACKEND = qiskit.Aer.get_backend('aer_simulator')
 """ qiskit backend: Module-level qiskit backend variable for quantum circuit
-simulation on local classical hardware via QASM simulator.
+simulation on local classical hardware via AER simulator.
 """
 
 
@@ -141,7 +141,7 @@ class Model(ABC):
             raise ValueError("scalar_input must be between 0 and 1 inclusive!")
         return float(scalar_input)
 
-    def measure(self, shots=1, backend=QASM_BACKEND) -> dict:
+    def measure(self, shots=1, backend=AER_BACKEND) -> dict:
         """Measures the qubits using a IBMQ backend
 
         Parameters
@@ -149,7 +149,7 @@ class Model(ABC):
         shots : int
             Number of measurement shots
         backend : qiskit backend
-            Quantum backend for the execution (QASM simulator as default)
+            Quantum backend for the execution (AER simulator as default)
 
         Returns
         ----------
@@ -222,7 +222,7 @@ class Model(ABC):
         numpy.ndarray
             Model's state vector.
         """
-        state_simulator = qiskit.Aer.get_backend('statevector_simulator')
+        state_simulator = qiskit.Aer.get_backend('aer_simulator_statevector')
         simulation = qiskit.execute(self.circ, state_simulator).result()
         return simulation.get_statevector(self.circ)
 
@@ -234,7 +234,7 @@ class Model(ABC):
         numpy.ndarray
             Model's density matrix.
         """
-        matrix_simulator = qiskit.Aer.get_backend('unitary_simulator')
+        matrix_simulator = qiskit.Aer.get_backend('aer_simulator_unitary')
         simulation = qiskit.execute(self.circ, matrix_simulator).result()
         return simulation.get_unitary(self.circ)
 

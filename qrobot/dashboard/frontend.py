@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 from dash.dependencies import Input, Output, State
 from flask import Flask, request
 
@@ -83,7 +83,7 @@ def update_interval_rate(refresh_value):
 
 @app.callback(Output('refresh-slider-text', 'children'),
               [Input('refresh-interval', 'n_intervals')],
-              state=[State('refresh-slider', 'value')])
+              [State('refresh-slider', 'value')])
 def update_refresh_interval(n_intervals, refresh_value):
     return f"Refresh: {refresh_value*1000}ms"
 

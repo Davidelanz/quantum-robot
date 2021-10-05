@@ -51,4 +51,4 @@ Module variables
 -------------------------------------
 
 .. automodule:: qrobot.models.model
-    :members: QASM_BACKEND
+    :members: AER_BACKEND
