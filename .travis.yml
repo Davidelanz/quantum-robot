@@ -26,7 +26,7 @@ install:
 # command to run tests
 script:
   # start redis server
-  - service redis-server start
+  # - service redis-server start
   # run tests without coverage:
   # - pytest
   # run tests with coverage:
