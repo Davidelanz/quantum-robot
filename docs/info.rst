@@ -24,7 +24,7 @@
       </a>
       <a>
          <!--python-&#8805;3.7-->
-         <img src="https://img.shields.io/badge/python-3.7 | 3.8-blue" alt="Python"/>
+         <img src="https://img.shields.io/badge/python-3.7|3.8|3.9-blue" alt="Python"/>
       </a>
       <a href="https://pypi.org/project/quantum-robot/">
          <img src="https://badge.fury.io/py/quantum-robot.svg" alt="PyPi version"/>

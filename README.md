@@ -30,7 +30,7 @@
     </a>
     <a>
         <!--python-&#8805;3.7-->
-         <img src="https://img.shields.io/badge/python-3.7|3.8-blue" alt="Python"/>
+         <img src="https://img.shields.io/badge/python-3.7|3.8|3.9-blue" alt="Python"/>
     </a>
     <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE">
         <img src="https://img.shields.io/badge/license-GNU_GPL_v3-blue" alt="License"/>
