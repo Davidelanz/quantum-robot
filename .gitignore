@@ -12,7 +12,9 @@ quantum_robot.egg-info/
 
 dist/
 
+
 **/.ipynb_checkpoints/
+**/.virtual_documents/
 
 build/
 

@@ -6,9 +6,9 @@ DESCRIPTION = 'A set of python modules for quantum-like perception modelling'
 with open('README.md') as f:
     LONG_DESCRIPTION = f.read()
 AUTHOR = 'Davide Lanza'
-AUTHOR_EMAIL = 'lanza.davide.it@gmail.com'
+AUTHOR_EMAIL = 'info@davidelanza.it'
 MAINTAINER = 'Davide Lanza'
-MAINTAINER_EMAIL = 'lanza.davide.it@gmail.com'
+MAINTAINER_EMAIL = 'info@davidelanza.it'
 URL = 'http://quantum-robot.org'
 DOWNLOAD_URL = 'https://pypi.org/project/quantum-robot/#files'
 LICENSE = 'GNU GPL'
