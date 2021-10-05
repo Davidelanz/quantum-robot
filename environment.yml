@@ -5,12 +5,12 @@ channels:
 dependencies:
   - python=3.8
   - pip
-  - dash
-  - matplotlib>=2.1.1
-  - numpy>=1.18.5
-  - pandas>=1.0.4
-  - pytest>=5.4.3
-  - seaborn>=0.10.1
+  - "pytest>=5.4.3"
+  - "dash>=2.0.0"
+  - "matplotlib>=2.1.1"
+  - "numpy>=1.18.5"
+  - "pandas>=1.0.4"
+  - "seaborn>=0.10.1"
   - pip:
-    - qiskit>=0.19.3
-    - redis
+    - "qiskit>=0.30.1"
+    - redisconda info --envs

@@ -17,7 +17,7 @@ class AngularModel(Model):
             The scalar input for a certain dimension, must be a number
             between 0 and 1 inclusive.
         dim : int
-            The model's dimension which the input belongs (values 
+            The model's dimension which the input belongs (values
             between ``0`` and ``n-1``)
 
         Returns
@@ -56,12 +56,12 @@ class AngularModel(Model):
 
     def decode(self):
         """The decoding for the ``AngularModel`` is a single measurement.
-        
+
         Returns
         --------
-        str 
+        str
             The string label corresponding to the decoded state
-        
+
         """
         measure_dict = self.measure()
         # Return the most measured state (only one measurement though)

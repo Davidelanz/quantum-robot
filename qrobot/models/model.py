@@ -8,12 +8,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-AER_SIMULATOR = qiskit.Aer.get_backend('aer_simulator')
-""" qiskit backend: Module-level qiskit backend variable for quantum circuit
-simulation on local classical hardware via AER simulator.
-"""
-
-
 class Model(ABC):
     """ ``Model`` is an abstract class which embeds the general features
     needed in a model for QL perception.
@@ -141,7 +135,8 @@ class Model(ABC):
         list
             The `target_vector`
         """
-        # If target_vector is a single number, convert it in a single-element vector
+        # If target_vector is a single number,
+        # convert it in a single-element vector
         if isinstance(target_vector, (float, int)):
             target_vector = [target_vector]
         # Dimensionality check on the vector
@@ -176,7 +171,7 @@ class Model(ABC):
 
         """
 
-    def measure(self, shots=1, backend=AER_SIMULATOR) -> dict:
+    def measure(self, shots=1, backend=None) -> dict:
         """Measures the qubits using a IBMQ backend
 
         Parameters
@@ -184,23 +179,27 @@ class Model(ABC):
         shots : int
             Number of measurement shots
         backend : qiskit backend
-            Quantum backend for the execution (AER simulator as default)
+            Quantum backend for the execution (if None, AER simulator is
+            chosen as default)
 
         Returns
         ----------
         dict
             State occurrences counts in the form {"state": count}
         """
+        # Initialize simulator if no backend is set
+        if backend is None:
+            backend = qiskit.Aer.get_backend('aer_simulator')
 
-        # Apply barrier
-        self.circ.barrier()
-
-        # Link the all the qubits to the corresponding classical bits
+        # Copy quantum circuit
+        circ = self.circ.copy()
+        # Add measure gates linking the all the qubits
+        # to the corresponding classical bits
         all_bits = list(range(0, self.n))
-        self.circ.measure(all_bits, all_bits)
+        circ.measure(all_bits, all_bits)
 
         # Execute the circuit on the backend
-        circ = qiskit.transpile(self.circ, backend)
+        circ = qiskit.transpile(circ, backend)
         job = qiskit.execute(circ, backend, shots=shots)
         counts_dict = job.result().get_counts(circ)
 
@@ -215,7 +214,7 @@ class Model(ABC):
         r"""Changes the basis of the quantum system choosing `target_vector`
         as the basis state \|00...0>."""
 
-    def get_state(self) -> np.ndarray:
+    def get_statevector(self) -> np.ndarray:
         """Returns the simulated state vector of the model.
 
         Returns
@@ -223,11 +222,23 @@ class Model(ABC):
         numpy.ndarray
             Model's state vector.
         """
-        circ = qiskit.transpile(self.circ, AER_SIMULATOR)
-        simulation = qiskit.execute(circ, AER_SIMULATOR).result()
-        return simulation.get_statevector(circ)
+        # Initialize simulator
+        backend = qiskit.Aer.get_backend('aer_simulator_statevector')
 
-    def get_density(self) -> np.ndarray:
+        # Copy quantum circuit (without measure gates)
+        circ = self.circ.copy()
+        circ.save_statevector()
+
+        # Transpile for simulator
+        circ = qiskit.transpile(circ, backend)
+
+        # Run and get statevector
+        simulation = qiskit.execute(circ, backend).result()
+        statevector = simulation.get_statevector(circ)
+
+        return statevector
+
+    def get_density_matrix(self) -> np.ndarray:
         """Returns the simulated density matrix of the model.
 
         Returns
@@ -235,9 +246,21 @@ class Model(ABC):
         numpy.ndarray
             Model's density matrix.
         """
-        circ = qiskit.transpile(self.circ, AER_SIMULATOR)
-        simulation = qiskit.execute(circ, AER_SIMULATOR).result()
-        return simulation.get_unitary(circ)
+        # Initialize simulator
+        backend = qiskit.Aer.get_backend('aer_simulator_unitary')
+
+        # Copy quantum circuit (without measure gates)
+        circ = self.circ.copy()
+        circ.save_unitary()
+
+        # Transpile for simulator
+        circ = qiskit.transpile(circ, backend)
+
+        # Run and get statevector
+        simulation = qiskit.execute(circ, backend).result()
+        statevector = simulation.get_unitary(circ)
+
+        return statevector
 
     def print_circuit(self) -> None:
         """Prints the quantum circuit on which the model is implemented."""
@@ -275,14 +298,14 @@ class Model(ABC):
 
         # Plot the vector state
         axis = fig.add_subplot(121)
-        state = pd.DataFrame(self.get_state().real)
+        state = pd.DataFrame(self.get_statevector().real)
         axis = sns.heatmap(state, annot=True, linewidths=.5, xticklabels="",
                            ax=axis, cmap="coolwarm", vmin=-1, vmax=1, fmt=".5g")
         axis.set_title("State vector (real part)")
 
         # Plot the density matrix
         axis = fig.add_subplot(122)
-        matrix = pd.DataFrame(self.get_density().real)
+        matrix = pd.DataFrame(self.get_density_matrix().real)
         axis = sns.heatmap(matrix, annot=True, linewidths=.5,
                            ax=axis, cmap="coolwarm", vmin=-1, vmax=1, fmt=".5g")
         axis.set_title("Density Matrix (real part)")

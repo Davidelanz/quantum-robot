@@ -12,7 +12,7 @@ quantum_robot.egg-info/
 
 dist/
 
-notebooks/.ipynb_checkpoints/
+**/.ipynb_checkpoints/
 
 build/
 

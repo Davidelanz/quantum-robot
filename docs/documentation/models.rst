@@ -46,9 +46,3 @@ is provided in order to illustrate the difference between this and the angular o
 .. autoclass:: qrobot.models.LinearModel
     :members:
 
-
-Module variables
--------------------------------------
-
-.. automodule:: qrobot.models.model
-    :members: AER_SIMULATOR

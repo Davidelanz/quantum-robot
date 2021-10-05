@@ -137,8 +137,8 @@ def test_query():
 def test_simulation():
     """Tests if the state and density simulation functions cause any error"""
     model = AngularModel(1, 1)
-    print(model.get_state())
-    print(model.get_density())
+    print(model.get_statevector())
+    print(model.get_density_matrix())
 
 
 
