@@ -50,6 +50,8 @@ def test_qunit():
     l1_unit0.stop()
     l1_unit1.stop()
 
+    # Redis functions
+    qrobot.qunits.qunit.redis_status()
     qrobot.qunits.qunit.flush_redis()
 
 

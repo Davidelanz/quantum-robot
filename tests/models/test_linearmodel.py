@@ -130,6 +130,8 @@ def test_query():
         assert model.query([1, .2, 0, 0, 0, 1, .2, 0])  # size > n
 
     # Check the exception for wrong target elements:
+    with pytest.raises(TypeError):
+        assert model.query(['1', 0, 0, 0, 0])  # wrong type
     with pytest.raises(ValueError):
         assert model.query([.1, .4, 5, .2, .1])  # third element is a 5
 

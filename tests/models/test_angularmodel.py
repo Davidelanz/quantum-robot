@@ -115,7 +115,8 @@ def test_query():
             model.encode(input_data[dim], dim)
     # Apply a query on the input_data (to obtain an unambiguous result)
     model.query(input_data)
-    # See if the actual output is the |00...0> state or a close one (ar most one zero)
+    # See if the actual output is the |00...0> state or a close one
+    # (at most one zero)
     assert model.decode() == '00000' or\
                              '10000' or\
                              '01000' or\
@@ -130,6 +131,8 @@ def test_query():
         assert model.query([1, .2, 0, 0, 0, 1, .2, 0])  # size > n
 
     # Check the exception for wrong target elements:
+    with pytest.raises(TypeError):
+        assert model.query(['1', 0, 0, 0, 0])  # wrong type
     with pytest.raises(ValueError):
         assert model.query([.1, .4, 5, .2, .1])  # third element is a 5
 
