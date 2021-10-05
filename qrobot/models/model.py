@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-AER_BACKEND = qiskit.Aer.get_backend('aer_simulator')
+AER_SIMULATOR = qiskit.Aer.get_backend('aer_simulator')
 """ qiskit backend: Module-level qiskit backend variable for quantum circuit
 simulation on local classical hardware via AER simulator.
 """
@@ -73,25 +73,7 @@ class Model(ABC):
             out_str += f"{k}: {v}, "
         return out_str[:-2] + "]"
 
-    def clear(self) -> None:
-        """Re-initialize the model with an empty circuit."""
-        self.circ = qiskit.QuantumCircuit(self.n, self.n)
-
-    @abstractmethod
-    def encode(self, scalar_input, dim) -> None:
-        """Encodes the scalar input in the correspondent qubit.
-
-        Example
-        -------
-        To encode a `sequence` of input vectors, given `tau` and `n`::
-
-            for t in range(model.tau): # loop through time
-                for dim in range(model.n): # loop through dimensions
-                    model.encode(sequence[t][dim], dim)
-
-        """
-
-    def dim_index_check(self, dim) -> int:
+    def _dim_index_check(self, dim) -> int:
         """This method ensures that a dimension index `dim`
         is an integer between 0 and `n-1`, where `n` is the dimension
         of the model.
@@ -118,7 +100,7 @@ class Model(ABC):
             raise IndexError(f"dim must be less than {self.n}!")
         return dim
 
-    def scalar_input_check(self, scalar_input) -> float:
+    def _scalar_input_check(self, scalar_input) -> float:
         """This method ensures that a `scalar_input` for the model
         is an integer or a float between 0 and 1 (inclusive).
 
@@ -141,41 +123,7 @@ class Model(ABC):
             raise ValueError("scalar_input must be between 0 and 1 inclusive!")
         return float(scalar_input)
 
-    def measure(self, shots=1, backend=AER_BACKEND) -> dict:
-        """Measures the qubits using a IBMQ backend
-
-        Parameters
-        ----------
-        shots : int
-            Number of measurement shots
-        backend : qiskit backend
-            Quantum backend for the execution (AER simulator as default)
-
-        Returns
-        ----------
-        dict
-            State occurrences counts in the form {"state": count}
-        """
-
-        # Apply barrier
-        self.circ.barrier()
-
-        # Link the all the qubits to the corresponding classical bits
-        all_bits = list(range(0, self.n))
-        self.circ.measure(all_bits, all_bits)
-
-        # Execute the circuit on the backend
-        job = qiskit.execute(self.circ, backend, shots=shots)
-        counts = job.result().get_counts(self.circ)
-
-        return counts
-
-    @abstractmethod
-    def query(self, target_vector) -> None:
-        r"""Changes the basis of the quantum system choosing `target_vector`
-        as the basis state \|00...0>."""
-
-    def target_vector_check(self, target_vector) -> list:
+    def _target_vector_check(self, target_vector) -> list:
         """This method ensures that a `target_vector` for the model
         is an `n`-dimensional vector (where `n` is the model's dimension).
 
@@ -210,9 +158,62 @@ class Model(ABC):
                     0 and 1 inclusive!")
         return target_vector
 
+    def clear(self) -> None:
+        """Re-initialize the model with an empty circuit."""
+        self.circ = qiskit.QuantumCircuit(self.n, self.n)
+
+    @abstractmethod
+    def encode(self, scalar_input, dim) -> None:
+        """Encodes the scalar input in the correspondent qubit.
+
+        Example
+        -------
+        To encode a `sequence` of input vectors, given `tau` and `n`::
+
+            for t in range(model.tau): # loop through time
+                for dim in range(model.n): # loop through dimensions
+                    model.encode(sequence[t][dim], dim)
+
+        """
+
+    def measure(self, shots=1, backend=AER_SIMULATOR) -> dict:
+        """Measures the qubits using a IBMQ backend
+
+        Parameters
+        ----------
+        shots : int
+            Number of measurement shots
+        backend : qiskit backend
+            Quantum backend for the execution (AER simulator as default)
+
+        Returns
+        ----------
+        dict
+            State occurrences counts in the form {"state": count}
+        """
+
+        # Apply barrier
+        self.circ.barrier()
+
+        # Link the all the qubits to the corresponding classical bits
+        all_bits = list(range(0, self.n))
+        self.circ.measure(all_bits, all_bits)
+
+        # Execute the circuit on the backend
+        circ = qiskit.transpile(self.circ, backend)
+        job = qiskit.execute(circ, backend, shots=shots)
+        counts_dict = job.result().get_counts(circ)
+
+        return counts_dict
+
     @abstractmethod
     def decode(self) -> str:
         """Exploits the information encoded in the qubit."""
+
+    @abstractmethod
+    def query(self, target_vector) -> None:
+        r"""Changes the basis of the quantum system choosing `target_vector`
+        as the basis state \|00...0>."""
 
     def get_state(self) -> np.ndarray:
         """Returns the simulated state vector of the model.
@@ -222,9 +223,9 @@ class Model(ABC):
         numpy.ndarray
             Model's state vector.
         """
-        state_simulator = qiskit.Aer.get_backend('aer_simulator_statevector')
-        simulation = qiskit.execute(self.circ, state_simulator).result()
-        return simulation.get_statevector(self.circ)
+        circ = qiskit.transpile(self.circ, AER_SIMULATOR)
+        simulation = qiskit.execute(circ, AER_SIMULATOR).result()
+        return simulation.get_statevector(circ)
 
     def get_density(self) -> np.ndarray:
         """Returns the simulated density matrix of the model.
@@ -234,9 +235,9 @@ class Model(ABC):
         numpy.ndarray
             Model's density matrix.
         """
-        matrix_simulator = qiskit.Aer.get_backend('aer_simulator_unitary')
-        simulation = qiskit.execute(self.circ, matrix_simulator).result()
-        return simulation.get_unitary(self.circ)
+        circ = qiskit.transpile(self.circ, AER_SIMULATOR)
+        simulation = qiskit.execute(circ, AER_SIMULATOR).result()
+        return simulation.get_unitary(circ)
 
     def print_circuit(self) -> None:
         """Prints the quantum circuit on which the model is implemented."""

@@ -1,5 +1,5 @@
 Dashboard
 =========================================
 
-.. automodule:: qrobot.dashboard.frontend
+.. automodule:: qrobot.dashboard.server
     :members:

@@ -20,6 +20,12 @@ def test_init():
         assert AngularModel(n=5, tau=0)
 
 
+def test_clear():
+    """Tests if clear is working correctly"""
+    model = AngularModel(n=2, tau=2)
+    model.clear()
+
+
 def test_encode():
     """Tests if exceptions are raised for input and dimension not being correct"""
 
@@ -45,6 +51,25 @@ def test_encode():
         assert model.encode(.55, -1)
     with pytest.raises(IndexError):
         assert model.encode(.55, 2)
+
+
+def test_measure():
+    """Tests measuring for unambiguous inputs"""
+
+    model = AngularModel(n=1, tau=1)
+    input_data = 1  # unambiguous input
+    model.encode(input_data, dim=0)
+    assert model.measure(shots=1) == {'1': 1}
+
+    model = AngularModel(n=1, tau=1)
+    input_data = 0  # unambiguous input
+    model.encode(input_data, dim=0)
+    assert model.measure(shots=1) == {'0': 1}
+
+    model = AngularModel(n=3, tau=1)
+    input_data = 1  # unambiguous input
+    model.encode(input_data, dim=1)
+    assert model.measure(shots=1) == {'010': 1}
 
 
 def test_decode():
@@ -107,6 +132,14 @@ def test_query():
     # Check the exception for wrong target elements:
     with pytest.raises(ValueError):
         assert model.query([.1, .4, 5, .2, .1])  # third element is a 5
+
+
+def test_simulation():
+    """Tests if the state and density simulation functions cause any error"""
+    model = AngularModel(1, 1)
+    print(model.get_state())
+    print(model.get_density())
+
 
 
 def test_plot():

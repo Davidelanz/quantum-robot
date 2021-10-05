@@ -2,11 +2,10 @@ import os
 from pathlib import Path
 
 import dash
-from dash import dcc
-from dash import html
 from dash.dependencies import Input, Output, State
 from flask import Flask, request
 
+from .layout import layout
 from .plots import bar_all_bursts
 
 ROOT_DIR = Path(__file__).parent
@@ -30,40 +29,7 @@ def shutdown():
     return f'{NAME} shutting down...'
 
 
-app.layout = html.Div(children=[
-    html.Div(className="container width60", children=[
-        html.H1(children='Quantum-robot Dashboard'),
-        html.Div(className="row", children=[
-            dcc.Slider(
-                id='refresh-slider',
-                min=0,
-                max=1,
-                step=0.001,
-                value=1,
-            ),
-            html.Div(id='refresh-slider-text')
-        ]),
-        html.H2(children="Bursts"),
-        html.Div(className="row", children=[
-            dcc.Loading(
-                className="loading",
-                id="loading-bursts-bar",
-                type="default",
-                fullscreen=False,
-                children=[
-                    dcc.Graph(
-                        className="graph",
-                        id='bursts-bar'
-                    )],
-            ),
-        ]),
-    ]),
-    dcc.Interval(
-        id='refresh-interval',
-        interval=1,  # (in milliseconds)
-        n_intervals=0
-    )
-])
+app.layout = layout
 
 
 @app.callback(
@@ -81,7 +47,7 @@ def update_interval_rate(refresh_value):
     return refresh_value*1000  # seconds to milliseconds
 
 
-@app.callback(Output('refresh-slider-text', 'children'),
+@app.callback([Output('refresh-slider-text', 'children')],
               [Input('refresh-interval', 'n_intervals')],
               [State('refresh-slider', 'value')])
 def update_refresh_interval(n_intervals, refresh_value):

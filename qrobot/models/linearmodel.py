@@ -37,8 +37,8 @@ class LinearModel(AngularModel):
             The rotation angle applied to the qubit.
         """
         # Check the arguments
-        dim = self.dim_index_check(dim)
-        scalar_input = self.scalar_input_check(scalar_input)
+        dim = self._dim_index_check(dim)
+        scalar_input = self._scalar_input_check(scalar_input)
 
         # Apply rotation to the qubit
         angle = (np.arcsin(2*scalar_input-1)+np.pi/2)/self.tau

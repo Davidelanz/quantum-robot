@@ -139,7 +139,7 @@ class QUnit():
             The query target state array in the computational basis
         """
         # Check arguments
-        query = self.model.target_vector_check(query)
+        query = self.model._target_vector_check(query)
         # Update accumulator
         self._logger.debug(f"Changing query from {self._query} to {query}")
         for i, q in enumerate(query):
@@ -218,7 +218,7 @@ class QUnit():
             The input qunit id
         """
         # Check arguments
-        dim = self.model.dim_index_check(dim)
+        dim = self.model._dim_index_check(dim)
         # Update accumulator
         self._logger.debug(
             f"Changing dim {dim} input from " +

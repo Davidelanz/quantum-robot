@@ -20,6 +20,12 @@ def test_init():
         assert LinearModel(n=5, tau=0)
 
 
+def test_clear():
+    """Tests if clear is working correctly"""
+    model = LinearModel(n=2, tau=2)
+    model.clear()
+
+
 def test_encode():
     """Tests if exceptions are raised for input and dimension not being correct"""
 
@@ -45,6 +51,25 @@ def test_encode():
         assert model.encode(.55, -1)
     with pytest.raises(IndexError):
         assert model.encode(.55, 4)
+
+
+def test_measure():
+    """Tests measuring for unambiguous inputs"""
+
+    model = LinearModel(n=1, tau=1)
+    input_data = 1  # unambiguous input
+    model.encode(input_data, dim=0)
+    assert model.measure(shots=1) == {'1': 1}
+
+    model = LinearModel(n=1, tau=1)
+    input_data = 0  # unambiguous input
+    model.encode(input_data, dim=0)
+    assert model.measure(shots=1) == {'0': 1}
+
+    model = LinearModel(n=3, tau=1)
+    input_data = 1  # unambiguous input
+    model.encode(input_data, dim=1)
+    assert model.measure(shots=1) == {'010': 1}
 
 
 def test_decode():
@@ -107,6 +132,10 @@ def test_query():
     # Check the exception for wrong target elements:
     with pytest.raises(ValueError):
         assert model.query([.1, .4, 5, .2, .1])  # third element is a 5
+
+
+def test_simulation():
+    raise NotImplementedError
 
 
 def test_plot():

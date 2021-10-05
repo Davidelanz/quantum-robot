@@ -26,8 +26,8 @@ class AngularModel(Model):
             The rotation angle applied to the qubit.
         """
         # Check the arguments
-        dim = self.dim_index_check(dim)
-        scalar_input = self.scalar_input_check(scalar_input)
+        dim = self._dim_index_check(dim)
+        scalar_input = self._scalar_input_check(scalar_input)
 
         # Apply rotation to the qubit
         angle = np.pi*scalar_input/self.tau
@@ -45,7 +45,7 @@ class AngularModel(Model):
             (between 0 and 1 inclusive).
         """
         # Check the arguments
-        target_vector = self.target_vector_check(target_vector)
+        target_vector = self._target_vector_check(target_vector)
 
         # Apply negative (inverse) rotations to the qubit in order to
         # have the target_vector state as the new |00...0> state.
