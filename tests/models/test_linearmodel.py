@@ -135,7 +135,10 @@ def test_query():
 
 
 def test_simulation():
-    raise NotImplementedError
+    """Tests if the state and density simulation functions cause any error"""
+    model = LinearModel(1, 1)
+    model.get_statevector()
+    model.get_density_matrix()
 
 
 def test_plot():
