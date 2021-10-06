@@ -1,20 +1,26 @@
 # Quantum-robot Python Package
 
-<div align="center" style="align:center; padding:20px">
+<div align="center" style="align:center; padding:20px;">
     <a href="http://quantum-robot.org">
         <img width="300" src="https://raw.githubusercontent.com/Davidelanz/quantum-robot/master/docs/quantum-robot-logo.svg">
     </a>
 </div>
-
+<br>
 <div align="center" style="align:center; padding:20px; line-height:2;">
-    <a href="https://travis-ci.com/github/Davidelanz/quantum-robot">
-        <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?branch=master" alt="Build"/>
-    </a>
     <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/python-package.yml">
         <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/python-package.yml/badge.svg"/>
     </a>
+    <a href="https://travis-ci.com/github/Davidelanz/quantum-robot">
+        <img src="https://travis-ci.com/Davidelanz/quantum-robot.svg?branch=master" alt="Build"/>
+    </a>
     <a href='http://docs.quantum-robot.org/en/latest/?badge=latest'>
         <img src='https://readthedocs.org/projects/quantum-robot/badge/?version=latest' alt='Documentation Status' />
+    </a>
+    <a>
+        <img src="https://img.shields.io/badge/python-3.7|3.8|3.9-yellow" alt="Python"/>
+    </a>
+    <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml">
+        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg" alt="CodeQL"/>
     </a>
     <a href="https://frontend.code-inspector.com/public/project/13599/quantum-robot/dashboard">
         <img src="https://www.code-inspector.com/project/13599/score/svg" alt="Code Quality"/>
@@ -25,12 +31,8 @@
     <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability">
         <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability" alt="Maintainability"/>
     </a>
-    <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml">
-        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg" alt="Maintainability"/>
-    </a>
-    <a>
-        <!--python-&#8805;3.7-->
-         <img src="https://img.shields.io/badge/python-3.7|3.8|3.9-blue" alt="Python"/>
+    <a href="https://snyk.io/advisor/python/quantum-robot">
+        <img src="https://snyk.io/advisor/python/quantum-robot/badge.svg" alt="snyk">
     </a>
     <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE">
         <img src="https://img.shields.io/badge/license-GNU_GPL_v3-blue" alt="License"/>
@@ -38,10 +40,8 @@
     <a href="https://zenodo.org/badge/latestdoi/274185290">
         <img src="https://zenodo.org/badge/274185290.svg" alt="DOI">
     </a>
-    <a href="https://snyk.io/advisor/python/quantum-robot">
-        <img src="https://snyk.io/advisor/python/quantum-robot/badge.svg" alt="snyk">
-    </a>
 </div>
+<br>
 
 `quantum-robot` is a Python package for quantum-like perception modeling
 for robotics. The package exploits [Qiksit](https://qiskit.org/)
@@ -50,9 +50,25 @@ simulated on a classical computer or sent to a quantum backend (service
 provided by [IBM Quantum
 Experience](https://quantum-computing.ibm.com/)).
 
-- Website: <http://quantum-robot.org>
-- Repository: <https://github.com/Davidelanz/quantum-robot/>
-- Documentation: <http://docs.quantum-robot.org/en/latest/>
+<div align="center" style="align:center; padding:20px;">
+    <table style="text-align:center;">
+        <thead>
+            <tr>
+            <th>Documentation</th>
+            <th>Website</th>
+            <th>Repository</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+            <td><a href="http://docs.quantum-robot.org/en/latest/">Link 🔗</a></td>
+            <td><a href="http://quantum-robot.org">Link 🔗</a></td>
+            <td><a href="https://github.com/Davidelanz/quantum-robot/">Link 🔗</a></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
 
 The project was started in 2019 by
 [Davide Lanza](https://scholar.google.com/citations?user=Lqx6VqEAAAAJ)
