@@ -18,7 +18,7 @@ The ``Burst`` abstract class
 
 |
 
-The ``ZeroBurst`` abstract class
+The ``ZeroBurst`` class
 -------------------------------------
 
 .. autoclass:: qrobot.bursts.ZeroBurst
@@ -26,7 +26,7 @@ The ``ZeroBurst`` abstract class
 
 |
 
-The ``OneBurst`` abstract class
+The ``OneBurst`` class
 -------------------------------------
 
 .. autoclass:: qrobot.bursts.OneBurst
