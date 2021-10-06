@@ -56,9 +56,9 @@ backend (service provided by `IBM Quantum Experience <https://quantum-computing.
       <table style="text-align:center;">
          <thead>
                <tr>
-               <th>Documentation</th>
-               <th>Website</th>
-               <th>Repository</th>
+               <th>&nbsp;&nbsp;Documentation&nbsp;&nbsp;</th>
+               <th>&nbsp;&nbsp;Website&nbsp;&nbsp;</th>
+               <th>&nbsp;&nbsp;Repository&nbsp;&nbsp;</th>
                </tr>
          </thead>
          <tbody>
