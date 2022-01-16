@@ -195,8 +195,7 @@ class Model(ABC):
             State occurrences counts in the form {"state": count}
         """
         # Initialize simulator if no backend is set
-        if backend is None:
-            backend: Backend = qiskit.Aer.get_backend("aer_simulator")
+        backend = backend or qiskit.Aer.get_backend("aer_simulator")
 
         # Copy quantum circuit
         circ = self.circ.copy()
@@ -231,7 +230,7 @@ class Model(ABC):
             Model's state vector.
         """
         # Initialize simulator
-        backend: Backend = qiskit.Aer.get_backend("aer_simulator_statevector")
+        backend = qiskit.Aer.get_backend("aer_simulator_statevector")
 
         # Copy quantum circuit (without measure gates)
         circ = self.circ.copy()

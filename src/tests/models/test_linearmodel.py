@@ -1,4 +1,5 @@
 import pytest
+
 from qrobot.models import LinearModel
 
 
