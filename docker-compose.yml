@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis
+
+  qrobot-dashboard:
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - 8899:8899
+    links:
+      - redis

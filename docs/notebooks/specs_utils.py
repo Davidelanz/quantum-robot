@@ -2,20 +2,21 @@
     These functions are made to easily plot the specs of the device on which the software is running
 """
 
+import multiprocessing
 import os
 import platform
-import subprocess
 import re
-import multiprocessing
+import subprocess
+
 import pandas as pd
-from IPython.display import display, HTML
+from IPython.display import HTML, display
 
 
 def get_cpu_model(spec="model name"):
     if platform.system() == "Windows":
         return platform.processor()
     if platform.system() == "Darwin":
-        os.environ['PATH'] = os.environ['PATH'] + os.pathsep + '/usr/sbin'
+        os.environ["PATH"] = os.environ["PATH"] + os.pathsep + "/usr/sbin"
         command = "sysctl -n machdep.cpu.brand_string"
         return subprocess.check_output(command).strip()
     if platform.system() == "Linux":
@@ -24,7 +25,7 @@ def get_cpu_model(spec="model name"):
         all_info = stream.read()
         all_info.strip()
         all_info = all_info.split("\n")
-        #all_info = str(subprocess.check_output(command, shell=True).strip())
+        # all_info = str(subprocess.check_output(command, shell=True).strip())
         for line in all_info:
             if spec in line:
                 return re.sub(f".*{spec}.*: ", "", line, 1)
@@ -32,7 +33,7 @@ def get_cpu_model(spec="model name"):
 
 def get_specs():
     table = [
-        #["", platform.version()],
+        # ["", platform.version()],
         ["Machine", platform.machine()],
         ["Platform", platform.platform()],
         ["Architecture", platform.architecture()],

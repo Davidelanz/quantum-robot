@@ -65,6 +65,17 @@ Check the required packages
 `here <https://github.com/Davidelanz/quantum-robot/blob/master/requirements.txt>`_.
 
 
+Conda development environment
+------------------------
+
+A conda development environment is provided at
+`dev-environment.yml <https://github.com/Davidelanz/quantum-robot/blob/master/dev-environment.yml>`_.
+and can be installed with
+
+.. code-block::
+
+    conda env create -f dev.environment.yml
+
 Docker image
 ------------------------
 
