@@ -11,10 +11,10 @@
         <img src="https://img.shields.io/badge/Python-3.6→3.9-yellow" alt="Python"/>
     </a>
     <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/build-package.yml">
-        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/build-package.yml/badge.svg"/>
+        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/build-package.yml/badge.svg?branch=master"/>
     </a>
     <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/super-linter.yml">
-        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/super-linter.yml/badge.svg"/>
+        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/super-linter.yml/badge.svg?branch=master"/>
     </a>
     <a href="https://codecov.io/gh/Davidelanz/quantum-robot" >
         <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU" alt="Code coverage"/>
@@ -23,7 +23,7 @@
         <img src='https://readthedocs.org/projects/quantum-robot/badge/?version=latest' alt='Documentation Status' />
     </a>
     <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml">
-        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg" alt="CodeQL"/>
+        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg?branch=master" alt="CodeQL"/>
     </a>
     <a href="https://frontend.code-inspector.com/public/project/13599/quantum-robot/dashboard">
         <img src="https://api.codiga.io/project/13599/score/svg" alt="Code Quality"/>

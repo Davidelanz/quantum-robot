@@ -15,8 +15,7 @@ sphinx:
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
-   version: 3.9
+   version: 3.8
    install:
       - requirements: docs/docs_requirements.txt
-      - requirements: requirements.txt
    system_packages: true
