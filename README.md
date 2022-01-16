@@ -86,7 +86,7 @@ Check the
 [Getting Started](http://docs.quantum-robot.org/en/latest/getting_started/getting_started.html)
 section of the Documentation for the Installation Guide.
 
-Demo [Notebooks](http://docs.quantum-robot.org/en/latest/notebooks/notebooks.html) 
+Demo [Notebooks](http://docs.quantum-robot.org/en/latest/notebooks/notebooks.html)
 and [Documentation](http://docs.quantum-robot.org/en/latest/documentation/documentation.html)
 is made available as well
 

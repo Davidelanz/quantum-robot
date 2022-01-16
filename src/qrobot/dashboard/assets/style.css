@@ -13,10 +13,10 @@ BODY, HEADERS
 */
 
 body {
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
   background-color: #f0f0f0;
-  font-family: "Poppins";
+  font-family: Poppins, helvetica, sans-serif;
   color: #595959;
   text-align: center;
   align-content: center;
@@ -60,30 +60,6 @@ CONTAINERS, ROWS, WIDTHS
 
 .row {
   display: flex;
-}
-
-/*
-===================================
-PLACEHOLDERS
-===================================
-*/
-
-::-webkit-input-placeholder {
-  text-align: center;
-}
-
-:-moz-placeholder {
-  /* Firefox 18- */
-  text-align: center;
-}
-
-::-moz-placeholder {
-  /* Firefox 19+ */
-  text-align: center;
-}
-
-:-ms-input-placeholder {
-  text-align: center;
 }
 
 /*

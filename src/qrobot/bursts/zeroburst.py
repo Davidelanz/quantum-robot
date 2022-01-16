@@ -23,4 +23,4 @@ class ZeroBurst(Burst):
     """
 
     def __call__(self, state: str) -> float:
-        return state.count('0')/len(state)
+        return state.count("0") / len(state)

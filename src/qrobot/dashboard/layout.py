@@ -10,7 +10,7 @@ layout = html.Div(
                     className="row",
                     children=[
                         dcc.Slider(
-                            id="refresh-slider", min=0, max=1, step=0.001, value=1,
+                            id="refresh-slider", min=0, max=1, step=0.001, value=1
                         ),
                         html.Div(id="refresh-slider-text"),
                     ],

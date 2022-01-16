@@ -12,7 +12,7 @@ from qiskit.result import Result
 
 
 class Model(ABC):
-    """ ``Model`` is an abstract class which embeds the general features
+    """``Model`` is an abstract class which embeds the general features
     needed in a model for QL perception.
 
 

@@ -30,7 +30,7 @@ class AngularModel(Model):
         scalar_input = self._scalar_input_check(scalar_input)
 
         # Apply rotation to the qubit
-        angle = np.pi*scalar_input/self.tau
+        angle = np.pi * scalar_input / self.tau
         self.circ.ry(angle, dim)
         return angle
 
@@ -51,7 +51,7 @@ class AngularModel(Model):
         # have the target_vector state as the new |00...0> state.
         # Loop through all the dimensions:
         for i in range(0, self.n):
-            angle = - np.pi*target_vector[i]
+            angle = -np.pi * target_vector[i]
             self.circ.ry(angle, i)
 
     def decode(self):

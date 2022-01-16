@@ -1,3 +1,3 @@
 from .qunit import QUnit
 
-__all__ = ['QUnit']
+__all__ = ["QUnit"]

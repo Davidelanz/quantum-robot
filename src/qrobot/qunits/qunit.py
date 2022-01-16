@@ -43,7 +43,7 @@ def flush_redis() -> None:
 
 
 class QUnit:
-    """ [QUnit description]
+    """[QUnit description]
 
     Parameters
     ------------

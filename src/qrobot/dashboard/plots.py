@@ -23,7 +23,7 @@ def bar_all_bursts():
     # Use textposition='auto' for direct text
     fig = go.Figure(
         data=[
-            go.Bar(x=df["qunit"], y=df["burst"], text=df["burst"], textposition="auto",)
+            go.Bar(x=df["qunit"], y=df["burst"], text=df["burst"], textposition="auto")
         ]
     )
 
