@@ -17,7 +17,7 @@
         <img src='https://readthedocs.org/projects/quantum-robot/badge/?version=latest' alt='Documentation Status' />
     </a>
     <a>
-        <img src="https://img.shields.io/badge/python-3.7|3.8|3.9-yellow" alt="Python"/>
+        <img src="https://img.shields.io/badge/python-3.6|3.7|3.8|3.9-yellow" alt="Python"/>
     </a>
     <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml">
         <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg" alt="CodeQL"/>

@@ -1,0 +1,25 @@
+FROM ubuntu:focal
+
+RUN apt-get update -y && \
+    apt-get install software-properties-common -y
+
+# Install redis
+RUN add-apt-repository ppa:redislabs/redis -y && \
+    apt-get update -y && \
+    apt-get install redis -y
+
+# Install python3
+RUN add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update -y && \
+    apt-get install python3.8 python3-pip -y
+
+# Install quantum-robot
+WORKDIR /quantum-robot
+COPY . /quantum-robot
+RUN pip install /quantum-robot
+
+# Start redis server
+COPY ./docker/start_redis.sh /start_redis.sh
+RUN chmod +x /start_redis.sh
+ENTRYPOINT  [ "/start_redis.sh" ]
+CMD [ "/bin/bash" ]

@@ -13,15 +13,3 @@ as well. You can check the latest sources with the command::
     git clone https://github.com/Davidelanz/quantum-robot.git
 
 
-
-Testing
-------------------------
-
-
-After installation, you can launch the test suite from outside the
-source directory (you will need to have ``pytest`` installed):
-
-::
-
-    pytest qrobot
-
