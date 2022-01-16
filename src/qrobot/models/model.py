@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import qiskit
 import seaborn as sns
-from qiskit.quantum_info import Statevector, Operator
 from qiskit.providers import Backend, BaseJob
+from qiskit.quantum_info import Operator, Statevector
 from qiskit.result import Result
 
 

@@ -8,14 +8,15 @@
 
 # -- Path setup --------------------------------------------------------------
 
+import os
+import sys
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import sphinx_rtd_theme  # ReadTheDocs theme
 import nbsphinx
-import os
-import sys
+import sphinx_rtd_theme  # ReadTheDocs theme
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -140,16 +141,15 @@ htmlhelp_basename = "quantum-robotdoc"
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
+    "papersize": "a4paper",
     #
-    # 'papersize': 'letterpaper',
     # The font size ('10pt', '11pt' or '12pt').
-    #
     # 'pointsize': '10pt',
+    #
     # Additional stuff for the LaTeX preamble.
-    #
     # 'preamble': '',
-    # Latex figure (float) alignment
     #
+    # Latex figure (float) alignment
     # 'figure_align': 'htbp',
 }
 

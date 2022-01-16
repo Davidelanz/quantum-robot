@@ -172,7 +172,7 @@ class QUnit:
             try:
                 in_qunits[dim] = self._in_qunits[dim]
             except KeyError:
-                in_qunits[dim] = None
+                in_qunits[dim] = "None"
         return in_qunits
 
     @property

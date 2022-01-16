@@ -2,13 +2,11 @@
     These functions are made to test and compare different models
 """
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
-def test_input(
-    model, input_samples, tau=1, x_label="input",
-):
+def test_input(model, input_samples, tau=1, x_label="input"):
     dataframe = pd.DataFrame()
     shots = 1000000
 

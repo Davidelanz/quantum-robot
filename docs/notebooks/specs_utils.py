@@ -2,13 +2,14 @@
     These functions are made to easily plot the specs of the device on which the software is running
 """
 
+import multiprocessing
 import os
 import platform
-import subprocess
 import re
-import multiprocessing
+import subprocess
+
 import pandas as pd
-from IPython.display import display, HTML
+from IPython.display import HTML, display
 
 
 def get_cpu_model(spec="model name"):
