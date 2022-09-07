@@ -1,6 +1,7 @@
 .coverage
 .pytest_cache
 .qrobot_logs
+.sphinx-docs
 .venv
 .vscode/
 **.egg-info/
@@ -10,4 +11,4 @@
 build/
 dist/
 docs/_build
-poetry.lock
+# poetry.lock
