@@ -55,16 +55,19 @@ redis = "*"
 seaborn = ">=0.10"
 
 [tool.poetry.group.dev.dependencies]
-black = "*"
-ipykernel = "*"
-mypy = "*"
-nbsphinx = ">=0.8.6"
-pylint = "*"
-pytest = "*"
-pytest-cov = "*"
-pytest-mock = "*"
-sphinx = ">=4.1.2"
-sphinx_rtd_theme = ">=0.5.0"
+black = "*" 
+ipykernel = "*" 
+ipython = ">=7.16.3" # not directly required, pinned by Snyk to avoid a vulnerability
+mistune = ">=2.0.1" # not directly required, pinned by Snyk to avoid a vulnerability
+mypy = "*" 
+nbsphinx = ">=0.8.6" 
+pygments = ">=2.7.4" # not directly required, pinned by Snyk to avoid a vulnerability
+pylint = "*" 
+pytest = "*" 
+pytest-cov = "*" 
+pytest-mock = "*" 
+sphinx = ">=4.1.2" 
+sphinx_rtd_theme = ">=0.5.0" 
 
 [tool.isort]
 profile = "black"

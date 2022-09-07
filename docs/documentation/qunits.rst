@@ -17,8 +17,8 @@ The ``QUnit`` class
 
 |
 
-Module variables
+Module functions and variables
 -------------------------------------
 
 .. automodule:: qrobot.qunits.qunit
-    :members: MIN_TS, DEFAULT_INPUT, redis_status, REDIS_PORT, flush_redis
+    :members: MIN_TS, redis_status, flush_redis
