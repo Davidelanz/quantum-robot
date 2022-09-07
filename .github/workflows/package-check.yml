@@ -1,0 +1,114 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Check Package
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint:
+    name: 🔎 Linting code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies via poetry
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install poetry
+          python -m poetry install
+
+      - name: Format with isort and black
+        run: |
+          python -m poetry run isort --diff .
+          python -m poetry run black --diff .
+
+      - name: Check types with mypy
+        run: python -m poetry run mypy
+        continue-on-error: true
+
+      - name: Lint with pylint
+        run: python -m poetry run pylint src
+        continue-on-error: true
+
+  build:
+    needs: lint
+    name: 🛠️ Test and build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Redis
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install software-properties-common -y
+          sudo add-apt-repository ppa:redislabs/redis -y
+          sudo apt-get update -y
+          sudo apt-get install redis -y
+
+      - name: Test code
+        run: |
+          python -m poetry run coverage run -m pytest
+          python -m poetry run coverage report -m
+
+      - name: Upload report to codecov
+        run: bash <(curl -s https://codecov.io/bash)
+
+      - name: Build package
+        run: python -m poetry build
+
+  docs:
+    name: 📖 Check documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Pandoc and Graphviz
+        run: |
+          sudo apt-get update -y
+          sudo apt install pandoc -y
+          sudo apt install graphviz -y
+
+      - name: Install dependencies via poetry
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install poetry
+          python -m poetry install
+
+      - name: Generate Sphinx docs
+        run: python3 -m poetry run sphinx-build -a -E -n -W --keep-going docs ./.sphinx-docs
+        # -a (write all files)
+        # -E (don't use a saved environment, always read all files)
+        # -n (nit-picky mode, warn about all missing references)
+        # -W (turn warnings into errors)
+        # --keep-going (with -W, keep going when getting warnings)
+
+      - name: Archive sphinx docs for 2 days
+        uses: actions/upload-artifact@v3
+        with:
+          name: sphinx-docs
+          path: ./.sphinx-docs/
+          retention-days: 2
