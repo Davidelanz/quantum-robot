@@ -53,3 +53,13 @@ jobs:
 
       - name: Upload report to codecov
         run: bash <(curl -s https://codecov.io/bash)
+
+      - name: Generate Sphinx docs
+        run: python3 -m poetry run sphinx-build -a docs ./.sphinx-docs
+
+      - name: Archive sphinx docs for 2 days
+        uses: actions/upload-artifact@v3
+        with:
+          name: sphinx-docs
+          path: ./.sphinx-docs/
+          retention-days: 2
