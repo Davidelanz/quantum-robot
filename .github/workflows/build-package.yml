@@ -47,7 +47,9 @@ jobs:
         run: python -m poetry run pylint src
 
       - name: Test code
-        run: python -m poetry run coverage run -m pytest
+        run: |
+          python -m poetry run coverage run -m pytest
+          python -m poetry run coverage report -m
 
       - name: Upload report to codecov
         run: bash <(curl -s https://codecov.io/bash)
