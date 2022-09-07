@@ -1,5 +1,5 @@
 """
-Dashboard webapp to monitor current qUnits sharing the redis server.
+Dashboard utilities for plotting.
 """
 
 import pandas as pd
@@ -9,21 +9,27 @@ from ..qunits.qunit import redis_status
 
 
 def bar_all_bursts():
+    """Barplot of all bursts."""
     status = {}
     status["qunit"] = []
     status["burst"] = []
-    for k, v in redis_status().items():
-        k = k.decode("ascii")
-        if "state" not in k:
-            status["qunit"].append(k)
-            status["burst"].append(float(v))
+    for key, value in redis_status().items():
+        key = key.decode("ascii")
+        if "state" not in key:
+            status["qunit"].append(key)
+            status["burst"].append(float(value))
 
-    df = pd.DataFrame(status).sort_values("qunit")
+    burst_df = pd.DataFrame(status).sort_values("qunit")
 
     # Use textposition='auto' for direct text
     fig = go.Figure(
         data=[
-            go.Bar(x=df["qunit"], y=df["burst"], text=df["burst"], textposition="auto")
+            go.Bar(
+                x=burst_df["qunit"],
+                y=burst_df["burst"],
+                text=burst_df["burst"],
+                textposition="auto",
+            )
         ]
     )
 

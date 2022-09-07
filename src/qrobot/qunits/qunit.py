@@ -14,13 +14,13 @@ MIN_TS = 0.01
 """
 
 
-def _get_redis(host="localhost", port=6379, db=0):
-    return redis.Redis(host, port, db)
+def _get_redis(host="localhost", port=6379, database=0):
+    return redis.Redis(host, port, database)
 
 
 def redis_status() -> dict:
     """Returns the current redis database status in the for of a dictionary
-    with {db_key : db_value} mapping.
+    with ``{db_key : db_value}`` mapping.
 
     Returns:
         dict: Redis current status
@@ -42,7 +42,7 @@ def flush_redis() -> None:
     logger.debug(f"Current redis state: {redis_status()}")
 
 
-class QUnit:
+class QUnit:  # pylint: disable=too-many-instance-attributes
     """[QUnit description]
 
     Parameters
@@ -86,18 +86,18 @@ class QUnit:
     # CONSTRUCTOR
     # ========================================================
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         name: str,
         model: Model,
         burst: Burst,
-        Ts: float,
+        Ts: float,  # pylint: disable=invalid-name
         query: list = None,
         in_qunits: Dict[int, str] = None,
         default_input: float = 0.0,
     ) -> None:
         # Create a instance unique identifier
-        self.id = name + "-" + str(uuid4())[:6]
+        self.id = name + "-" + str(uuid4())[:6]  # pylint: disable=invalid-name
         # use it for log
         self._logger = get_logger(self.id)
         self._logger.debug(f"Initializing qUnit {self.id}")
@@ -106,7 +106,7 @@ class QUnit:
         self.name = name
         self.model = model
         self.burst = burst
-        self.Ts = self._period_check(Ts)
+        self.Ts = self._period_check(Ts)  # pylint: disable=invalid-name
         self.default_input = default_input
 
         if query is None:
@@ -154,18 +154,18 @@ class QUnit:
         query = self.model._target_vector_check(query)
         # Update accumulator
         self._logger.debug(f"Changing query from {self._query} to {query}")
-        for i, q in enumerate(query):
-            self._query[i] = q
+        for idx, value in enumerate(query):
+            self._query[idx] = value
         self._logger.debug(f"_query={self._query}")
 
     @property
     def in_qunits(self) -> Dict[int, str]:
-        """Current output {``dim`` : ``qunit_id``} couplings
+        """Current output ``{dim : qunit_id}`` couplings.
 
         Returns
         -------
         dict
-            The current output {``dim`` : ``qunit_id``} couplings dictionary
+            The current output ``{dim : qunit_id}`` couplings dictionary
         """
         in_qunits = {}
         for dim in range(self.model.n):
@@ -209,8 +209,8 @@ class QUnit:
 
     def __repr__(self) -> str:
         out_str = f'QUnit "{self.id}"'
-        for k, v in dict(self).items():
-            out_str += f"\n     {k}:\t{v}"
+        for key, value in dict(self).items():
+            out_str += f"\n     {key}:\t{value}"
         return out_str
 
     # ========================================================
@@ -228,7 +228,7 @@ class QUnit:
             The input qunit id
         """
         # Check arguments
-        dim = self.model._dim_index_check(dim)
+        dim = self.model._dim_index_check(dim)  # pylint: disable=protected-access
         # Update accumulator
         self._logger.debug(
             f"Changing dim {dim} input from " + f"{self.in_qunits[dim]} to {qunit_id}"
@@ -261,7 +261,7 @@ class QUnit:
     # ========================================================
 
     @staticmethod
-    def _period_check(Ts) -> float:
+    def _period_check(Ts) -> float:  # pylint: disable=invalid-name
         """This method ensures that a `Ts` for the qUnit
         is an integer or a float greater than the minimum allowed.
 
@@ -293,9 +293,9 @@ class QUnit:
             self._logger.debug("Initializing a new temporal window")
             self.model.clear()
             # "t" is the event index of the temporal window
-            for t in range(self.model.tau):
+            for t_idx in range(self.model.tau):
 
-                self._logger.debug(f"Temporal window event {t+1}/{self.model.tau}")
+                self._logger.debug(f"Temporal window event {t_idx+1}/{self.model.tau}")
 
                 # Get input
                 input_vector = self.input_vector

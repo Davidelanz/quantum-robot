@@ -15,7 +15,8 @@ class LinearModel(AngularModel):
     the same one). For a time-varying sequencee (tau > 1)
     the results obtained are again nonlinear, and similar to the
     one of ``AngularModel``
-    (see `this notebook <https://github.com/Davidelanz/quantum-robot/blob/master/notebooks/model_comparison.ipynb>`_
+    (see `this notebook <https://github.com/Davidelanz/quantum-robot/blob/\
+    master/notebooks/model_comparison.ipynb>`_
     for more information)
 
     """
