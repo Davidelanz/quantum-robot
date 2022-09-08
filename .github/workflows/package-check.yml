@@ -1,0 +1,135 @@
+name: Check Package
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint:
+    name: 🔎 Check package
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Only 3.9 for linting
+        python-version: ["3.9"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.0.0
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Check formatting with isort and black
+        run: |
+          poetry run isort --diff .
+          poetry run black --diff .
+
+      - name: Check types with mypy
+        run: poetry run mypy
+        continue-on-error: true
+
+      - name: Lint with pylint
+        run: poetry run pylint src
+        continue-on-error: true
+
+  build:
+    needs: lint
+    name: 🛠️ Test and build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.0.0
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Test code
+        # Exclude redis tests for now from testing
+        run: |
+          poetry run coverage run -m  pytest -m "not redistest"
+          poetry run coverage xml -o .coverage.xml
+          poetry run coverage report -m --skip-covered
+
+      - name: Upload coverage report to GitHub
+        uses: 5monkeys/cobertura-action@master
+        with:
+          path: .coverage.xml
+          minimum_coverage: 70
+          repo_token: ${{github.token}}
+          skip_covered: true
+
+      - name: Upload coverage report to CodeCov
+        run: bash <(curl -s https://codecov.io/bash)
+
+      - name: Build package
+        run: poetry build
+
+  docs:
+    name: 📖 Check sphinx
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Only 3.9 for linting
+        python-version: ["3.9"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.0.0
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Install Pandoc and Graphviz
+        run: |
+          sudo apt-get update -y
+          sudo apt install pandoc -y
+          sudo apt install graphviz -y
+
+      - name: Generate Sphinx docs
+        run: poetry run sphinx-build -a -E -W --keep-going docs ./.sphinx-docs
+        # -a (write all files)
+        # -E (don't use a saved environment, always read all files)
+        # -W (turn warnings into errors)
+        # -n (nit-picky mode, warn about all missing references)
+        # --keep-going (with -W, keep going when getting warnings)
+
+      - name: Archive sphinx docs for 2 days
+        uses: actions/upload-artifact@v3
+        with:
+          name: sphinx-docs
+          path: ./.sphinx-docs/
+          retention-days: 2

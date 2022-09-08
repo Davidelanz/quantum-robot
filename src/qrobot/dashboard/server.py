@@ -1,3 +1,6 @@
+"""
+Dashboard webapp to monitor current qUnits sharing the redis server.
+"""
 import os
 from pathlib import Path
 
@@ -17,6 +20,7 @@ app = dash.Dash(NAME, assets_folder=ASSETS_DIR, server=server)
 
 
 def shutdown_server():
+    """Shutdown werkzeug server."""
     func = request.environ.get("werkzeug.server.shutdown")
     if func is None:
         raise RuntimeError(f"{NAME} is not running with the Werkzeug Server")
@@ -24,7 +28,7 @@ def shutdown_server():
 
 
 @server.route("/shutdown", methods=["GET"])
-def shutdown():
+def _shutdown():
     shutdown_server()
     return f"{NAME} shutting down..."
 
@@ -35,7 +39,7 @@ app.layout = layout
 @app.callback(
     Output("bursts-bar", "figure"), [Input("refresh-interval", "n_intervals")]
 )
-def update_bar_all_bursts(_):
+def _update_bar_all_bursts(_):
     figure = bar_all_bursts()
     return figure
 
@@ -43,7 +47,7 @@ def update_bar_all_bursts(_):
 @app.callback(
     Output("refresh-interval", "interval"), [Input("refresh-slider", "value")]
 )
-def update_interval_rate(refresh_value):
+def _update_interval_rate(refresh_value):
     return refresh_value * 1000  # seconds to milliseconds
 
 
@@ -52,7 +56,7 @@ def update_interval_rate(refresh_value):
     [Input("refresh-interval", "n_intervals")],
     [State("refresh-slider", "value")],
 )
-def update_refresh_interval(_, refresh_value):
+def _update_refresh_interval(_, refresh_value):
     return f"Refresh: {refresh_value*1000}ms"
 
 
@@ -60,6 +64,5 @@ def run_dashboard():
     """Run dashboard at ``http://localhost:8050``.
     To shutdown the dashboard, go to
     ``http://localhost:8050/shutdown``.
-
     """
     app.run_server(debug=False)

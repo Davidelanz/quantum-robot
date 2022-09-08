@@ -1,11 +1,14 @@
 from time import sleep
 
+import pytest
+
 import qrobot
 from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
 from qrobot.qunits import QUnit
 
 
+@pytest.mark.redistest
 def test_qunit():
     # Layer 0
     l0_unit0 = QUnit(

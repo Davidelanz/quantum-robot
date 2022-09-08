@@ -33,13 +33,13 @@ class Model(ABC):
         Quantum circuit which implements the model.
     """
 
-    def __init__(self, n, tau) -> None:
+    def __init__(self, n, tau) -> None:  # pylint: disable=invalid-name
         """Initialize the class"""
 
         # Check the argument n
         if isinstance(n, int):
             if n > 0:
-                self.n = n
+                self.n = n  # pylint: disable=invalid-name
             else:
                 raise ValueError("n must be greater than 0!")
         else:
@@ -64,8 +64,8 @@ class Model(ABC):
 
     def __repr__(self) -> str:
         out_str = "["
-        for k, v in dict(self).items():
-            out_str += f"{k}: {v}, "
+        for key, value in dict(self).items():
+            out_str += f"{key}: {value}, "
         return out_str[:-2] + "]"
 
     def _dim_index_check(self, dim) -> int:
