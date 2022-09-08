@@ -4,16 +4,11 @@
 
 version: 2
 
-sphinx:
-   configuration: docs/conf.py
-
 build:
    os: ubuntu-20.04
    tools:
       python: "3.9"
-
-python:
-   install:
-      - method: pip
-        path: .
-   system_packages: true
+   commands:
+      - python -m pip install poetry
+      - python -m poetry install
+      - python -m poetry run sphinx-build docs _readthedocs/html/
