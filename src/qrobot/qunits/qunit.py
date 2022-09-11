@@ -3,43 +3,14 @@ from time import sleep
 from typing import Dict, List
 from uuid import uuid4
 
-import redis
-
 from ..bursts import Burst
 from ..logs import get_logger
 from ..models import Model
+from . import redis_utils
 
 MIN_TS = 0.01
 """ float: Minimum sampling period allowed (in seconds).
 """
-
-
-def _get_redis(host="localhost", port=6379, database=0):
-    return redis.Redis(host, port, database)
-
-
-def redis_status() -> dict:
-    """Returns the current redis database status in the for of a dictionary
-    with ``{db_key : db_value}`` mapping.
-
-    Returns:
-        dict: Redis current status
-    """
-    _r = _get_redis()
-    status = {}
-    for key in _r.scan_iter():
-        status[key.decode("ascii")] = _r.get(key).decode("ascii")
-    return status
-
-
-def flush_redis() -> None:
-    """Flush the redis database"""
-    logger = get_logger("redis")
-    logger.info("Flushing redis database")
-    logger.debug(f"Previous redis state: {redis_status()}")
-    _r = _get_redis()
-    _r.flushdb()
-    logger.debug(f"Current redis state: {redis_status()}")
 
 
 class QUnit:  # pylint: disable=too-many-instance-attributes
@@ -186,7 +157,7 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         """
         input_vector = [self.default_input] * self.model.n
         for dim, qunit_id in self._in_qunits.items():
-            _r = _get_redis()
+            _r = redis_utils.get_redis()
             val = _r.get(qunit_id)
             if val is not None:
                 input_vector[dim] = float(val)
@@ -252,7 +223,7 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         except AssertionError:
             self._logger.warning("qUnit is not running")
         # Delete outputs from redis
-        _r = _get_redis()
+        _r = redis_utils.get_redis()
         _r.delete(self.id)
         _r.delete(self.id + " state")
 
@@ -317,7 +288,7 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
 
             # Write output on Redis database
             self._logger.debug("Writing output on redis")
-            _r = _get_redis()
+            _r = redis_utils.get_redis()
             if not (
                 _r.mset({self.id + " state": out_state})
                 and _r.mset({self.id: self.burst(out_state)})
