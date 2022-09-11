@@ -1,8 +1,8 @@
 Redis database
 ------------------------
 
-The quantum-robot package requires `Redis <https://redis.io>`_.
-Redis is a high performance, super fast and easy to use in-memory
+The quantum-robot package requires `Redis <https://redis.io>`_,
+a high performance, super fast and easy to use in-memory
 database.
 
 .. figure:: https://github.com/dspezia/redis-doc/raw/client_command/topics/Data_size.png
@@ -10,46 +10,17 @@ database.
     :align: center  
     :target: https://redis.io/topics/benchmarks
     
-    Check the `How fast is Redis? <https://redis.io/topics/benchmarks>`_ benchmark page for further information
+    Check the `How fast is Redis? <https://redis.io/topics/benchmarks>`_ 
+    benchmark page for further information
 
 
-- **Install Redis from the official Ubuntu PPA:**
+- To install redis, check 
+  `redis.io/docs/getting-started/installation/ <https://redis.io/docs/getting-started/installation/>`_
 
-    You can install the latest stable version of Redis from the 
-    ``redislabs/redis`` package repository. Add the repository 
-    to the ``apt`` index, update it and install:
+- The `redis-py <https://github.com/andymccurdy/redis-py>`_ pyhon 
+  package is what is used by quantum-robot to connect to the redis 
+  database (`redis.io/clients#python <https://redis.io/clients#python>`_).
 
-    .. code-block::
-
-        $ sudo add-apt-repository ppa:redislabs/redis
-        $ sudo apt-get update
-        $ sudo apt-get install redis
-
-- **Install Redis from Snapcraft:**
-
-    You can install the latest stable version of Redis from the Snapcraft 
-    marketplace:
-
-    .. code-block::
-        
-        $ sudo snap install redis
-
-- **Redis for Windows:**
-
-    A port for Windows based on Redis is available at 
-    https://github.com/MicrosoftArchive/redis. This project though is no longer
-    being actively maintained. 
-    If you are looking for a Windows version of Redis, you may want to check out 
-    `Memurai <https://www.memurai.com/>`_.
-
-- **Build from source:**
-
-    Check the https://redis.io/download#installation page for dedicated  
-    instructions and further information.
-
-**Python package**: The `redis-py <https://github.com/andymccurdy/redis-py>`_ package 
-is defined on the `Redis website <https://redis.io/clients#python>`_ as 
-"the way to go for Python".
 
 .. note::
 
@@ -57,9 +28,24 @@ is defined on the `Redis website <https://redis.io/clients#python>`_ as
     ``service redis-server start``
 
 
-Docker image
-------------------------
+It is also possible to use Docker to spin a redis server without installing 
+redis on your local machine:
 
-.. note::
+..  code-block:: shell
 
-    A Docker image will be released soon.
+    docker run --name redis_contaner -p 6379:6379 -d redis
+
+The to stop it:
+    
+..  code-block:: shell
+
+    docker stop redis_contaner
+    docker rm redis_contaner
+
+To check wether the redis database is reachable, open a python shell 
+(e.g. ``poetry run python``) and run:
+
+..  code-block:: python
+
+    >>> from qrobot.qunits.redis_utils import redis_status
+    >>> redis_status()
