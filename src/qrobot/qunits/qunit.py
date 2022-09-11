@@ -3,8 +3,8 @@ from time import sleep
 from typing import Dict, List
 from uuid import uuid4
 
+from .._logger.logger import get_logger
 from ..bursts import Burst
-from ..logs import get_logger
 from ..models import Model
 from . import redis_utils
 

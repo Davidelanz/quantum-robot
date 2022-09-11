@@ -1,6 +1,6 @@
 import redis
 
-from ..logs import get_logger
+from .._logger.logger import get_logger
 
 
 def get_redis(
