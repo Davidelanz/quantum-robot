@@ -33,6 +33,7 @@ to connect and to manage the redis database.
 
 .. automodule:: qrobot.qunits.redis_utils
     :members: get_redis
+    :noindex:
 
 .. automodule:: qrobot.qunits.redis_utils
     :members: redis_status, flush_redis
