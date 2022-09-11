@@ -32,9 +32,10 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         Dictionary containing {``dim`` : ``qunit_id``} inputs
         couplings, i.e. ``qunit_id`` output is the input for dimension
         ``dim``. Defaults to ``None``.
-    default_input: float
-        Default scalar input value when qunit does not have an available one.
-        Defaults to 0.0
+    default_input: List[float]
+        Default input vector of scalar values to use as default value
+        when qunit does not have an available one.
+        Defaults to ``model.n*[0.0]``
 
     Attributes
     ----------
@@ -48,9 +49,9 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         The burst the qUnit implements
     Ts : float
         The sampling period for which the qUnit samples an event
-    default_input: float
-        Default scalar input value when qunit does not have an available one.
-        Defaults to 0.0
+    default_input: List[float]
+        Default input vector of scalar values to use as default value
+        when qunit does not have an available one
     """
 
     # ========================================================
@@ -65,7 +66,7 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         Ts: float,  # pylint: disable=invalid-name
         query: list = None,
         in_qunits: Dict[int, str] = None,
-        default_input: float = 0.0,
+        default_input: float = None,
     ) -> None:
         # Create a instance unique identifier
         self.id = name + "-" + str(uuid4())[:6]  # pylint: disable=invalid-name
@@ -78,7 +79,7 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         self.model = model
         self.burst = burst
         self.Ts = self._period_check(Ts)  # pylint: disable=invalid-name
-        self.default_input = default_input
+        self.default_input = default_input or model.n * [0.0]
 
         if query is None:
             query = [0.0] * (self.model.n)
@@ -155,7 +156,7 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         list
             The current input vector
         """
-        input_vector = [self.default_input] * self.model.n
+        input_vector = self.default_input
         for dim, qunit_id in self._in_qunits.items():
             _r = redis_utils.get_redis()
             val = _r.get(qunit_id)
@@ -163,8 +164,34 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
                 input_vector[dim] = float(val)
             else:
                 self._logger.info(f"Unable to read {qunit_id} input")
-                input_vector[dim] = self.default_input
         return input_vector
+
+    @input_vector.setter
+    def input_vector(self, input_vector: List[float]) -> None:
+        """Set a new query state for the qunit
+
+        Parameters
+        -----------
+        input_vector : List[float]
+            The new input_vector value
+
+        Warning
+        ---------
+        This setter will be deprecated with the introduction of sensorial
+        interfaces, since it should not be possible to hard-write
+        qUnits' inputs from the python code directly
+        """
+        # TODO: This has to be deprecated with the introduction of
+        #       sensorial units
+        self._logger.warning(
+            "The qunit.input_vector setter will be deprecated with "
+            + "the introduction of sensorial interfaces, since it "
+            + "should not be possible to hard-write qUnits' inputs "
+            + "from the python code directly."
+        )
+        input_vector = self.model._target_vector_check(input_vector)
+        self.default_input = input_vector
+        self._logger.debug(f"default_input is now {self.input_vector}")
 
     # ========================================================
     # BUILT-IN
