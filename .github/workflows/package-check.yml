@@ -107,10 +107,14 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: Install redis
+        run: sudo apt-get install -y redis-tools redis-server
+
       - name: Test code
-        # Exclude redis tests for now from testing
+        # To exclude redis tests:
+        # poetry run coverage run -m pytest -m "not redistest"
         run: |
-          poetry run coverage run -m  pytest -m "not redistest"
+          poetry run coverage run -m pytest 
           poetry run coverage xml -o .coverage.xml
           poetry run coverage report -m --skip-covered
 
