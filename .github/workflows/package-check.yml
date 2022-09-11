@@ -189,6 +189,7 @@ jobs:
         # -W (turn warnings into errors)
         # -n (nit-picky mode, warn about all missing references)
         # --keep-going (with -W, keep going when getting warnings)
+        continue-on-error: true
 
       - name: Archive sphinx docs for 2 days
         uses: actions/upload-artifact@v3
