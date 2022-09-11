@@ -2,6 +2,7 @@ name: "CodeQL"
 # https://github.com/github/codeql-action
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
   pull_request:
