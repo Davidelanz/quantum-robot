@@ -1,4 +1,4 @@
-name: Check Package
+name: Package Check
 
 on:
   push:
@@ -7,12 +7,11 @@ on:
     branches: [master]
 
 jobs:
-  lint:
-    name: 🔎 Check package
+  formatting:
+    name: 🔎 Formatting
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Only 3.9 for linting
         python-version: ["3.9"]
     steps:
       - name: Checkout
@@ -35,22 +34,62 @@ jobs:
           poetry run isort --diff .
           poetry run black --diff .
 
-      - name: Check types with mypy
-        run: poetry run mypy
-        continue-on-error: true
+  mypy:
+    name: 🔎 Type hinting
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.0.0
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install
+
+  pylint:
+    name: 🔎 Linting
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.0.0
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install
 
       - name: Lint with pylint
         run: poetry run pylint src
         continue-on-error: true
 
-  build:
-    needs: lint
-    name: 🛠️ Test and build
+  test:
+    needs: [formatting, mypy, pylint]
+    name: 🪖 Testing
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.9"]
 
     steps:
       - name: Checkout
@@ -68,10 +107,14 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: Install redis
+        run: sudo apt-get install -y redis-tools redis-server
+
       - name: Test code
-        # Exclude redis tests for now from testing
+        # To exclude redis tests:
+        # poetry run coverage run -m pytest -m "not redistest"
         run: |
-          poetry run coverage run -m  pytest -m "not redistest"
+          poetry run coverage run -m pytest 
           poetry run coverage xml -o .coverage.xml
           poetry run coverage report -m --skip-covered
 
@@ -86,15 +129,39 @@ jobs:
       - name: Upload coverage report to CodeCov
         run: bash <(curl -s https://codecov.io/bash)
 
+  build:
+    needs: [test]
+    name: 🛠️ Building
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.0.0
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install
+
       - name: Build package
         run: poetry build
 
   docs:
-    name: 📖 Check sphinx
+    name: 📖 Documentation
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Only 3.9 for linting
         python-version: ["3.9"]
 
     steps:
@@ -126,6 +193,7 @@ jobs:
         # -W (turn warnings into errors)
         # -n (nit-picky mode, warn about all missing references)
         # --keep-going (with -W, keep going when getting warnings)
+        continue-on-error: true
 
       - name: Archive sphinx docs for 2 days
         uses: actions/upload-artifact@v3

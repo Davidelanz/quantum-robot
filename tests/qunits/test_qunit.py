@@ -53,8 +53,8 @@ def test_qunit():
     l1_unit1.stop()
 
     # Redis functions
-    qrobot.qunits.qunit.redis_status()
-    qrobot.qunits.qunit.flush_redis()
+    qrobot.qunits.redis_utils.redis_status()
+    qrobot.qunits.redis_utils.flush_redis()
 
 
 if __name__ == "__main__":

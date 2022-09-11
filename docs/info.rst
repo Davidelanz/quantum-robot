@@ -7,14 +7,8 @@
    </div>
    <br>
    <div align="center" style="align:center; padding:20px; line-height:2;">
-      <a>
-         <img src="https://img.shields.io/badge/Python-3.6→3.9-yellow" alt="Python"/>
-      </a>
-      <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/build-package.yml">
-         <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/build-package.yml/badge.svg?branch=master"/>
-      </a>
-      <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/super-linter.yml">
-         <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/super-linter.yml/badge.svg?branch=master"/>
+      <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml">
+         <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml/badge.svg?branch=master"/>
       </a>
       <a href="https://codecov.io/gh/Davidelanz/quantum-robot" >
          <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU" alt="Code coverage"/>

@@ -5,7 +5,7 @@ Dashboard utilities for plotting.
 import pandas as pd
 import plotly.graph_objs as go
 
-from ..qunits.qunit import redis_status
+from ..qunits.redis_utils import redis_status
 
 
 def bar_all_bursts():

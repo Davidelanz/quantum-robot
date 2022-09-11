@@ -17,8 +17,24 @@ The ``QUnit`` class
 
 |
 
-Module functions and variables
+QUnit Globals
 -------------------------------------
 
 .. automodule:: qrobot.qunits.qunit
-    :members: MIN_TS, redis_status, flush_redis
+    :members: MIN_TS
+
+|
+
+Redis utilities
+-------------------------------------
+
+The module ``qrobot.qunits.redis_utils`` contains useful functions
+to connect and to manage the redis database.
+
+.. automodule:: qrobot.qunits.redis_utils
+    :members: get_redis
+
+.. automodule:: qrobot.qunits.redis_utils
+    :members: redis_status, flush_redis
+
+|
