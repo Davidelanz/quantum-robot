@@ -132,7 +132,9 @@ jobs:
           skip_covered: true
 
       - name: Upload coverage report to CodeCov
-        run: bash <(curl -s https://codecov.io/bash)
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./.coverage.xml
 
   build:
     needs: [test]
