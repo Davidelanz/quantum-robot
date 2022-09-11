@@ -1,15 +1,14 @@
 Install quantum-robot
 ------------------------
 
-The easiest way to install *quantum-robot* is using ``pip``::
+The easiest way to install ``quantum-robot`` is using ``pip``::
 
     pip install -U quantum-robot
 
 
-The package can be `installed from
-source <https://packaging.python.org/tutorials/installing-packages/#id19>`__
-as well. You can check the latest sources with the command::
+
+The package can be installed from source as well via ``poetry``:::
 
     git clone https://github.com/Davidelanz/quantum-robot.git
-
-
+    cd quantum-robot
+    poetry install
