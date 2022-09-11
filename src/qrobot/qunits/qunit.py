@@ -285,41 +285,44 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
     # THREADS
     # ========================================================
 
+    def _loop_iteration(self) -> None:
+        """Single iteration of the processing loop."""
+        self._logger.debug("Initializing a new temporal window")
+        self.model.clear()
+        # "t" is the event index of the temporal window
+        for t_idx in range(self.model.tau):
+
+            self._logger.debug(f"Temporal window event {t_idx+1}/{self.model.tau}")
+
+            # Get input
+            input_vector = self.input_vector
+            self._logger.debug(f"input_vector={input_vector}")
+
+            # Loop through the dimensions to encode data
+            for dim in range(self.model.n):
+                self.model.encode(input_vector[dim], dim)
+
+            # wait for the next input in the time window
+            sleep(self.Ts)
+
+        # After the time window, apply the query
+        self._logger.debug(f"Querying for state {self._query}")
+        self.model.query(self._query)
+
+        # Decode
+        out_state = self.model.decode()
+
+        # Write output on Redis database
+        self._logger.debug("Writing output on redis")
+        _r = redis_utils.get_redis()
+        if not (
+            _r.mset({self.id + " state": out_state})
+            and _r.mset({self.id: self.burst(out_state)})
+        ):
+            raise Exception(
+                f"Problem in writing qunit {self.id} output on Redis database!"
+            )
+
     def _loop(self) -> None:
         while True:
-
-            self._logger.debug("Initializing a new temporal window")
-            self.model.clear()
-            # "t" is the event index of the temporal window
-            for t_idx in range(self.model.tau):
-
-                self._logger.debug(f"Temporal window event {t_idx+1}/{self.model.tau}")
-
-                # Get input
-                input_vector = self.input_vector
-                self._logger.debug(f"input_vector={input_vector}")
-
-                # Loop through the dimensions to encode data
-                for dim in range(self.model.n):
-                    self.model.encode(input_vector[dim], dim)
-
-                # wait for the next input in the time window
-                sleep(self.Ts)
-
-            # After the time window, apply the query
-            self._logger.debug(f"Querying for state {self._query}")
-            self.model.query(self._query)
-
-            # Decode
-            out_state = self.model.decode()
-
-            # Write output on Redis database
-            self._logger.debug("Writing output on redis")
-            _r = redis_utils.get_redis()
-            if not (
-                _r.mset({self.id + " state": out_state})
-                and _r.mset({self.id: self.burst(out_state)})
-            ):
-                raise Exception(
-                    f"Problem in writing qunit {self.id} " + "output on Redis database!"
-                )
+            self._loop_iteration()
