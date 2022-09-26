@@ -57,6 +57,10 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: Run MyPy
+        run: poetry run mypy .
+        continue-on-error: true
+
   pylint:
     name: 🔎 Linting
     runs-on: ubuntu-latest

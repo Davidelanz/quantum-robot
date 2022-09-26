@@ -184,7 +184,7 @@ class Model(ABC):
         Parameters
         ----------
         shots : int
-            Number of measurement shots
+            Number of times to repeat the measurement shot
         backend : qiskit Backend
             Quantum backend for the execution (if None, AER simulator is
             chosen as default)

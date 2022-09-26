@@ -1,22 +1,24 @@
-"""
-Module containing logging utilities
-"""
+"""Module containing logging utilities."""
 
-# import inspect
 import logging
-import os
 import sys
-
-# from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
-
-LOGS_DIR = os.path.join(os.getcwd(), ".qrobot_logs")
-LOG_FILE = os.path.join(LOGS_DIR, "qrobot.log")
+from pathlib import Path
 
 FORMATTER = logging.Formatter(
     "%(asctime)s — %(name)s — %(levelname)s — "
     + "%(funcName)s:%(lineno)d — %(message)s"
 )
+
+
+def log_dir() -> Path:
+    """Return the path to the directory storing logs."""
+    return Path.cwd().joinpath(".qrobot_logs")
+
+
+def log_file() -> Path:
+    """Return the path to the current log file."""
+    return log_dir().joinpath("qrobot.log")
 
 
 def get_console_handler():
@@ -27,9 +29,8 @@ def get_console_handler():
 
 
 def get_file_handler():
-    if not os.path.exists(LOGS_DIR):
-        os.makedirs(LOGS_DIR)
-    file_handler = TimedRotatingFileHandler(LOG_FILE, when="midnight")
+    log_dir().mkdir(parents=True, exist_ok=True)
+    file_handler = TimedRotatingFileHandler(log_file(), when="midnight")
     file_handler.setFormatter(FORMATTER)
     file_handler.setLevel(logging.DEBUG)
     return file_handler

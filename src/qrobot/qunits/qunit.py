@@ -3,8 +3,8 @@ from time import sleep
 from typing import Dict, List
 from uuid import uuid4
 
+from .._logger.logger import get_logger
 from ..bursts import Burst
-from ..logs import get_logger
 from ..models import Model
 from . import redis_utils
 
@@ -32,9 +32,10 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         Dictionary containing {``dim`` : ``qunit_id``} inputs
         couplings, i.e. ``qunit_id`` output is the input for dimension
         ``dim``. Defaults to ``None``.
-    default_input: float
-        Default scalar input value when qunit does not have an available one.
-        Defaults to 0.0
+    default_input: List[float]
+        Default input vector of scalar values to use as default value
+        when qunit does not have an available one.
+        Defaults to ``model.n*[0.0]``
 
     Attributes
     ----------
@@ -48,9 +49,9 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         The burst the qUnit implements
     Ts : float
         The sampling period for which the qUnit samples an event
-    default_input: float
-        Default scalar input value when qunit does not have an available one.
-        Defaults to 0.0
+    default_input: List[float]
+        Default input vector of scalar values to use as default value
+        when qunit does not have an available one
     """
 
     # ========================================================
@@ -65,7 +66,7 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         Ts: float,  # pylint: disable=invalid-name
         query: list = None,
         in_qunits: Dict[int, str] = None,
-        default_input: float = 0.0,
+        default_input: float = None,
     ) -> None:
         # Create a instance unique identifier
         self.id = name + "-" + str(uuid4())[:6]  # pylint: disable=invalid-name
@@ -78,7 +79,7 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         self.model = model
         self.burst = burst
         self.Ts = self._period_check(Ts)  # pylint: disable=invalid-name
-        self.default_input = default_input
+        self.default_input = default_input or model.n * [0.0]
 
         if query is None:
             query = [0.0] * (self.model.n)
@@ -155,7 +156,7 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
         list
             The current input vector
         """
-        input_vector = [self.default_input] * self.model.n
+        input_vector = self.default_input
         for dim, qunit_id in self._in_qunits.items():
             _r = redis_utils.get_redis()
             val = _r.get(qunit_id)
@@ -163,8 +164,34 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
                 input_vector[dim] = float(val)
             else:
                 self._logger.info(f"Unable to read {qunit_id} input")
-                input_vector[dim] = self.default_input
         return input_vector
+
+    @input_vector.setter
+    def input_vector(self, input_vector: List[float]) -> None:
+        """Set a new query state for the qunit
+
+        Parameters
+        -----------
+        input_vector : List[float]
+            The new input_vector value
+
+        Warning
+        ---------
+        This setter will be deprecated with the introduction of sensorial
+        interfaces, since it should not be possible to hard-write
+        qUnits' inputs from the python code directly
+        """
+        # TODO: This has to be deprecated with the introduction of
+        #       sensorial units
+        self._logger.warning(
+            "The qunit.input_vector setter will be deprecated with "
+            + "the introduction of sensorial interfaces, since it "
+            + "should not be possible to hard-write qUnits' inputs "
+            + "from the python code directly."
+        )
+        input_vector = self.model._target_vector_check(input_vector)
+        self.default_input = input_vector
+        self._logger.debug(f"default_input is now {self.input_vector}")
 
     # ========================================================
     # BUILT-IN
@@ -258,41 +285,44 @@ class QUnit:  # pylint: disable=too-many-instance-attributes
     # THREADS
     # ========================================================
 
+    def _loop_iteration(self) -> None:
+        """Single iteration of the processing loop."""
+        self._logger.debug("Initializing a new temporal window")
+        self.model.clear()
+        # "t" is the event index of the temporal window
+        for t_idx in range(self.model.tau):
+
+            self._logger.debug(f"Temporal window event {t_idx+1}/{self.model.tau}")
+
+            # Get input
+            input_vector = self.input_vector
+            self._logger.debug(f"input_vector={input_vector}")
+
+            # Loop through the dimensions to encode data
+            for dim in range(self.model.n):
+                self.model.encode(input_vector[dim], dim)
+
+            # wait for the next input in the time window
+            sleep(self.Ts)
+
+        # After the time window, apply the query
+        self._logger.debug(f"Querying for state {self._query}")
+        self.model.query(self._query)
+
+        # Decode
+        out_state = self.model.decode()
+
+        # Write output on Redis database
+        self._logger.debug("Writing output on redis")
+        _r = redis_utils.get_redis()
+        if not (
+            _r.mset({self.id + " state": out_state})
+            and _r.mset({self.id: self.burst(out_state)})
+        ):
+            raise Exception(
+                f"Problem in writing qunit {self.id} output on Redis database!"
+            )
+
     def _loop(self) -> None:
         while True:
-
-            self._logger.debug("Initializing a new temporal window")
-            self.model.clear()
-            # "t" is the event index of the temporal window
-            for t_idx in range(self.model.tau):
-
-                self._logger.debug(f"Temporal window event {t_idx+1}/{self.model.tau}")
-
-                # Get input
-                input_vector = self.input_vector
-                self._logger.debug(f"input_vector={input_vector}")
-
-                # Loop through the dimensions to encode data
-                for dim in range(self.model.n):
-                    self.model.encode(input_vector[dim], dim)
-
-                # wait for the next input in the time window
-                sleep(self.Ts)
-
-            # After the time window, apply the query
-            self._logger.debug(f"Querying for state {self._query}")
-            self.model.query(self._query)
-
-            # Decode
-            out_state = self.model.decode()
-
-            # Write output on Redis database
-            self._logger.debug("Writing output on redis")
-            _r = redis_utils.get_redis()
-            if not (
-                _r.mset({self.id + " state": out_state})
-                and _r.mset({self.id: self.burst(out_state)})
-            ):
-                raise Exception(
-                    f"Problem in writing qunit {self.id} " + "output on Redis database!"
-                )
+            self._loop_iteration()
