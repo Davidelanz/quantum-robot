@@ -3,7 +3,7 @@ from typing import Dict, List
 from ..bursts import Burst
 from ..models import Model
 from . import redis_utils
-from .base_unit import BaseUnit
+from .base import BaseUnit
 
 MIN_TS = 0.01
 """ float: Minimum sampling period allowed (in seconds).
