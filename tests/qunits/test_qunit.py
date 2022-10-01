@@ -11,6 +11,10 @@ from qrobot.qunits import QUnit
 @pytest.mark.redis
 def test_qunit():
 
+    # Flush redis before starting
+    qrobot.qunits.redis_utils.flush_redis()
+    assert qrobot.qunits.redis_utils.redis_status() == {}
+
     # Layer 0
     l0_unit0 = QUnit(
         name="l0_unit0",
@@ -76,17 +80,25 @@ def test_qunit():
     assert l1_unit0.input_vector == [0.0]
     assert l1_unit1.input_vector == [0.0]
 
-    # Start loops iterations (one temporal window each)
-    l0_unit0._loop_iteration()
-    l1_unit0._loop_iteration()
-    l1_unit1._loop_iteration()
+    # Start unit tasks
+    l0_unit0.start()
+    l1_unit0.start()
+    l1_unit1.start()
+
+    # Process data for 4 seconds
+    sleep(4)
+
     # Then check that after some time the unit are writing something in redis
     assert l0_unit0.id in qrobot.qunits.redis_utils.redis_status()
     assert l1_unit0.id in qrobot.qunits.redis_utils.redis_status()
     assert l1_unit1.id in qrobot.qunits.redis_utils.redis_status()
 
-    # Flush redis aftewards
-    qrobot.qunits.redis_utils.flush_redis()
+    # Stop unit tasks
+    l0_unit0.stop()
+    l1_unit0.stop()
+    l1_unit1.stop()
+
+    # Redis should be empyz afterwards if the units stopped correctly
     assert qrobot.qunits.redis_utils.redis_status() == {}
 
 
