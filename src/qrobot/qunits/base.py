@@ -5,7 +5,6 @@ from uuid import uuid4
 
 from .._logger.logger import get_logger
 
-
 MIN_TS = 0.01
 """ float: Minimum time period allowed (in seconds).
 """

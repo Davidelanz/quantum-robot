@@ -5,10 +5,6 @@ from ..models import Model
 from . import redis_utils
 from .base import BaseUnit
 
-MIN_TS = 0.01
-""" float: Minimum sampling period allowed (in seconds).
-"""
-
 
 class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
     """[QUnit description]
@@ -156,33 +152,6 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
                 self._logger.info(f"Unable to read {qunit_id} input")
         return input_vector
 
-    @input_vector.setter
-    def input_vector(self, input_vector: List[float]) -> None:
-        """Set a new query state for the qunit
-
-        Parameters
-        -----------
-        input_vector : List[float]
-            The new input_vector value
-
-        Warning
-        ---------
-        This setter will be deprecated with the introduction of sensorial
-        interfaces, since it should not be possible to hard-write
-        qUnits' inputs from the python code directly
-        """
-        # TODO: This has to be deprecated with the introduction of
-        #       sensorial units
-        self._logger.warning(
-            "The qunit.input_vector setter will be deprecated with "
-            + "the introduction of sensorial interfaces, since it "
-            + "should not be possible to hard-write qUnits' inputs "
-            + "from the python code directly."
-        )
-        input_vector = self.model._target_vector_check(input_vector)
-        self.default_input = input_vector
-        self._logger.debug(f"default_input is now {self.input_vector}")
-
     def set_input(self, dim: int, qunit_id: str) -> None:
         """Set a new input qunit for the desired dimension
 
@@ -229,8 +198,8 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
             self.model.query(self._query)
             # Decode
             out_state = self.model.decode()
+            self._logger.debug(f"Output state = {out_state}")
             # Write output on Redis database
-            self._logger.debug("Writing output on redis")
             _r = redis_utils.get_redis()
             if not (
                 _r.mset({self.id + " state": out_state})
