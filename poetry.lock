@@ -1374,6 +1374,14 @@ tomli = ">=1.0.0"
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
 
 [[package]]
+name = "pytest-check"
+version = "1.0.10"
+description = "A pytest plugin that allows multiple failures per test."
+category = "dev"
+optional = false
+python-versions = ">3.7"
+
+[[package]]
 name = "pytest-cov"
 version = "3.0.0"
 description = "Pytest plugin for measuring coverage."
@@ -2199,7 +2207,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<4"
-content-hash = "409a6e3dca723d72a029b12020fdbe8967b22a577a5338f16f83171c346cf667"
+content-hash = "a8271129995e7f117b188ef418f6c18d2c5017b40e33b096e2bb84bf8a011f1f"
 
 [metadata.files]
 alabaster = [
@@ -3310,6 +3318,10 @@ pyrsistent = [
 pytest = [
     {file = "pytest-7.1.3-py3-none-any.whl", hash = "sha256:1377bda3466d70b55e3f5cecfa55bb7cfcf219c7964629b967c37cf0bda818b7"},
     {file = "pytest-7.1.3.tar.gz", hash = "sha256:4f365fec2dff9c1162f834d9f18af1ba13062db0c708bf7b946f8a5c76180c39"},
+]
+pytest-check = [
+    {file = "pytest-check-1.0.10.tar.gz", hash = "sha256:9e0edcd740f2c5be6a6cedb64c390d979c00cd7836798acb3b6d6c8ed101a22a"},
+    {file = "pytest_check-1.0.10-py3-none-any.whl", hash = "sha256:5e11fa4e5daf525b05080a756966aa8e18be6f57db7887fc081e4b2ab352948e"},
 ]
 pytest-cov = [
     {file = "pytest-cov-3.0.0.tar.gz", hash = "sha256:e7f0f5b1617d2210a2cabc266dfe2f4c75a8d32fb89eafb7ad9d06f6d076d470"},
