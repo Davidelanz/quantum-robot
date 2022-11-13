@@ -3,9 +3,25 @@ QUnits
 
 ``qrobot.qunits`` module class diagram:
 
-.. inheritance-diagram:: qrobot.qunits.QUnit
-   :top-classes: qrobot.qunits.qunit.QUnit
+.. inheritance-diagram:: qrobot.qunits.SensorialUnit, qrobot.qunits.QUnit
+   :top-classes: qrobot.qunits.base.BaseUnit
    :parts: 1
+
+|
+
+The ``BaseUnit`` abstract class
+-------------------------------------
+
+.. autoclass:: qrobot.qunits.base.BaseUnit
+    :members:
+
+|
+
+``BaseUnit`` Globals
+-------------------------------------
+
+.. automodule:: qrobot.qunits.base
+    :members: MIN_TS
 
 |
 
@@ -17,13 +33,14 @@ The ``QUnit`` class
 
 |
 
-QUnit Globals
+The ``SensorialUnit`` class
 -------------------------------------
 
-.. automodule:: qrobot.qunits.qunit
-    :members: MIN_TS
+.. autoclass:: qrobot.qunits.SensorialUnit
+    :members:
 
 |
+
 
 Redis utilities
 -------------------------------------
