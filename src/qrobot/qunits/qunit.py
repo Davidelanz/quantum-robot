@@ -195,12 +195,14 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         if self._t_idx.value == self.model.tau:
             # Apply the query
             self._logger.debug(f"Querying for state {self._query}")
-            self.model.query(self._query)
+            self.model.query(self.query)
             # Decode
             out_state = self.model.decode()
             self._logger.debug(f"Output state = {out_state}")
             # Write output on Redis database
+            self._logger.debug("Opening a connection to redis...")
             _r = redis_utils.get_redis()
+            self._logger.debug(f"Redis connected: {_r}")
             if not (
                 _r.mset({self.id + " state": out_state})
                 and _r.mset({self.id: self.burst(out_state)})
