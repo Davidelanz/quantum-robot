@@ -10,7 +10,7 @@ build:
    jobs:
       post_create_environment:
          # Install Graphviz
-         - sudo apt install graphviz
+         - apt install graphviz
          # Install poetry
          - python -m pip install poetry
          # Tell poetry to not use a virtual environment
