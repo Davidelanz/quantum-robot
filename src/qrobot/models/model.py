@@ -19,7 +19,7 @@ class Model(ABC):
     Parameters
     ----------
     n : int
-        Model's dimension (must be greater than 0)
+        Model's dimension (must be greater than 0, 1 is a scalar)
     tau : int
         Number of samples of the temporal window (must be greater than 0)
 
@@ -92,7 +92,7 @@ class Model(ABC):
         if dim < 0:
             raise ValueError("dim must be greater or equal to 0!")
         if dim >= self.n:
-            raise IndexError(f"dim must be less than {self.n}!")
+            raise IndexError(f"dim is greater than the model dimension n={self.n}!")
         return dim
 
     @staticmethod
