@@ -13,4 +13,4 @@ Several notebooks are available to get started with the package and its capabili
     03_multidimensional_angular_model.ipynb
     04_linear_angular_model_comparison.ipynb
     05_computation_speed_benchmark.ipynb
-    qunits_demo.ipynb
+    06_qunits_getting_started.ipynb
