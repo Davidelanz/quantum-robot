@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List
 
 from ..bursts import Burst
@@ -145,7 +146,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         input_vector = self.default_input
         for dim, qunit_id in self._in_qunits.items():
             _r = redis_utils.get_redis()
-            val = _r.get(qunit_id)
+            val = _r.get(qunit_id + " output")
             if val is not None:
                 input_vector[dim] = float(val)
             else:
@@ -174,8 +175,10 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
         _r = redis_utils.get_redis()
-        _r.delete(self.id)
+        _r.delete(self.id + " output")
         _r.delete(self.id + " state")
+        _r.delete(self.id + " query")
+        _r.delete(self.id + " in_qunits")
 
     def _unit_task(self) -> None:
         """Single iteration of the processing loop."""
@@ -204,8 +207,10 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
             _r = redis_utils.get_redis()
             self._logger.debug(f"Redis connected: {_r}")
             if not (
-                _r.mset({self.id + " state": out_state})
-                and _r.mset({self.id: self.burst(out_state)})
+                _r.mset({self.id + " output": self.burst(out_state)})
+                and _r.mset({self.id + " state": str(out_state)})
+                and _r.mset({self.id + " query": json.dumps(self.query)})
+                and _r.mset({self.id + " in_qunits": json.dumps(self.in_qunits)})
             ):
                 raise Exception(
                     f"Problem in writing qunit {self.id} output on Redis database!"

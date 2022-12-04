@@ -4,6 +4,7 @@ from time import sleep
 from uuid import uuid4
 
 from .._logger.logger import get_logger
+from . import redis_utils
 
 MIN_TS = 0.01
 """ float: Minimum time period allowed (in seconds).
@@ -68,19 +69,26 @@ class BaseUnit(ABC):
     def start(self) -> None:
         """Starts the unit's background threads"""
         try:
+            self._logger.info(f"Starting {self.__class__.__name__}")
             self._loop_thread.start()
-            self._logger.info("Starting unit")
+            # Add the unit with its class to redis
+            _r = redis_utils.get_redis()
+            _r.mset({self.id + " class": self.__class__.__name__})
         except AssertionError:
-            self._logger.warning("Unit is already started")
+            self._logger.warning(f"{self.__class__.__name__} is already started")
 
     def stop(self) -> None:
         """Stops the unit's background threads"""
         try:
-            self._loop_thread.terminate()
             self._logger.info(f"Stopping {self.__class__.__name__}")
+            self._loop_thread.terminate()
+            self._logger.info("Cleaning redis")
+            self._clean_redis()
+            # Remove the unit with its class from redis
+            _r = redis_utils.get_redis()
+            _r.delete(self.id + " class")
         except AssertionError:
             self._logger.warning(f"{self.__class__.__name__} is not running")
-        self._clean_redis()
 
     @abstractmethod
     def _clean_redis(self) -> None:
