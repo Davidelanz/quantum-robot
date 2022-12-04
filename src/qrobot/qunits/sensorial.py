@@ -70,7 +70,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
         _r = redis_utils.get_redis()
-        _r.delete(self.id)
+        _r.delete(self.id + " output")
 
     def _unit_task(self) -> None:
         """Single iteration of the processing loop."""
@@ -80,7 +80,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         self._logger.debug("Writing input on redis")
         # Write it on redis
         _r = redis_utils.get_redis()
-        if not (_r.mset({self.id: self.scalar_reading})):
+        if not (_r.mset({self.id + " output": self.scalar_reading})):
             raise Exception(
                 f"Problem in writing SensorialUnit {self.id} output on Redis database!"
             )
