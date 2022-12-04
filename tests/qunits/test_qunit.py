@@ -1,4 +1,5 @@
 from time import sleep
+from typing import Tuple
 
 import pytest
 import pytest_check as check
@@ -8,24 +9,13 @@ from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
 from qrobot.qunits import QUnit
 
-
 # Using pytest_check for this test to allow the whole test
 # to execute and stop the multithreading via unit.stop()
 # methods instead of closing the main thread
 # and leaving the unit subprocesses open.
 
 
-@pytest.mark.skip(
-    reason="The test works running with VSCode debugger "
-    "but not via pytest (the thread stops the _unit_task "
-    "at the mode.decode() step)"
-)
-@pytest.mark.redis
-def test_qunit():
-    # Flush redis before starting
-    qrobot.qunits.redis_utils.flush_redis()
-    check.equal(qrobot.qunits.redis_utils.redis_status(), {})
-
+def test_init_qunits() -> Tuple[QUnit, QUnit, QUnit]:
     # Layer 0
     l0_unit0 = QUnit(
         name="l0_unit0",
@@ -100,6 +90,23 @@ def test_qunit():
     check.equal(l1_unit0.input_vector, [0.0])
     check.equal(l1_unit1.input_vector, [0.0])
 
+    return l0_unit0, l1_unit0, l1_unit1
+
+
+@pytest.mark.skip(
+    reason="The test works running with VSCode debugger "
+    "but not via pytest (the thread stops the _unit_task "
+    "at the mode.decode() step)"
+)
+@pytest.mark.redis
+def test_qunit():
+    # Flush redis before starting
+    qrobot.qunits.redis_utils.flush_redis()
+    check.equal(qrobot.qunits.redis_utils.redis_status(), {})
+
+    # Initialize qunits
+    l0_unit0, l1_unit0, l1_unit1 = test_init_qunits()
+
     # Start unit tasks
     l0_unit0.start()
     l1_unit0.start()
@@ -120,7 +127,3 @@ def test_qunit():
 
     # Redis should be empty afterwards if the units stopped correctly
     check.equal(qrobot.qunits.redis_utils.redis_status(), {})
-
-
-if __name__ == "__main__":
-    test_qunit()
