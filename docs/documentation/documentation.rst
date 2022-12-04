@@ -8,7 +8,7 @@ Documentation
     models.rst
     bursts.rst
     qunits.rst
+    visualization.rst
     logger.rst
-    dashboard.rst
 
 
