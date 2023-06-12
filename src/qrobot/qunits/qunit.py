@@ -181,7 +181,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
             The latest burst output written by the unit on the Redis database
         """
         global_status = redis_utils.redis_status()
-        out = global_status.get(f"{self.name} output", None)
+        out = global_status.get(f"{self.id} output", None)
         return float(out) if out else None
 
     def _clean_redis(self) -> None:
