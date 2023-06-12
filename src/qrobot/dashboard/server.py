@@ -1,68 +1,38 @@
 """
-Dashboard webapp to monitor current qUnits sharing the redis server.
+Dashboard webapp Dash server callbacks.
 """
-import os
-from pathlib import Path
-
 import dash
 from dash.dependencies import Input, Output, State
-from flask import Flask, request
 
-from .layout import layout
-from .plots import bar_all_bursts
-
-ROOT_DIR = Path(__file__).parent
-ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
-NAME = "Quantum-robot Dashboard"
-
-server = Flask(NAME)
-app = dash.Dash(NAME, assets_folder=ASSETS_DIR, server=server)
+from qrobot.draw.draw import draw
+from qrobot.graph.graph import graph
+from qrobot.qunits.redis_utils import redis_status
 
 
-def shutdown_server():
-    """Shutdown werkzeug server."""
-    func = request.environ.get("werkzeug.server.shutdown")
-    if func is None:
-        raise RuntimeError(f"{NAME} is not running with the Werkzeug Server")
-    func()
+def register_callbacks(dash_app: dash.Dash) -> dash.Dash:
+    """Register server callback functions to the Dash app."""
 
+    @dash_app.callback(
+        Output("network-graph", "figure"), [Input("refresh-interval", "n_intervals")]
+    )
+    def _update_network_graph(_):
+        status = redis_status()
+        network = graph(status)
+        figure = draw(network, show=False, return_figure=True)
+        return figure
 
-@server.route("/shutdown", methods=["GET"])
-def _shutdown():
-    shutdown_server()
-    return f"{NAME} shutting down..."
+    @dash_app.callback(
+        Output("refresh-interval", "interval"), [Input("refresh-slider", "value")]
+    )
+    def _update_interval_rate(refresh_value):
+        return refresh_value * 1000  # seconds to milliseconds
 
+    @dash_app.callback(
+        [Output("refresh-slider-text", "children")],
+        [Input("refresh-interval", "n_intervals")],
+        [State("refresh-slider", "value")],
+    )
+    def _update_refresh_interval(_, refresh_value):
+        return [f"Refresh: {refresh_value*1000}ms"]
 
-app.layout = layout
-
-
-@app.callback(
-    Output("bursts-bar", "figure"), [Input("refresh-interval", "n_intervals")]
-)
-def _update_bar_all_bursts(_):
-    figure = bar_all_bursts()
-    return figure
-
-
-@app.callback(
-    Output("refresh-interval", "interval"), [Input("refresh-slider", "value")]
-)
-def _update_interval_rate(refresh_value):
-    return refresh_value * 1000  # seconds to milliseconds
-
-
-@app.callback(
-    [Output("refresh-slider-text", "children")],
-    [Input("refresh-interval", "n_intervals")],
-    [State("refresh-slider", "value")],
-)
-def _update_refresh_interval(_, refresh_value):
-    return f"Refresh: {refresh_value*1000}ms"
-
-
-def run_dashboard():
-    """Run dashboard at ``http://localhost:8050``.
-    To shutdown the dashboard, go to
-    ``http://localhost:8050/shutdown``.
-    """
-    app.run_server(debug=False)
+    return dash_app

@@ -1,7 +1,1 @@
-"""
-Dashboard imports
-"""
-
-from .server import run_dashboard
-
-__all__ = ["run_dashboard"]
+from .app import create_app

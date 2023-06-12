@@ -13,23 +13,15 @@ layout = html.Div(
                     className="row",
                     children=[
                         dcc.Slider(
-                            id="refresh-slider", min=0, max=1, step=0.001, value=1
+                            id="refresh-slider", min=0.5, max=2, step=0.5, value=1
                         ),
                         html.Div(id="refresh-slider-text"),
                     ],
                 ),
-                html.H2(children="Bursts"),
+                html.H2(children="Network Graph"),
                 html.Div(
                     className="row",
-                    children=[
-                        dcc.Loading(
-                            className="loading",
-                            id="loading-bursts-bar",
-                            type="default",
-                            fullscreen=False,
-                            children=[dcc.Graph(className="graph", id="bursts-bar")],
-                        ),
-                    ],
+                    children=[dcc.Graph(className="graph", id="network-graph")],
                 ),
             ],
         ),
