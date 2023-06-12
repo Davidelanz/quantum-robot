@@ -84,6 +84,25 @@ Demo [Notebooks](http://docs.quantum-robot.org/en/latest/notebooks/notebooks.htm
 and [Documentation](http://docs.quantum-robot.org/en/latest/documentation/documentation.html)
 is made available as well
 
+## Development
+
+To install the package and run tests directly from the repository, `poetry` is suggested:
+```
+git clone https://github.com/Davidelanz/quantum-robot.git
+poetry install
+poetry run pytest .
+```
+
+To correctly run all the tests, one needs a redis server on port `6379`:
+```
+docker run --name redis_contaner -p 6379:6379 -d redis
+```
+
+To open an interactive session using the provided notebooks in the `docs/notebooks` directory, one can use `poetry` as well:
+```
+poetry run jupyter-notebook
+```
+
 ## Contributing
 
 If you are interested in the project, we welcome new contributors of all
