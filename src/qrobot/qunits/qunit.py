@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from ..bursts import Burst
 from ..models import Model
@@ -171,6 +171,18 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         )
         self._in_qunits[dim] = qunit_id
         self._logger.debug(f"_in_qunits={self._in_qunits}")
+
+    def get_burst_output(self) -> Optional[float]:
+        """Get the latest burst output from the qUnit
+
+        Returns
+        -------
+        float
+            The latest burst output written by the unit on the Redis database
+        """
+        global_status = redis_utils.redis_status()
+        out = global_status.get(f"{self.name} output", None)
+        return float(out) if out else None
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
