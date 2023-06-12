@@ -102,7 +102,8 @@ strict = true
 
 [tool.coverage.run]
 omit = [
-  # omit dashboard since in early development
+  # TODO: Omit dashboard and graph since in early development, clean them later
+  "src/qrobot/graph/*",
   "src/qrobot/dashboard/*",
 ]
 
