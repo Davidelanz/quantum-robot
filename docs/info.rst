@@ -19,9 +19,6 @@
       <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml">
          <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg?branch=master" alt="CodeQL"/>
       </a>
-      <a href="https://frontend.code-inspector.com/public/project/13599/quantum-robot/dashboard">
-         <img src="https://api.codiga.io/project/13599/score/svg" alt="Code Quality"/>
-      </a>
       <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability">
          <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability" alt="Maintainability"/>
       </a>
@@ -31,8 +28,8 @@
       <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE">
          <img src="https://img.shields.io/badge/license-GNU_GPL_v3-blue" alt="License"/>
       </a>
-      <a href="https://zenodo.org/badge/latestdoi/274185290">
-         <img src="https://zenodo.org/badge/274185290.svg" alt="DOI">
+      <a href="https://doi.org/10.5281/zenodo.3926776">
+         <img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3926776-blue" alt="DOI 10.5281/zenodo.3926776">
       </a>
    </div>
    <br>
@@ -67,10 +64,10 @@ backend (service provided by `IBM Quantum Experience <https://quantum-computing.
 
 
 
-The project was started in 2019 by 
+The project was started in 2019 by
 `Davide Lanza <https://scholar.google.com/citations?user=Lqx6VqEAAAAJ>`__
 as a Master thesis research, with the help
 of `Fulvio Mastrogiovanni <https://www.dibris.unige.it/mastrogiovanni-fulvio>`__ and `Paolo
 Solinas <http://www.spin.cnr.it/index.php/people/46-researchers/49-solinas-paolo.html>`__.
-It is currently maintained by 
+It is currently maintained by
 `Davide Lanza <https://scholar.google.com/citations?user=Lqx6VqEAAAAJ>`__.
