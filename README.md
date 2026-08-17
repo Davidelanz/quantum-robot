@@ -4,7 +4,6 @@
 [![CodeQL](https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml)
 [![Code coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU)](https://codecov.io/gh/Davidelanz/quantum-robot)
 [![Documentation Status](https://readthedocs.org/projects/quantum-robot/badge/?version=latest)](http://docs.quantum-robot.org/en/latest/)
-[![Dependency review](https://github.com/Davidelanz/quantum-robot/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/Davidelanz/quantum-robot/security/dependabot)
 [![Snyk Advisor](https://img.shields.io/badge/Snyk_Security-blue)](https://snyk.io/advisor/python/quantum-robot)
 [![Maintainability](https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability)](https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability)
 [![License](https://img.shields.io/badge/license-GNU_GPL_v3-blue)](LICENSE)
