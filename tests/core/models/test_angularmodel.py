@@ -9,17 +9,17 @@ def test_init():
 
     # Testing wrong n
     with pytest.raises(TypeError):
-        assert AngularModel(n=1.2, tau=2)
+        AngularModel(n=1.2, tau=2)
     with pytest.raises(ValueError):
-        assert AngularModel(n=-1, tau=3)
+        AngularModel(n=-1, tau=3)
     with pytest.raises(ValueError):
-        assert AngularModel(n=0, tau=2)
+        AngularModel(n=0, tau=2)
 
     # Testing wrong tau
     with pytest.raises(TypeError):
-        assert AngularModel(n=1, tau=1.2)
+        AngularModel(n=1, tau=1.2)
     with pytest.raises(ValueError):
-        assert AngularModel(n=5, tau=0)
+        AngularModel(n=5, tau=0)
 
 
 def test_clear():
@@ -42,21 +42,21 @@ def test_encode():
 
     # Testing wrong input
     with pytest.raises(TypeError):
-        assert model.encode([0.1, 0.2], 1)
+        model.encode([0.1, 0.2], 1)
     with pytest.raises(TypeError):
-        assert model.encode("a", 0)
+        model.encode("a", 0)
     with pytest.raises(ValueError):
-        assert model.encode(1.1, 1)
+        model.encode(1.1, 1)
     with pytest.raises(ValueError):
-        assert model.encode(-0.1, 0)
+        model.encode(-0.1, 0)
 
     # Testing wrong dim
     with pytest.raises(TypeError):
-        assert model.encode(0.55, 2.1)
+        model.encode(0.55, 2.1)
     with pytest.raises(ValueError):
-        assert model.encode(0.55, -1)
+        model.encode(0.55, -1)
     with pytest.raises(IndexError):
-        assert model.encode(0.55, 2)
+        model.encode(0.55, 2)
 
 
 def test_measure():
@@ -127,15 +127,15 @@ def test_query():
 
     # Check the exception for wrong targets:
     with pytest.raises(ValueError):
-        assert model.query([1, 0.2])  # size < n
+        model.query([1, 0.2])  # size < n
     with pytest.raises(ValueError):
-        assert model.query([1, 0.2, 0, 0, 0, 1, 0.2, 0])  # size > n
+        model.query([1, 0.2, 0, 0, 0, 1, 0.2, 0])  # size > n
 
     # Check the exception for wrong target elements:
     with pytest.raises(TypeError):
-        assert model.query(["1", 0, 0, 0, 0])  # wrong type
+        model.query(["1", 0, 0, 0, 0])  # wrong type
     with pytest.raises(ValueError):
-        assert model.query([0.1, 0.4, 5, 0.2, 0.1])  # third element is a 5
+        model.query([0.1, 0.4, 5, 0.2, 0.1])  # third element is a 5
 
 
 def test_simulation():
