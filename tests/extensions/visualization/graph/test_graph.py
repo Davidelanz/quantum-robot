@@ -45,3 +45,11 @@ def test_graph():
         ],
     }
     assert expected_json == node_link_data(graph(test_status))
+
+
+def test_graph_allows_units_without_an_output_yet():
+    """A partial Redis status remains renderable while workers are starting."""
+    network = graph({"l1 class": "QUnit", "l1 in_qunits": '{"0": "l0"}'})
+
+    assert set(network.nodes) == {"l0", "l1"}
+    assert network.edges["l0", "l1"] == {}
