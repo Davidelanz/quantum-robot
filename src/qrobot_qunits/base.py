@@ -35,7 +35,7 @@ class BaseUnit(ABC):
         The time period for which the unit execute its task
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         name: str,
         sampling_period: float | int,
@@ -43,7 +43,7 @@ class BaseUnit(ABC):
         logging_config: LoggingConfig | None = None,
     ) -> None:
         # Create a instance unique identifier
-        self.id = name + "-" + str(uuid4())[:6]  # pylint: disable=invalid-name
+        self.id = name + "-" + str(uuid4())[:6]
         # use it for logging purposes
         self._logger = get_logger(self.id)
         self._logger.debug(f"Initializing {self.__class__.__name__} {self.id}")

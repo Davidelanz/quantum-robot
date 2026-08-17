@@ -27,7 +27,9 @@ layout = html.Div(
             ],
         ),
         dcc.Interval(
-            id="refresh-interval", interval=1, n_intervals=0  # (in milliseconds)
+            id="refresh-interval",
+            interval=1,
+            n_intervals=0,  # (in milliseconds)
         ),
     ]
 )

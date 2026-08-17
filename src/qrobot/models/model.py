@@ -32,15 +32,13 @@ class Model(ABC):
         Backend-specific circuit which implements the model.
     """
 
-    def __init__(
-        self, n: int, tau: int, backend: QuantumBackend | None = None
-    ) -> None:  # pylint: disable=invalid-name
+    def __init__(self, n: int, tau: int, backend: QuantumBackend | None = None) -> None:
         """Initialize the class"""
 
         # Check the argument n
         if isinstance(n, int):
             if n > 0:
-                self.n = n  # pylint: disable=invalid-name
+                self.n = n
             else:
                 raise ValueError("n must be greater than 0!")
         else:
@@ -147,16 +145,20 @@ class Model(ABC):
             target_vector = list(target_vector)
         # Dimensionality check on the vector
         if len(target_vector) != self.n:
-            raise ValueError(f"target_vector must be a {self.n}\
-                             -dimensional vector!")
+            raise ValueError(
+                f"target_vector must be a {self.n}\
+                             -dimensional vector!"
+            )
         for element in target_vector:
             if not isinstance(element, (float, int)):
                 raise TypeError(
                     "target_vector elements must be all integers or floats!"
                 )
             if element > 1 or element < 0:
-                raise ValueError("target_vector elements must be all between \
-                    0 and 1 inclusive!")
+                raise ValueError(
+                    "target_vector elements must be all between \
+                    0 and 1 inclusive!"
+                )
         return [float(element) for element in target_vector]
 
     def clear(self) -> None:
@@ -250,7 +252,7 @@ class Model(ABC):
         """
         if self.n >= 6:  # avoid matrices too big to be useful
             raise OverflowError(
-                f"n={self.n} means {np.power(2,self.n)} states"
+                f"n={self.n} means {np.power(2, self.n)} states"
                 + "(too much for a reasonable plot)!"
             )
 

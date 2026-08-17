@@ -42,6 +42,6 @@ def register_callbacks(
         [State("refresh-slider", "value")],
     )
     def _update_refresh_interval(_: int, refresh_value: float) -> list[str]:
-        return [f"Refresh: {refresh_value*1000}ms"]
+        return [f"Refresh: {refresh_value * 1000}ms"]
 
     return dash_app

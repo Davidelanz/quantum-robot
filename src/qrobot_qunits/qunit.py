@@ -10,8 +10,12 @@ from .base import BaseUnit
 from .redis_utils import RedisConfig, RedisWriteError
 
 
-class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
-    """[QUnit description]
+class QUnit(BaseUnit):
+    """Periodically process coupled inputs through a quantum-like model.
+
+    A qUnit reads its inputs from Redis, encodes them over the model's
+    temporal window, applies a query, and publishes the resulting burst
+    output back to Redis.
 
     Parameters
     ------------
@@ -51,7 +55,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         when qunit does not have an available one
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         name: str,
         model: Model,
@@ -174,7 +178,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
             The input qunit id
         """
         # Check arguments
-        dim = self.model._dim_index_check(dim)  # pylint: disable=protected-access
+        dim = self.model._dim_index_check(dim)
         # Update accumulator
         self._logger.debug(
             f"Changing dim {dim} input from " + f"{self.in_qunits[dim]} to {qunit_id}"
@@ -206,7 +210,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         """Single iteration of the processing loop."""
         # "_t_idx" is the event index of the temporal window
         self._logger.debug(
-            f"Temporal window event {self._t_idx.value+1}/{self.model.tau}"
+            f"Temporal window event {self._t_idx.value + 1}/{self.model.tau}"
         )
         # Get input
         input_vector = self.input_vector

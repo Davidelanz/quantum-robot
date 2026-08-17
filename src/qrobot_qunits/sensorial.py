@@ -6,7 +6,7 @@ import redis
 from collections.abc import Generator
 
 
-class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
+class SensorialUnit(BaseUnit):
     """Unit periodically sending normalized scalar readings.
 
     Parameters
@@ -32,7 +32,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         does not have an available one
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         name: str,
         sampling_period: float | int,
