@@ -1,4 +1,4 @@
-"""Graph construction and Plotly rendering for qRobot networks."""
+"""Graph construction and Plotly rendering for quantum-robot networks."""
 
 from .draw import draw
 from .graph import graph

@@ -1,4 +1,4 @@
-"""Stable interface between qRobot models and quantum SDKs."""
+"""Stable interface between quantum-robot models and quantum SDKs."""
 
 from abc import ABC, abstractmethod
 from typing import Any
@@ -7,7 +7,7 @@ import numpy as np
 
 
 class QuantumBackend(ABC):
-    """Create and simulate the circuits used by qRobot models."""
+    """Create and simulate the circuits used by quantum-robot models."""
 
     @abstractmethod
     def create_circuit(self, qubits: int) -> Any:
