@@ -21,7 +21,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         The model the qUnit implements
     burst : qrobot.bursts.Burst
         The burst the qUnit implements
-    Ts : float
+    sampling_period : float
         The sampling time with wich the qUnit reads the input
     query : list, optional
         The target state for the model queries. Defaults to ``None``
@@ -44,7 +44,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         The model which the qUnit implements
     burst : qrobot.bursts.Burst
         The burst the qUnit implements
-    Ts : float
+    sampling_period : float
         The sampling period for which the qUnit samples an event
     default_input: List[float]
         Default input vector of scalar values to use as default value
@@ -56,7 +56,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         name: str,
         model: Model,
         burst: Burst,
-        Ts: float | int,  # pylint: disable=invalid-name
+        sampling_period: float | int,
         query: list[float] | None = None,
         in_qunits: dict[int, str] | None = None,
         default_input: list[float] | None = None,
@@ -64,7 +64,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         logging_config: LoggingConfig | None = None,
     ) -> None:
         # Call the BaseUnit constructor
-        super().__init__(name, Ts, redis_config, logging_config)
+        super().__init__(name, sampling_period, redis_config, logging_config)
 
         # Store the qUnits name and properties
         self.model = model
@@ -95,7 +95,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         yield "model", str(self.model)
         yield "burst", str(self.burst.__class__)
         yield "query", self.query
-        yield "Ts", self.Ts
+        yield "sampling_period", self.sampling_period
 
     @property
     def query(self) -> list[float]:

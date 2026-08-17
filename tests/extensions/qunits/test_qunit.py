@@ -32,13 +32,15 @@ def fixture_flush_redis() -> None:
 def fixture_q_brain() -> Tuple[QUnit, QUnit, QUnit]:
     """Initialize the qBrain."""
     # Layer 0
-    l0_unit0 = SensorialUnit(name="l0_unit0", Ts=0.05, redis_config=TEST_REDIS_CONFIG)
+    l0_unit0 = SensorialUnit(
+        name="l0_unit0", sampling_period=0.05, redis_config=TEST_REDIS_CONFIG
+    )
     check.equal(
         dict(l0_unit0),
         {
             "name": "l0_unit0",
             "id": l0_unit0.id,
-            "Ts": 0.05,
+            "sampling_period": 0.05,
         },
     )
     # Layer 1
@@ -46,7 +48,7 @@ def fixture_q_brain() -> Tuple[QUnit, QUnit, QUnit]:
         name="l1_unit0",
         model=AngularModel(n=1, tau=3),
         burst=ZeroBurst(),
-        Ts=0.2,
+        sampling_period=0.2,
         in_qunits={0: l0_unit0.id},  # Will receive Input from l0_unit0, dim 0
         redis_config=TEST_REDIS_CONFIG,
     )
@@ -54,7 +56,7 @@ def fixture_q_brain() -> Tuple[QUnit, QUnit, QUnit]:
         name="l1_unit1",
         model=AngularModel(n=1, tau=5),
         burst=ZeroBurst(),
-        Ts=0.2,
+        sampling_period=0.2,
         in_qunits={0: l0_unit0.id},  # Will receive input from l0_unit0, dim 1
         redis_config=TEST_REDIS_CONFIG,
     )
@@ -79,7 +81,7 @@ def test_init_qunits(
             "model": "[model: AngularModel, n: 1, tau: 3]",
             "burst": "<class 'qrobot.bursts.zeroburst.ZeroBurst'>",
             "query": [0.0],
-            "Ts": 0.2,
+            "sampling_period": 0.2,
         },
     )
     check.equal(
@@ -90,7 +92,7 @@ def test_init_qunits(
             "model": "[model: AngularModel, n: 1, tau: 5]",
             "burst": "<class 'qrobot.bursts.zeroburst.ZeroBurst'>",
             "query": [0.0],
-            "Ts": 0.2,
+            "sampling_period": 0.2,
         },
     )
 

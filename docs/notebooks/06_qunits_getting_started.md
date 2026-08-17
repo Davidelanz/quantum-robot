@@ -49,7 +49,9 @@ First, define a sensorial input:
 
 ```{code-cell} ipython3
 # Layer 0 - Unit 0
-l0_unit0 = SensorialUnit("l0_unit_0", Ts=0.1, logging_config=logging_config)
+l0_unit0 = SensorialUnit(
+    "l0_unit_0", sampling_period=0.1, logging_config=logging_config
+)
 ```
 
 ```{code-cell} ipython3
@@ -83,7 +85,7 @@ l1_unit0 = QUnit(
     name="l1_unit0",
     model=AngularModel(n=1, tau=10),
     burst=OneBurst(),
-    Ts=0.3,
+    sampling_period=0.3,
     in_qunits={0: l0_unit0.id},  # Will receive Input from l0_unit0, dim 0
     logging_config=logging_config,
 )
@@ -93,7 +95,7 @@ l1_unit1 = QUnit(
     name="l1_unit1",
     model=AngularModel(n=1, tau=25),
     burst=ZeroBurst(),
-    Ts=0.2,
+    sampling_period=0.2,
     in_qunits={0: l0_unit0.id},  # Will receive input from l0_unit0, dim 1
     logging_config=logging_config,
 )
@@ -242,7 +244,7 @@ styles = ["g", "b"]
 status_df[units].plot(style=styles, ax=ax)
 # Plot time windows
 t_start = status_df[l1_unit0.id + " output"].dropna().index[0]
-t_step = l1_unit0.model.tau * l1_unit0.Ts
+t_step = l1_unit0.model.tau * l1_unit0.sampling_period
 t_windows = np.arange(t_start, 31, t_step)
 plt.vlines(x=t_windows, ymin=0, ymax=1, colors="gray", ls="dotted", lw=1)
 # Plot query as dashed line
@@ -261,7 +263,7 @@ styles = ["g", "b"]
 status_df[units].plot(style=styles, ax=ax)
 # Plot time windows
 t_start = status_df[l1_unit1.id + " output"].dropna().index[0]
-t_step = l1_unit1.model.tau * l1_unit1.Ts
+t_step = l1_unit1.model.tau * l1_unit1.sampling_period
 t_windows = np.arange(t_start, 31, t_step)
 plt.vlines(x=t_windows, ymin=0, ymax=1, colors="gray", ls="dotted", lw=1)
 # Plot query as dashed line
@@ -287,7 +289,11 @@ print("\n".join(logging_config.file_path.read_text().splitlines()[-20:]))
 ```
 
 ```{code-cell} ipython3
-print("Time window time:", l1_unit1.Ts * l1_unit1.model.tau, "seconds")
+print(
+    "Time window time:",
+    l1_unit1.sampling_period * l1_unit1.model.tau,
+    "seconds",
+)
 matching_lines = [
     line
     for line in logging_config.file_path.read_text().splitlines()

@@ -13,7 +13,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
     ------------
     name : str
         The SensorialUnit name
-    Ts : float
+    sampling_period : float
         The sampling time with wich the SensorialUnit reads the input
     default_input: float
         Default input for the scalar readings when the SensorialUnit
@@ -25,7 +25,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         The unique instance identifier of the SensorialUnit
     name : str
         The unique instance identifier of the SensorialUnit
-    Ts : float
+    sampling_period : float
         The sampling period for which the SensorialUnit samples an event
     default_input: float
         Default input for the scalar readings when the SensorialUnit
@@ -35,13 +35,13 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=too-many-arguments
         self,
         name: str,
-        Ts: float | int,  # pylint: disable=invalid-name
+        sampling_period: float | int,
         default_input: float | None = None,
         redis_config: RedisConfig | None = None,
         logging_config: LoggingConfig | None = None,
     ) -> None:
         # Call the BaseUnit constructor
-        super().__init__(name, Ts, redis_config, logging_config)
+        super().__init__(name, sampling_period, redis_config, logging_config)
 
         # Store the SensorialUnit name and properties
         self.default_input = 0.0 if default_input is None else default_input
@@ -56,7 +56,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
         yield "name", self.name
         yield "id", self.id
-        yield "Ts", self.Ts
+        yield "sampling_period", self.sampling_period
 
     @property
     def scalar_reading(self) -> float:
