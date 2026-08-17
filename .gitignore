@@ -1,6 +1,7 @@
 .coverage
 .coverage.xml
 .mypy_cache
+.ruff_cache
 .pytest_cache
 .qrobot_logs
 .sphinx-docs
@@ -13,4 +14,4 @@
 build/
 dist/
 docs/_build
-# poetry.lock
+.DS_Store

@@ -1,4 +1,4 @@
-name: Package Check
+name: Quality
 
 on:
   workflow_dispatch:
@@ -8,209 +8,47 @@ on:
     branches: [master]
 
 jobs:
-  formatting:
-    timeout-minutes: 5
-    name: 🔎 Formatting
+  quality:
+    name: Quality (Python 3.14)
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9"]
+    permissions:
+      contents: read
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3.0.0
-
-      - name: Install poetry
+      - uses: actions/checkout@v6
+      - name: Install Poetry
         run: pipx install poetry
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Check formatting with isort and black
+          python-version: "3.14"
+          cache: poetry
+          cache-dependency-path: poetry.lock
+      - name: Install all development capabilities
+        run: poetry install --all-extras
+      - name: Validate project metadata
+        run: poetry check
+      - name: Check lint and formatting
         run: |
-          poetry run isort --diff .
-          poetry run black --diff .
-
-  mypy:
-    timeout-minutes: 5
-    name: 🔎 Type hinting
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9"]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3.0.0
-
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Run MyPy
-        run: poetry run mypy .
-        continue-on-error: true
-
-  pylint:
-    timeout-minutes: 5
-    name: 🔎 Linting
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9"]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3.0.0
-
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Lint with pylint
-        run: poetry run pylint src
-        continue-on-error: true
-
-  test:
-    timeout-minutes: 5
-    needs: [formatting, mypy, pylint]
-    name: 🪖 Testing
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.9"]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3.0.0
-
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Install redis
-        run: sudo apt-get install -y redis-tools redis-server
-
-      - name: Test code
-        # To exclude redis tests:
-        # poetry run coverage run -m pytest -m "not redistest"
-        run: |
-          poetry run coverage run -m pytest 
-          poetry run coverage xml -o .coverage.xml
-          poetry run coverage report -m --skip-covered
-
-      - name: Upload coverage report to GitHub
-        uses: 5monkeys/cobertura-action@master
-        with:
-          path: .coverage.xml
-          minimum_coverage: 70
-          repo_token: ${{github.token}}
-          skip_covered: true
-
-      - name: Upload coverage report to CodeCov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./.coverage.xml
-
-  build:
-    timeout-minutes: 5
-    needs: [test]
-    name: 🛠️ Building
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9"]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3.0.0
-
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Build package
+          poetry run ruff check src tests scripts
+          poetry run black --check src tests scripts
+      - name: Run tests with core coverage gate
+        run: poetry run pytest --cov=qrobot --cov-fail-under=100
+      - name: Build distribution
         run: poetry build
-
-  docs:
-    timeout-minutes: 5
-    name: 📖 Documentation
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9"]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3.0.0
-
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Build Sphinx documentation
+        run: poetry run python scripts/build_docs.py
+      - name: Upload HTML documentation
+        uses: actions/upload-artifact@v4
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Install Pandoc and Graphviz
-        run: |
-          sudo apt-get update -y
-          sudo apt install pandoc -y
-          sudo apt install graphviz -y
-
-      - name: Generate Sphinx docs
-        run: poetry run sphinx-build -a -E -W --keep-going docs ./.sphinx-docs
-        # -a (write all files)
-        # -E (don't use a saved environment, always read all files)
-        # -W (turn warnings into errors)
-        # -n (nit-picky mode, warn about all missing references)
-        # --keep-going (with -W, keep going when getting warnings)
-        continue-on-error: true
-
-      - name: Archive sphinx docs for 2 days
-        uses: actions/upload-artifact@v3
-        with:
-          name: sphinx-docs
-          path: ./.sphinx-docs/
-          retention-days: 2
+          name: qrobot-documentation
+          path: docs/_build/html
+          if-no-files-found: error

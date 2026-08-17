@@ -8,7 +8,7 @@ class AngularModel(Model):
     information in the angle of the qubits' Bloch sphere representations
     """
 
-    def encode(self, scalar_input, dim):
+    def encode(self, scalar_input, dim) -> float:
         """Encodes the scalar input in the correspondent qubit
 
         Parameters
@@ -34,7 +34,7 @@ class AngularModel(Model):
         self.circ.ry(angle, dim)
         return angle
 
-    def query(self, target_vector):
+    def query(self, target_vector) -> None:
         r"""Changes the basis of the quantum system choosing target_vector as
         the basis state \|00...0>
 
@@ -54,7 +54,7 @@ class AngularModel(Model):
             angle = -np.pi * target_vector[i]
             self.circ.ry(angle, i)
 
-    def decode(self):
+    def decode(self) -> str:
         """The decoding for the ``AngularModel`` is a single measurement.
 
         Returns

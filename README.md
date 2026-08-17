@@ -1,137 +1,132 @@
-# Quantum-robot Python Package
+# quantum-robot
 
-<div align="center" style="align:center; padding:20px;">
-    <a href="http://quantum-robot.org">
-        <img width="300" src="https://raw.githubusercontent.com/Davidelanz/quantum-robot/master/docs/quantum-robot-logo.svg">
-    </a>
-</div>
-<br>
-<div align="center" style="align:center; padding:20px; line-height:2;">
-    <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml">
-        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml/badge.svg?branch=master"/>
-    </a>
-    <a href="https://codecov.io/gh/Davidelanz/quantum-robot" >
-        <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU" alt="Code coverage"/>
-    </a>
-    <a href='http://docs.quantum-robot.org/en/latest/?badge=latest'>
-        <img src='https://readthedocs.org/projects/quantum-robot/badge/?version=latest' alt='Documentation Status' />
-    </a>
-    <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml">
-        <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg?branch=master" alt="CodeQL"/>
-    </a>
-    <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability">
-        <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability" alt="Maintainability"/>
-    </a>
-    <a href="https://snyk.io/advisor/python/quantum-robot">
-        <img src="https://snyk.io/advisor/python/quantum-robot/badge.svg" alt="snyk">
-    </a>
-    <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE">
-        <img src="https://img.shields.io/badge/license-GNU_GPL_v3-blue" alt="License"/>
-    </a>
-    <a href="https://doi.org/10.5281/zenodo.3926776">
-        <img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3926776-blue" alt="DOI 10.5281/zenodo.3926776">
-    </a>
-</div>
-<br>
+[![Quality](https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml/badge.svg)](https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml)
+[![CodeQL](https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml)
+[![Code coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU)](https://codecov.io/gh/Davidelanz/quantum-robot)
+[![Documentation Status](https://readthedocs.org/projects/quantum-robot/badge/?version=latest)](http://docs.quantum-robot.org/en/latest/)
+[![Maintainability](https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability)](https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability)
+[![Snyk Advisor](https://snyk.io/advisor/python/quantum-robot/badge.svg)](https://snyk.io/advisor/python/quantum-robot)
+[![License](https://img.shields.io/badge/license-GNU_GPL_v3-blue)](LICENSE)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3926776-blue)](https://doi.org/10.5281/zenodo.3926776)
 
-`quantum-robot` is a Python package for quantum-like perception modeling
-for robotics. The package exploits [Qiksit](https://qiskit.org/)
-framework, implementing the models on quantum circuits which can be
-simulated on a classical computer or sent to a quantum backend (service
-provided by [IBM Quantum
-Experience](https://quantum-computing.ibm.com/)).
-
-<div align="center" style="align:center; padding:20px;">
-    <table style="text-align:center;">
-        <thead>
-            <tr>
-            <th>Documentation</th>
-            <th>Website</th>
-            <th>Repository</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-            <td><a href="http://docs.quantum-robot.org/en/latest/">Link 🔗</a></td>
-            <td><a href="http://quantum-robot.org">Link 🔗</a></td>
-            <td><a href="https://github.com/Davidelanz/quantum-robot/">Link 🔗</a></td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
+`quantum-robot` provides quantum-like perception models for robotics. It
+targets Python 3.14 and exposes a small backend interface; Qiskit is the
+bundled backend implementation.
 
 The project was started in 2019 by
-[Davide Lanza](https://scholar.google.com/citations?user=Lqx6VqEAAAAJ)
-as a Master thesis
-research, with the help of
+[Davide Lanza](https://scholar.google.com/citations?user=Lqx6VqEAAAAJ) as
+Master's thesis research, with help from
 [Fulvio Mastrogiovanni](https://scholar.google.it/citations?user=9dRRzV0AAAAJ&hl=en)
-and
-[Paolo Solinas](https://rubrica.unige.it/personale/UkNHWllv).
-It is currently maintained by [Davide Lanza](https://scholar.google.com/citations?user=Lqx6VqEAAAAJ).
+and [Paolo Solinas](https://rubrica.unige.it/personale/UkNHWllv). It is
+maintained by Davide Lanza.
 
+The project is one Poetry distribution with a dependency-light `qrobot` core
+and optional extension import packages:
 
-## Getting Started
+| Capability | Install extra | Import package |
+| --- | --- | --- |
+| Core models and Qiskit backend | — | `qrobot` |
+| qUnits / Redis integration | `qunits` | `qrobot_qunits` |
+| Graph and drawing tools | `visualization` | `qrobot_visualization` |
+| Dashboard | `dashboard` | `qrobot_dashboard` |
 
-Check the
-[Getting Started](http://docs.quantum-robot.org/en/latest/getting_started/getting_started.html)
-section of the Documentation for the Installation Guide.
+## Install
 
-Demo [Notebooks](http://docs.quantum-robot.org/en/latest/notebooks/notebooks.html)
-and [Documentation](http://docs.quantum-robot.org/en/latest/documentation/documentation.html)
-is made available as well
+Install the published core package:
+
+```console
+python -m pip install --upgrade quantum-robot
+```
+
+Install optional capabilities only when needed:
+
+```console
+python -m pip install --upgrade "quantum-robot[qunits,visualization]"
+```
 
 ## Development
 
-To install the package and run tests directly from the repository, `poetry` is suggested:
-```
+Use [Poetry](https://python-poetry.org/) with Python 3.14. The following
+installs every development capability into Poetry’s project environment:
+
+```console
 git clone https://github.com/Davidelanz/quantum-robot.git
-poetry install
-poetry run pytest .
+cd quantum-robot
+poetry env use 3.14
+poetry install --all-extras
 ```
 
-To correctly run all the tests, one needs a redis server on port `6379`:
+Run the standard quality checks through that environment:
+
+```console
+poetry check
+poetry run ruff check src tests scripts
+poetry run black --check src tests scripts
+poetry run pytest --cov=qrobot --cov-fail-under=100
+poetry build
 ```
-docker run --name redis_contaner -p 6379:6379 -d redis
+
+Apply the formatter when needed:
+
+```console
+poetry run black src tests scripts
 ```
 
-To open an interactive session using the provided notebooks in the `docs/notebooks` directory, one can use `poetry` as well:
+The qUnits integration tests and the executable qUnits tutorial require Redis
+on `localhost:6379`. Start a disposable local instance when running them:
+
+```console
+docker run --rm --name qrobot-redis -p 6379:6379 -d redis:7-alpine
+poetry run pytest
 ```
-poetry run jupyter-notebook
+
+Stop it with `docker stop qrobot-redis`.
+
+## Documentation
+
+The documentation source is MyST Markdown, including six executable tutorials.
+Building it runs those tutorials, renders MathJax formulas, and writes the
+resulting site to `docs/_build/html`:
+
+```console
+docker run --rm --name qrobot-redis -p 6379:6379 -d redis:7-alpine
+poetry run python scripts/build_docs.py
 ```
 
-## Contributing
+Open `docs/_build/html/index.html` directly in a browser. No local HTTP server
+or repository Docker Compose setup is required.
 
-If you are interested in the project, we welcome new contributors of all
-experience levels. For any questions, [contact the
-maintainer](mailto:info@davidelanza.it).
+## Project layout
 
-An example module with the docstring standard we adopted is available
-[here](https://github.com/Davidelanz/quantum-robot/blob/master/docs/docstring_example/template.py).
+```text
+src/
+  qrobot/                 # core package and backend interface
+  qrobot_qunits/          # optional Redis-based extension
+  qrobot_visualization/   # optional graph/drawing extension
+  qrobot_dashboard/       # optional dashboard extension
+tests/
+  core/
+  extensions/
+docs/                     # MyST API docs and executable tutorials
+```
 
-## Citing
+## Contributing and citation
 
-If you use quantum-robot in a scientific publication, we would
-appreciate citations to the following paper:
+Contributions are welcome; see [the contributing guide](.github/CONTRIBUTING.md).
+For questions, contact [the maintainer](mailto:info@davidelanza.it).
 
-```{.sourceCode .bibtex}
+If you use quantum-robot in research, please cite:
+
+```bibtex
 @InProceedings{10.1007/978-3-030-71151-1_44,
-    author="Lanza, Davide
-        and Solinas, Paolo
-        and Mastrogiovanni, Fulvio",
-    editor="Siciliano, Bruno
-        and Laschi, Cecilia
-        and Khatib, Oussama",
-    title="Multi-sensory Integration in a Quantum-Like Robot Perception Model",
-    booktitle="Experimental Robotics",
-    year="2021",
-    publisher="Springer International Publishing",
-    address="Cham",
-    pages="502--509",
-    isbn="978-3-030-71151-1"
+  author = {Lanza, Davide and Solinas, Paolo and Mastrogiovanni, Fulvio},
+  title = {Multi-sensory Integration in a Quantum-Like Robot Perception Model},
+  booktitle = {Experimental Robotics},
+  year = {2021},
+  pages = {502--509}
 }
 ```
 
 ## License
 
-[GNU-GPLv3](https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE)
+[GPL-3.0-or-later](LICENSE)

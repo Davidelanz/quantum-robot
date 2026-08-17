@@ -2,7 +2,7 @@ from .burst import Burst
 
 
 class OneBurst(Burst):
-    """When called, ``ZeroBurst`` converts a measured state into
+    """When called, ``OneBurst`` converts a measured state into
     a float number which is:
 
     .. math::

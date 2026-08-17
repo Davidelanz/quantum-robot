@@ -1,14 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Dict
-
-import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import qiskit
-import seaborn as sns
-from qiskit.providers import Backend, BaseJob
-from qiskit.quantum_info import Operator, Statevector
-from qiskit.result import Result
+from qrobot.backends import QiskitBackend, QuantumBackend
 
 
 class Model(ABC):
@@ -29,11 +21,13 @@ class Model(ABC):
         Model's dimension.
     tau : int
         Number of samples of the temporal window.
-    circ : qiskit.QuantumCircuit
-        Quantum circuit which implements the model.
+    circ : object
+        Backend-specific circuit which implements the model.
     """
 
-    def __init__(self, n, tau) -> None:  # pylint: disable=invalid-name
+    def __init__(
+        self, n: int, tau: int, backend: QuantumBackend | None = None
+    ) -> None:  # pylint: disable=invalid-name
         """Initialize the class"""
 
         # Check the argument n
@@ -54,8 +48,8 @@ class Model(ABC):
         else:
             raise TypeError("tau must be an integer!")
 
-        # Initialize the circuit
-        self.circ = qiskit.QuantumCircuit(n, n)
+        self.backend = backend or QiskitBackend()
+        self.circ = self.backend.create_circuit(n)
 
     def __iter__(self):
         yield "model", self.__class__.__name__
@@ -144,28 +138,24 @@ class Model(ABC):
             target_vector = [target_vector]
         # Dimensionality check on the vector
         if len(target_vector) is not self.n:
-            raise ValueError(
-                f"target_vector must be a {self.n}\
-                             -dimensional vector!"
-            )
+            raise ValueError(f"target_vector must be a {self.n}\
+                             -dimensional vector!")
         for element in target_vector:
             if not isinstance(element, (float, int)):
                 raise TypeError(
                     "target_vector elements must be all integers or floats!"
                 )
             if element > 1 or element < 0:
-                raise ValueError(
-                    "target_vector elements must be all between \
-                    0 and 1 inclusive!"
-                )
+                raise ValueError("target_vector elements must be all between \
+                    0 and 1 inclusive!")
         return target_vector
 
     def clear(self) -> None:
         """Re-initialize the model with an empty circuit."""
-        self.circ = qiskit.QuantumCircuit(self.n, self.n)
+        self.circ = self.backend.create_circuit(self.n)
 
     @abstractmethod
-    def encode(self, scalar_input, dim) -> None:
+    def encode(self, scalar_input, dim) -> float:
         """Encodes the scalar input in the correspondent qubit.
 
         Example
@@ -178,39 +168,19 @@ class Model(ABC):
 
         """
 
-    def measure(self, shots=1, backend: Backend = None) -> Dict[str, int]:
+    def measure(self, shots: int = 1) -> dict[str, int]:
         """Measures the qubits using a IBMQ backend
 
         Parameters
         ----------
         shots : int
             Number of times to repeat the measurement shot
-        backend : qiskit Backend
-            Quantum backend for the execution (if None, AER simulator is
-            chosen as default)
-
         Returns
         ----------
         dict
             State occurrences counts in the form {"state": count}
         """
-        # Initialize simulator if no backend is set
-        backend = backend or qiskit.Aer.get_backend("aer_simulator")
-
-        # Copy quantum circuit
-        circ = self.circ.copy()
-        # Add measure gates linking the all the qubits
-        # to the corresponding classical bits
-        all_bits = list(range(0, self.n))
-        circ.measure(all_bits, all_bits)
-
-        # Execute the circuit on the backend
-        circ = qiskit.transpile(circ, backend)
-        job: BaseJob = qiskit.execute(circ, backend, shots=shots)
-        job_result: Result = job.result()
-        counts_dict: dict[str, int] = job_result.get_counts(circ)
-
-        return counts_dict
+        return self.backend.sample_counts(self.circ, shots)
 
     @abstractmethod
     def decode(self) -> str:
@@ -229,22 +199,7 @@ class Model(ABC):
         numpy.ndarray
             Model's state vector.
         """
-        # Initialize simulator
-        backend = qiskit.Aer.get_backend("aer_simulator_statevector")
-
-        # Copy quantum circuit (without measure gates)
-        circ = self.circ.copy()
-        circ.save_statevector()
-
-        # Transpile for simulator
-        circ = qiskit.transpile(circ, backend)
-
-        # Run and get statevector
-        job: BaseJob = qiskit.execute(circ, backend)
-        job_result: Result = job.result()
-        statevector: Statevector = job_result.get_statevector(circ)
-
-        return np.asarray(statevector)
+        return self.backend.statevector(self.circ)
 
     def get_density_matrix(self) -> np.ndarray:
         """Returns the simulated density matrix of the model.
@@ -254,22 +209,7 @@ class Model(ABC):
         numpy.ndarray
             Model's density matrix.
         """
-        # Initialize simulator
-        backend: Backend = qiskit.Aer.get_backend("aer_simulator_unitary")
-
-        # Copy quantum circuit (without measure gates)
-        circ = self.circ.copy()
-        circ.save_unitary()
-
-        # Transpile for simulator
-        circ = qiskit.transpile(circ, backend)
-
-        # Run and get unitary operator
-        job: BaseJob = qiskit.execute(circ, backend)
-        job_result: Result = job.result()
-        unitary_operator: Operator = job_result.get_unitary(circ)
-
-        return np.asarray(unitary_operator)
+        return self.backend.unitary(self.circ)
 
     def print_circuit(self) -> None:
         """Prints the quantum circuit on which the model is implemented."""
@@ -303,6 +243,18 @@ class Model(ABC):
                 f"n={self.n} means {np.power(2,self.n)} states"
                 + "(too much for a reasonable plot)!"
             )
+
+        # Import plotting libraries only for this optional presentation method.
+        # This keeps numerical modelling usable without a notebook/plotting stack.
+        try:
+            import matplotlib.pyplot as plt
+            import pandas as pd
+            import seaborn as sns
+        except ImportError as exc:
+            raise ImportError(
+                "plot_state_mat() requires the 'model-visualization' extra. "
+                "Install it with 'poetry install --extras model-visualization'."
+            ) from exc
 
         fig = plt.figure(figsize=(15, 4))
 
