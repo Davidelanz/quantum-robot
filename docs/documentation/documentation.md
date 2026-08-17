@@ -6,6 +6,7 @@
 models
 bursts
 qunits
+simulator
 visualization
 logger
 ```

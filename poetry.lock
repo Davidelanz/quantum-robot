@@ -599,7 +599,7 @@ description = "Python library for calculating contours of 2D quadrilateral grids
 optional = true
 python-versions = ">=3.11"
 groups = ["main"]
-markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
+markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
 files = [
     {file = "contourpy-1.3.3-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:709a48ef9a690e1343202916450bc48b9e51c049b089c7f79a267b46cffcdaa1"},
     {file = "contourpy-1.3.3-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:23416f38bfd74d5d28ab8429cc4d63fa67d5068bd711a85edb1c3fb0c3e2f381"},
@@ -827,7 +827,7 @@ description = "Composable style cycles"
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
+markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
 files = [
     {file = "cycler-0.12.1-py3-none-any.whl", hash = "sha256:85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30"},
     {file = "cycler-0.12.1.tar.gz", hash = "sha256:88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c"},
@@ -1011,7 +1011,7 @@ description = "Tools to manipulate font files"
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
+markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
 files = [
     {file = "fonttools-4.63.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:e3297a6a4059b4acc3a1e9a8b04741f240a80044eef08ebd32e8b5bcdddce75b"},
     {file = "fonttools-4.63.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:b1cd75a03ad8cb5bc40c90bfde68c0c47de423aa19e5c0f362b43520645eea94"},
@@ -1540,7 +1540,7 @@ description = "A fast implementation of the Cassowary constraint solver"
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
+markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
 files = [
     {file = "kiwisolver-1.5.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:1acc7e5b7ef05e9da8bb70cd6c7c4513090213d2e1ad9720f599f0bf6c52aec5"},
     {file = "kiwisolver-1.5.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:bad20d4c69c851c982a1e3606f4c293edfd5a87885786c50082412240c4b1ffd"},
@@ -1965,7 +1965,7 @@ description = "Python plotting package"
 optional = true
 python-versions = ">=3.11"
 groups = ["main"]
-markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
+markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
 files = [
     {file = "matplotlib-3.11.1-cp311-cp311-macosx_10_12_x86_64.whl", hash = "sha256:b7cf158e7add54a8d51ac9b5a84abd6d4e13ed4951b4f25f1c5139f41c2addb2"},
     {file = "matplotlib-3.11.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:d2ace7273b9a5061a3b420918a16fae1f2dc5dfee1abcc13aba71b5d94b1820c"},
@@ -2433,7 +2433,7 @@ description = "Core utilities for Python packages"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\" or extra == \"lint\""
+markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\" or extra == \"lint\""
 files = [
     {file = "packaging-26.3-py3-none-any.whl", hash = "sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"},
     {file = "packaging-26.3.tar.gz", hash = "sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79"},
@@ -2581,7 +2581,7 @@ description = "Python Imaging Library (fork)"
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
+markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
 files = [
     {file = "pillow-12.3.0-cp310-cp310-macosx_10_10_x86_64.whl", hash = "sha256:6c0016e7b354317c4e9e525b937ac8596c38d2d232b419529b9cd7a1cd46e39a"},
     {file = "pillow-12.3.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:bcc33feacfaefce60c12fd500a277533bdc02b10a19f7f6d348763d8140bbba7"},
@@ -3013,7 +3013,7 @@ description = "pyparsing - Classes and methods to define and execute parsing gra
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
+markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
 files = [
     {file = "pyparsing-3.3.2-py3-none-any.whl", hash = "sha256:850ba148bd908d7e2411587e247a1e4f0327839c40e2e5e6d05a007ecc69911d"},
     {file = "pyparsing-3.3.2.tar.gz", hash = "sha256:c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc"},
@@ -3125,7 +3125,7 @@ description = "Extensions to the standard Python datetime module"
 optional = true
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 groups = ["main"]
-markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
+markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
 files = [
     {file = "python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"},
     {file = "python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"},
@@ -3415,7 +3415,7 @@ description = "Python client for Redis database and key-value store"
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "extra == \"qunits\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
+markers = "extra == \"qunits\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
 files = [
     {file = "redis-8.1.0-py3-none-any.whl", hash = "sha256:a4fe1aac3d3b3cc791d4b3d5931c5a956045dc951ee74d1c913ee3ac4d2ee9fb"},
     {file = "redis-8.1.0.tar.gz", hash = "sha256:6e1a19beef9225c83efd689c7e6b7da2d5215b1f42cd13b7fc3714d0a09c7b25"},
@@ -3819,7 +3819,7 @@ description = "Python 2 and 3 compatibility utilities"
 optional = true
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 groups = ["main"]
-markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
+markers = "extra == \"model-visualization\" or extra == \"visualization\" or extra == \"simulator\" or extra == \"dashboard\" or extra == \"test\" or extra == \"docs\""
 files = [
     {file = "six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"},
     {file = "six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"},
@@ -4311,10 +4311,11 @@ docs = ["ipykernel", "jupytext", "matplotlib", "myst-nb", "networkx", "pandas", 
 lint = ["black", "build", "ruff"]
 model-visualization = ["matplotlib", "pandas", "seaborn"]
 qunits = ["redis"]
+simulator = ["matplotlib", "redis"]
 test = ["matplotlib", "networkx", "pandas", "pytest", "pytest-check", "pytest-cov", "pytest-mock", "redis", "seaborn"]
 visualization = ["matplotlib", "networkx", "plotly"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<3.15"
-content-hash = "0ad85be39885a7fc4b684d32f4a1ddc137db47039078d42c68c025bc6a5ea8d9"
+content-hash = "5f3cea8f024f9b0e0d474de5319def81b3409dc3a1f134de964ffa21ecca7405"

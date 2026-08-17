@@ -28,6 +28,7 @@ and optional extension import packages:
 | Core models and Qiskit backend | — | `qrobot` |
 | qUnits / Redis integration | `qunits` | `qrobot_qunits` |
 | Graph and drawing tools | `visualization` | `qrobot_visualization` |
+| Lightweight 2-D robot simulator | `simulator` | `qrobot_simulator` |
 | Dashboard | `dashboard` | `qrobot_dashboard` |
 
 ## Install
@@ -41,7 +42,7 @@ python -m pip install --upgrade quantum-robot
 Install optional capabilities only when needed:
 
 ```console
-python -m pip install --upgrade "quantum-robot[qunits,visualization]"
+python -m pip install --upgrade "quantum-robot[qunits,visualization,simulator]"
 ```
 
 ## Development
@@ -89,9 +90,18 @@ poetry run pytest
 
 Stop it with `docker stop qrobot-redis`.
 
+Run the live bug-like qBrain demo with Redis listening locally:
+
+```console
+poetry run python examples/bug_world.py
+```
+
+It opens a focused Matplotlib chessboard where the Redis-connected qBrain drives
+the bug through five actuator interfaces.
+
 ## Documentation
 
-The documentation source is MyST Markdown, including six executable tutorials.
+The documentation source is MyST Markdown, including executable tutorials.
 Building it runs those tutorials, renders MathJax formulas, and writes the
 resulting site to `docs/_build/html`:
 
@@ -109,6 +119,7 @@ src/
   qrobot/                 # core package and backend interface
   qrobot_qunits/          # optional Redis-based extension
   qrobot_visualization/   # optional graph/drawing extension
+  qrobot_simulator/       # optional lightweight 2-D robot simulator
   qrobot_dashboard/       # optional dashboard extension
 tests/
   core/
