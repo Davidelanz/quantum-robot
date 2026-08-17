@@ -45,14 +45,14 @@ jobs:
           poetry run black --check src tests scripts
 
       # test
-      - name: Run tests with core coverage gate
+      - name: Run tests with coverage
         run: |
           poetry run pytest --cov --junitxml=junit.xml -o junit_family=legacy
-      - name: Upload test results to Codecov
+      - name: Upload coverage report to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+        uses: codecov/codecov-action@v5
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       # build
       - name: Build distribution
