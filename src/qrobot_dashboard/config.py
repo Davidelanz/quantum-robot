@@ -3,6 +3,7 @@ Configuration used by the create_app function.
 
 Note: keep it free of inner-project import statements to help prevent circular imports.
 """
+
 from pathlib import Path
 
 

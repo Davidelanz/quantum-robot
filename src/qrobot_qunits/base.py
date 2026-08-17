@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from time import sleep
 from uuid import uuid4
 
-from .._logger.logger import get_logger
+from qrobot.logger.logger import get_logger
 from . import redis_utils
 
 MIN_TS = 0.01
@@ -52,8 +52,18 @@ class BaseUnit(ABC):
         # To define managed variables:
         # -> self.name = self._multiproc_manager.list(value)
 
-        # Initialize threads
-        self._loop_thread = multiprocessing.Process(target=self._loop)
+        # A process is deliberately created when ``start`` is called. On
+        # platforms using the ``spawn`` start method, creating it while the
+        # object is still being initialized captures the manager's own worker
+        # process and makes the unit impossible to pickle.
+        self._loop_thread: multiprocessing.Process | None = None
+
+    def __getstate__(self):
+        """Serialize manager proxies, but not their local manager process."""
+        state = self.__dict__.copy()
+        state["_multiproc_manager"] = None
+        state["_loop_thread"] = None
+        return state
 
     def __iter__(self):
         yield "name", self.name
@@ -68,27 +78,30 @@ class BaseUnit(ABC):
 
     def start(self) -> None:
         """Starts the unit's background threads"""
-        try:
-            self._logger.info(f"Starting {self.__class__.__name__}")
-            self._loop_thread.start()
-            # Add the unit with its class to redis
-            _r = redis_utils.get_redis()
-            _r.mset({self.id + " class": self.__class__.__name__})
-        except AssertionError:
+        if self._loop_thread is not None and self._loop_thread.is_alive():
             self._logger.warning(f"{self.__class__.__name__} is already started")
+            return
+        self._logger.info(f"Starting {self.__class__.__name__}")
+        self._loop_thread = multiprocessing.Process(target=self._loop)
+        self._loop_thread.start()
+        # Add the unit with its class to redis
+        _r = redis_utils.get_redis()
+        _r.mset({self.id + " class": self.__class__.__name__})
 
     def stop(self) -> None:
         """Stops the unit's background threads"""
-        try:
-            self._logger.info(f"Stopping {self.__class__.__name__}")
-            self._loop_thread.terminate()
-            self._logger.info("Cleaning redis")
-            self._clean_redis()
-            # Remove the unit with its class from redis
-            _r = redis_utils.get_redis()
-            _r.delete(self.id + " class")
-        except AssertionError:
+        if self._loop_thread is None or not self._loop_thread.is_alive():
             self._logger.warning(f"{self.__class__.__name__} is not running")
+            return
+        self._logger.info(f"Stopping {self.__class__.__name__}")
+        self._loop_thread.terminate()
+        self._loop_thread.join()
+        self._loop_thread = None
+        self._logger.info("Cleaning redis")
+        self._clean_redis()
+        # Remove the unit with its class from redis
+        _r = redis_utils.get_redis()
+        _r.delete(self.id + " class")
 
     @abstractmethod
     def _clean_redis(self) -> None:

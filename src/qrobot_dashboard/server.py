@@ -1,12 +1,12 @@
 """
 Dashboard webapp Dash server callbacks.
 """
+
 import dash
 from dash.dependencies import Input, Output, State
 
-from qrobot.draw.draw import draw
-from qrobot.graph.graph import graph
-from qrobot.qunits.redis_utils import redis_status
+from qrobot_qunits.redis_utils import redis_status
+from qrobot_visualization import draw, graph
 
 
 def register_callbacks(dash_app: dash.Dash) -> dash.Dash:

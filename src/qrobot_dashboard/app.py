@@ -1,19 +1,20 @@
 """
 Dashboard webapp to monitor current qUnits sharing the same redis server.
 """
+
 import os
 
 from dash import Dash
 from flask import Flask
 
-from qrobot.dashboard.layout import layout
-from qrobot.dashboard.server import register_callbacks
+from qrobot_dashboard.layout import layout
+from qrobot_dashboard.server import register_callbacks
 
 
-def create_app(config_object_name: str = "qrobot.dashboard.config.Config") -> Flask:
+def create_app(config_object_name: str = "qrobot_dashboard.config.Config") -> Flask:
     """Factory function for the Dashboard app.
 
-    Run the app via `FLASK_APP=qrobot.dashboard poetry run flask run`"""
+    Run the app via ``FLASK_APP=qrobot_dashboard.app:create_app flask run``."""
     server = Flask(__name__, static_folder="static")
 
     # Configure flask app/server here

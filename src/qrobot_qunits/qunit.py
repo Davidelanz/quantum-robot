@@ -1,8 +1,8 @@
 import json
 from typing import Dict, List, Optional
 
-from ..bursts import Burst
-from ..models import Model
+from qrobot.bursts import Burst
+from qrobot.models import Model
 from . import redis_utils
 from .base import BaseUnit
 

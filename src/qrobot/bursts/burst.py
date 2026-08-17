@@ -7,4 +7,5 @@ class Burst(ABC):
 
     @abstractmethod
     def __call__(self, state: str) -> float:
-        pass
+        """Return the burst value for ``state``."""
+        raise NotImplementedError

@@ -1,6 +1,7 @@
 """
 Dashboard webapp Dash layout.
 """
+
 from dash import dcc, html
 
 layout = html.Div(

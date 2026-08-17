@@ -1,12 +1,13 @@
-from . import bursts, dashboard, models, qunits
-from .draw.draw import draw
-from .graph.graph import graph
+"""Core quantum-like perception models and burst strategies.
+
+Optional integrations live in separately installable distributions:
+``qrobot-qunits``, ``qrobot-visualization``, and ``qrobot-dashboard``.
+"""
+
+from . import bursts, logger, models
 
 __all__ = [
     "bursts",
-    "dashboard",
-    "draw",
-    "graph",
+    "logger",
     "models",
-    "qunits",
 ]

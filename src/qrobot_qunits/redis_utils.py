@@ -1,6 +1,6 @@
 import redis
 
-from .._logger.logger import get_logger
+from qrobot.logger.logger import get_logger
 
 
 def get_redis(
