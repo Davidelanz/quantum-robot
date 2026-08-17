@@ -1,6 +1,6 @@
 from networkx.readwrite.json_graph import node_link_data
 
-from qrobot import graph
+from qrobot_visualization import graph
 
 
 def test_graph():
@@ -39,7 +39,7 @@ def test_graph():
                 "id": "l1_unit1",
             },
         ],
-        "links": [
+        "edges": [
             {"output": "0.438", "source": "l0_unit_0", "target": "l1_unit0"},
             {"output": "0.438", "source": "l0_unit_0", "target": "l1_unit1"},
         ],

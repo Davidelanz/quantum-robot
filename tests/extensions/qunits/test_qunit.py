@@ -3,11 +3,11 @@ from typing import Tuple
 
 import pytest
 import pytest_check as check
+from redis.exceptions import ConnectionError
 
-import qrobot
 from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
-from qrobot.qunits import QUnit, SensorialUnit
+from qrobot_qunits import QUnit, SensorialUnit, redis_utils
 
 # Using pytest_check for this test to allow the whole test
 # to execute and stop the multithreading via unit.stop()
@@ -18,8 +18,12 @@ from qrobot.qunits import QUnit, SensorialUnit
 @pytest.fixture
 def fixture_flush_redis() -> None:
     """Flush redis before starting the test."""
-    qrobot.qunits.redis_utils.flush_redis()
-    check.equal(qrobot.qunits.redis_utils.redis_status(), {})
+    try:
+        redis_utils.get_redis().ping()
+    except ConnectionError:
+        pytest.skip("Redis is not available on localhost:6379")
+    redis_utils.flush_redis()
+    check.equal(redis_utils.redis_status(), {})
 
 
 @pytest.fixture
@@ -55,6 +59,7 @@ def fixture_q_brain() -> Tuple[QUnit, QUnit, QUnit]:
     return q_brain
 
 
+@pytest.mark.redis
 def test_init_qunits(
     fixture_flush_redis,
     fixture_q_brain: Tuple[QUnit, QUnit, QUnit],
@@ -121,9 +126,9 @@ def test_qunit(
     sleep(4)
 
     # Then check that after some time the unit are writing something in redis
-    check.is_true(l0_unit0.id in qrobot.qunits.redis_utils.redis_status())
-    check.is_true(l1_unit0.id in qrobot.qunits.redis_utils.redis_status())
-    check.is_true(l1_unit1.id in qrobot.qunits.redis_utils.redis_status())
+    check.is_true(l0_unit0.id in redis_utils.redis_status())
+    check.is_true(l1_unit0.id in redis_utils.redis_status())
+    check.is_true(l1_unit1.id in redis_utils.redis_status())
 
     # Stop unit tasks
     l0_unit0.stop()
@@ -131,4 +136,4 @@ def test_qunit(
     l1_unit1.stop()
 
     # Redis should be empty afterwards if the units stopped correctly
-    check.equal(qrobot.qunits.redis_utils.redis_status(), {})
+    check.equal(redis_utils.redis_status(), {})

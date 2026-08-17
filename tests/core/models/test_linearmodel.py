@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 
 from qrobot.models import LinearModel
 
@@ -22,9 +23,13 @@ def test_init():
 
 
 def test_clear():
-    """Tests if clear is working correctly"""
+    """Clear replaces the circuit and restores the ground state."""
     model = LinearModel(n=2, tau=2)
+    original_circuit = model.circ
+    model.encode(1, dim=0)
     model.clear()
+    assert model.circ is not original_circuit
+    assert model.measure(shots=10) == {"00": 10}
 
 
 def test_encode():
@@ -117,9 +122,7 @@ def test_query():
     # Apply a query on the input_data (to obtain an unambiguous result)
     model.query(input_data)
     # See if the actual output is the |00...0> state
-    assert (
-        model.decode() == "00000" or "10000" or "01000" or "00100" or "00010" or "00001"
-    )
+    assert model.decode() in {"00000", "10000", "01000", "00100", "00010", "00001"}
 
     # Check the exception for wrong targets:
     with pytest.raises(ValueError):
@@ -135,10 +138,13 @@ def test_query():
 
 
 def test_simulation():
-    """Tests if the state and density simulation functions cause any error"""
+    """Statevector and unitary are numerically consistent for a known rotation."""
     model = LinearModel(1, 1)
-    model.get_statevector()
-    model.get_density_matrix()
+    model.encode(0.5, 0)
+    statevector = model.get_statevector()
+    unitary = model.get_density_matrix()
+    assert np.allclose(np.abs(statevector), [np.sqrt(0.5), np.sqrt(0.5)])
+    assert np.allclose(unitary.conj().T @ unitary, np.eye(2))
 
 
 def test_plot():
@@ -146,6 +152,11 @@ def test_plot():
     model = LinearModel(1, 1)
     model.print_circuit()
     model.plot_state_mat()
+
+
+def test_plot_rejects_unreadable_large_state_space():
+    with pytest.raises(OverflowError, match="too much"):
+        LinearModel(6, 1).plot_state_mat()
 
 
 def test_probabilities():
