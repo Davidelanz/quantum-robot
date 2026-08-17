@@ -176,7 +176,7 @@ class Model(ABC):
         """
 
     def measure(self, shots: int = 1) -> dict[str, int]:
-        """Measures the qubits using a IBMQ backend
+        """Measure the qubits using the configured backend.
 
         Parameters
         ----------
