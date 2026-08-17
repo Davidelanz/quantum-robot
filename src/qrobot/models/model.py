@@ -209,7 +209,8 @@ class Model(ABC):
         numpy.ndarray
             Model's density matrix.
         """
-        return self.backend.unitary(self.circ)
+        statevector = self.get_statevector()
+        return np.outer(statevector, statevector.conjugate())
 
     def print_circuit(self) -> None:
         """Prints the quantum circuit on which the model is implemented."""

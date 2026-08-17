@@ -20,7 +20,3 @@ class QuantumBackend(ABC):
     @abstractmethod
     def statevector(self, circuit: Any) -> np.ndarray:
         """Return the circuit's final statevector."""
-
-    @abstractmethod
-    def unitary(self, circuit: Any) -> np.ndarray:
-        """Return the circuit's unitary matrix."""

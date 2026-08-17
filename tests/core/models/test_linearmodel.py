@@ -138,13 +138,14 @@ def test_query():
 
 
 def test_simulation():
-    """Statevector and unitary are numerically consistent for a known rotation."""
+    """Statevector and density matrix are correct for a known rotation."""
     model = LinearModel(1, 1)
     model.encode(0.5, 0)
     statevector = model.get_statevector()
-    unitary = model.get_density_matrix()
+    density_matrix = model.get_density_matrix()
     assert np.allclose(np.abs(statevector), [np.sqrt(0.5), np.sqrt(0.5)])
-    assert np.allclose(unitary.conj().T @ unitary, np.eye(2))
+    assert np.allclose(density_matrix, np.outer(statevector, statevector.conj()))
+    assert np.isclose(np.trace(density_matrix), 1)
 
 
 def test_plot():
