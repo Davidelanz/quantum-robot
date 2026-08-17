@@ -1,6 +1,6 @@
 from networkx.readwrite.json_graph import node_link_data
 
-from qrobot_visualization import graph
+from qrobot_visualization import build_network, graph
 
 
 def test_graph():
@@ -53,3 +53,10 @@ def test_graph_allows_units_without_an_output_yet():
 
     assert set(network.nodes) == {"l0", "l1"}
     assert network.edges["l0", "l1"] == {}
+
+
+def test_build_network_is_the_descriptive_public_api() -> None:
+    """The preferred name has the same compatibility-preserving behaviour."""
+    status = {"l0 class": "SensorialUnit"}
+
+    assert node_link_data(build_network(status)) == node_link_data(graph(status))

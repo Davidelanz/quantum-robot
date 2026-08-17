@@ -24,7 +24,8 @@ from qrobot.bursts import OneBurst, ZeroBurst
 from qrobot.logger import LoggingConfig, configure_logging
 from qrobot.models import AngularModel
 from qrobot_qunits import QUnit, SensorialUnit, redis_utils
-from qrobot_visualization import draw, graph
+from qrobot_visualization import build_network, draw
+from IPython.display import HTML, display
 from pathlib import Path
 import time
 ```
@@ -165,9 +166,10 @@ for i in range(int(30 * (1 / refresh_time))):
     print(json.dumps(status, indent=1, sort_keys=True))
     print(int(i * refresh_time), "/30 seconds")
 
-    # Plot graph
-    qbrain_graph = graph(status)
-    draw(qbrain_graph, show=False)
+# Plot the final network graph of the qBrain
+qbrain_graph = build_network(statuses[-1])
+qbrain_figure = draw(qbrain_graph)
+display(HTML(qbrain_figure.to_html(full_html=False, include_plotlyjs=True)))
 ```
 
 Read manually the latest outputs of the qunits found on the redis database:

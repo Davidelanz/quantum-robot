@@ -48,7 +48,7 @@ def _write_edge(graph: nx.Graph, node_id: str, key: str, value: Any) -> None:
                 graph.add_edge(in_qunit, node_id)
 
 
-def graph(status_dict: Mapping[str, str]) -> nx.DiGraph:
+def build_network(status_dict: Mapping[str, str]) -> nx.DiGraph:
     """Given the Redis status dictionary, generate a `networkx` directed graph
     containing all the units connected as nodes.
 
@@ -72,3 +72,12 @@ def graph(status_dict: Mapping[str, str]) -> nx.DiGraph:
             graph.edges[source, target]["output"] = output
 
     return graph
+
+
+def graph(status_dict: Mapping[str, str]) -> nx.DiGraph:
+    """Build a network graph from Redis status data.
+
+    Deprecated alias for :func:`build_network`. It remains available so
+    existing applications can move to the less ambiguous public name.
+    """
+    return build_network(status_dict)

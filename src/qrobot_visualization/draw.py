@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import matplotlib as mpl
 import networkx as nx
@@ -165,23 +165,14 @@ def _layout() -> go.Layout:
 
 def draw(
     graph: nx.Graph,
-    show: bool = True,
-    return_figure: bool = False,
-    static_plot: bool = True,
-) -> Optional[go.Figure]:
+) -> go.Figure:
     """Visualize a directed graph containing all the running units as connected nodes.
 
     Args:
         graph (nx.Graph): The directed graph.
-        show (bool, optional): Whether to show the generated plotly Figure.
-            Defaults to True.
-        return_figure (bool, optional): Whether to return the generated plotly Figure.
-            Defaults to False.
-        static_plot (bool, optional): Whether to have a static or interactive
-            plotly Figure. Defaults to True.
-
     Returns:
-        go.Figure: The generated plotly Figure (if ``return_figure`` is ``True``).
+        go.Figure: The generated Plotly figure. Call ``figure.show()`` in an
+            interactive application when display is wanted.
     """
     # Create figure
     fig = go.Figure(layout=_layout())
@@ -194,9 +185,4 @@ def draw(
     fig.add_trace(_node_trace(graph, positions, size=25, font_size=12))
     # Avoid text label clipping after adding al the traces
     fig.update_traces(cliponaxis=False)
-    # Show figure
-    if show:
-        config = {"staticPlot": static_plot}
-        fig.show(config=config)
-    if return_figure:
-        return fig
+    return fig

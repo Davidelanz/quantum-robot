@@ -9,13 +9,13 @@ import plotly.graph_objects as go
 from dash.dependencies import Input, Output, State
 
 from qrobot_qunits.redis_utils import redis_status
-from qrobot_visualization import draw, graph
+from qrobot_visualization import build_network, draw
 
 
-def build_network_figure(status: Mapping[str, str]) -> go.Figure | None:
+def build_network_figure(status: Mapping[str, str]) -> go.Figure:
     """Build the dashboard figure from a Redis status mapping."""
-    network = graph(status)
-    return draw(network, show=False, return_figure=True)
+    network = build_network(status)
+    return draw(network)
 
 
 def register_callbacks(
