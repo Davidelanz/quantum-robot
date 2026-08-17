@@ -9,16 +9,8 @@
 # -- Path setup --------------------------------------------------------------
 
 import os
-import sys
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-import nbsphinx
 import sphinx_rtd_theme  # ReadTheDocs theme
-
-sys.path.insert(0, os.path.abspath(".."))
 
 
 # -- Project information -----------------------------------------------------
@@ -47,10 +39,10 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
+    "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    "sphinx.ext.inheritance_diagram",
+    "myst_nb",
     "sphinx_rtd_theme",
-    "nbsphinx",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -59,8 +51,8 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = [".rst", ".md"]
-# source_suffix = '.rst'
+source_suffix = {".md": "myst-nb"}
+myst_enable_extensions = ["amsmath", "dollarmath"]
 
 # The master toctree document.
 master_doc = "index"
@@ -76,6 +68,12 @@ language = "en"
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+nb_execution_mode = "force"
+nb_execution_timeout = 600
+nb_execution_raise_on_error = True
+if os.environ.get("QROBOT_SKIP_REDIS_NOTEBOOK"):
+    nb_execution_excludepatterns = ["notebooks/06_qunits_getting_started.md"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
@@ -95,7 +93,6 @@ html_theme = "sphinx_rtd_theme"
 #
 html_theme_options = {
     "logo_only": True,
-    "display_version": True,
     "prev_next_buttons_location": "bottom",
     "style_external_links": False,
     "style_nav_header_background": "white",
