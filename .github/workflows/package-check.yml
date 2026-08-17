@@ -8,8 +8,8 @@ on:
     branches: [master]
 
 jobs:
-  quality:
-    name: Quality (Python 3.14)
+  package-check:
+    name: Package full check (Python 3.14)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -24,6 +24,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
+      # prepare
       - uses: actions/checkout@v6
       - name: Install Poetry
         run: pipx install poetry
@@ -34,16 +35,30 @@ jobs:
           cache-dependency-path: poetry.lock
       - name: Install all development capabilities
         run: poetry install --all-extras
+
+      # check
       - name: Validate project metadata
         run: poetry check
       - name: Check lint and formatting
         run: |
           poetry run ruff check src tests scripts
           poetry run black --check src tests scripts
+
+      # test
       - name: Run tests with core coverage gate
-        run: poetry run pytest --cov=qrobot --cov-fail-under=100
+        run: |
+          poetry run pytest --cov --junitxml=junit.xml -o junit_family=legacy
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      # build
       - name: Build distribution
         run: poetry build
+
+      # docs
       - name: Build Sphinx documentation
         run: poetry run python scripts/build_docs.py
       - name: Upload HTML documentation

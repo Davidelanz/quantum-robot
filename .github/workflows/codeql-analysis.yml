@@ -11,20 +11,18 @@ jobs:
   analyze:
     name: Analyze Python
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       security-events: write
-
     steps:
+      # prepare
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      # Initializes the CodeQL tools for scanning.
+      # CodeQL scanning
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: python
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
