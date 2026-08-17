@@ -137,7 +137,7 @@ class Model(ABC):
         if isinstance(target_vector, (float, int)):
             target_vector = [target_vector]
         # Dimensionality check on the vector
-        if len(target_vector) is not self.n:
+        if len(target_vector) != self.n:
             raise ValueError(f"target_vector must be a {self.n}\
                              -dimensional vector!")
         for element in target_vector:
