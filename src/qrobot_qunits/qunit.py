@@ -54,9 +54,9 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         model: Model,
         burst: Burst,
         Ts: float,  # pylint: disable=invalid-name
-        query: list = None,
-        in_qunits: Dict[int, str] = None,
-        default_input: float = None,
+        query: List[float] | None = None,
+        in_qunits: Dict[int, str] | None = None,
+        default_input: List[float] | None = None,
     ) -> None:
         # Call the BaseUnit constructor
         super().__init__(name, Ts)
@@ -64,11 +64,14 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         # Store the qUnits name and properties
         self.model = model
         self.burst = burst
-        self.default_input = default_input or model.n * [0.0]
+        self.default_input = self.model._target_vector_check(
+            default_input if default_input is not None else [0.0] * model.n
+        )
 
         # Default query to all 0s if not specified
-        if query is None:
-            query = [0.0] * (self.model.n)
+        query = self.model._target_vector_check(
+            query if query is not None else [0.0] * self.model.n
+        )
 
         # Initialize multiprocessing variables
         # - Query array variable
@@ -143,7 +146,9 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         list
             The current input vector
         """
-        input_vector = self.default_input
+        # Inputs received from Redis must not alter the configured fallback
+        # values used by later temporal windows.
+        input_vector = self.default_input.copy()
         for dim, qunit_id in self._in_qunits.items():
             _r = redis_utils.get_redis()
             val = _r.get(qunit_id + " output")
@@ -182,7 +187,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         """
         global_status = redis_utils.redis_status()
         out = global_status.get(f"{self.id} output", None)
-        return float(out) if out else None
+        return float(out) if out is not None else None
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""

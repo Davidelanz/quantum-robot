@@ -1,4 +1,4 @@
-from time import sleep
+from time import monotonic, sleep
 from typing import Tuple
 
 import pytest
@@ -103,37 +103,42 @@ def test_init_qunits(
     check.equal(l1_unit0.input_vector, [0.0])
     check.equal(l1_unit1.input_vector, [0.0])
 
+    # Redis values are applied to a new vector, never to the configured
+    # fallback used by following temporal windows.
+    input_vector = l1_unit0.input_vector
+    input_vector[0] = 1.0
+    check.equal(l1_unit0.default_input, [0.0])
 
-@pytest.mark.skip(
-    reason="The test works running with VSCode debugger "
-    "but not via pytest (the thread stops the _unit_task "
-    "at the mode.decode() step)"
-)
+
 @pytest.mark.redis
 def test_qunit(
     fixture_flush_redis,
     fixture_q_brain: Tuple[QUnit, QUnit, QUnit],
 ):
-    # Initialize qunits
+    """Worker processes publish outputs and clean their Redis keys on stop."""
     l0_unit0, l1_unit0, l1_unit1 = fixture_q_brain
+    units = (l0_unit0, l1_unit0, l1_unit1)
 
-    # Start unit tasks
-    l0_unit0.start()
-    l1_unit0.start()
-    l1_unit1.start()
+    try:
+        for unit in units:
+            unit.start()
 
-    # Process data for 4 seconds
-    sleep(4)
+        expected_output_keys = {f"{unit.id} output" for unit in units}
+        deadline = monotonic() + 6
+        status = redis_utils.redis_status()
+        while monotonic() < deadline and not expected_output_keys.issubset(status):
+            sleep(0.1)
+            status = redis_utils.redis_status()
 
-    # Then check that after some time the unit are writing something in redis
-    check.is_true(l0_unit0.id in redis_utils.redis_status())
-    check.is_true(l1_unit0.id in redis_utils.redis_status())
-    check.is_true(l1_unit1.id in redis_utils.redis_status())
+        assert expected_output_keys.issubset(status)
+        assert l1_unit0.get_burst_output() is not None
+        assert l1_unit1.get_burst_output() is not None
+        assert all(
+            unit._loop_thread is not None and unit._loop_thread.is_alive()
+            for unit in units
+        )
+    finally:
+        for unit in units:
+            unit.stop()
 
-    # Stop unit tasks
-    l0_unit0.stop()
-    l1_unit0.stop()
-    l1_unit1.stop()
-
-    # Redis should be empty afterwards if the units stopped correctly
-    check.equal(redis_utils.redis_status(), {})
+    assert redis_utils.redis_status() == {}

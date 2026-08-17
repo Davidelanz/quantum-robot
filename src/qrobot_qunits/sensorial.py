@@ -32,13 +32,13 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         self,
         name: str,
         Ts: float,  # pylint: disable=invalid-name
-        default_input: float = 0,
+        default_input: float | None = None,
     ) -> None:
         # Call the BaseUnit constructor
         super().__init__(name, Ts)
 
         # Store the SensorialUnit name and properties
-        self.default_input = default_input or 0.0
+        self.default_input = 0.0 if default_input is None else default_input
 
         # Initialize multiprocessing variables
         # - _scalar_reading array variable
