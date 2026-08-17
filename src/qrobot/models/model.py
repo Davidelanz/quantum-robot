@@ -145,20 +145,16 @@ class Model(ABC):
             target_vector = list(target_vector)
         # Dimensionality check on the vector
         if len(target_vector) != self.n:
-            raise ValueError(
-                f"target_vector must be a {self.n}\
-                             -dimensional vector!"
-            )
+            raise ValueError(f"target_vector must be a {self.n}\
+                             -dimensional vector!")
         for element in target_vector:
             if not isinstance(element, (float, int)):
                 raise TypeError(
                     "target_vector elements must be all integers or floats!"
                 )
             if element > 1 or element < 0:
-                raise ValueError(
-                    "target_vector elements must be all between \
-                    0 and 1 inclusive!"
-                )
+                raise ValueError("target_vector elements must be all between \
+                    0 and 1 inclusive!")
         return [float(element) for element in target_vector]
 
     def clear(self) -> None:
