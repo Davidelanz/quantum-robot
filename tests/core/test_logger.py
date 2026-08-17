@@ -45,3 +45,24 @@ def test_explicit_logging_configuration_writes_only_the_requested_file(
         )
     finally:
         configure_logging(LoggingConfig(console=False))
+
+
+def test_explicit_logging_configuration_can_write_to_console(capsys) -> None:
+    """Applications can opt into a console handler without a log file."""
+    package_logger = configure_logging(
+        LoggingConfig(level=logging.WARNING, console=True)
+    )
+
+    try:
+        get_logger("test").warning("configured console message")
+
+        assert "configured console message" in capsys.readouterr().out
+        assert (
+            sum(
+                getattr(handler, "_qrobot_managed", False)
+                for handler in package_logger.handlers
+            )
+            == 1
+        )
+    finally:
+        configure_logging(LoggingConfig(console=False))
