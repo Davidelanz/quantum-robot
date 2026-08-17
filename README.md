@@ -1,11 +1,12 @@
 # quantum-robot
 
-[![Quality](https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml/badge.svg)](https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml)
+[![Package Check](https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml/badge.svg)](https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml)
 [![CodeQL](https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml)
 [![Code coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU)](https://codecov.io/gh/Davidelanz/quantum-robot)
 [![Documentation Status](https://readthedocs.org/projects/quantum-robot/badge/?version=latest)](http://docs.quantum-robot.org/en/latest/)
+[![Dependency review](https://github.com/Davidelanz/quantum-robot/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/Davidelanz/quantum-robot/security/dependabot)
+[![Snyk Advisor](https://img.shields.io/badge/Snyk_Security-blue)](https://snyk.io/advisor/python/quantum-robot)
 [![Maintainability](https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability)](https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability)
-[![Snyk Advisor](https://snyk.io/advisor/python/quantum-robot/badge.svg)](https://snyk.io/advisor/python/quantum-robot)
 [![License](https://img.shields.io/badge/license-GNU_GPL_v3-blue)](LICENSE)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3926776-blue)](https://doi.org/10.5281/zenodo.3926776)
 
@@ -94,8 +95,7 @@ docker run --rm --name qrobot-redis -p 6379:6379 -d redis:7-alpine
 poetry run python scripts/build_docs.py
 ```
 
-Open `docs/_build/html/index.html` directly in a browser. No local HTTP server
-or repository Docker Compose setup is required.
+Open `docs/_build/html/index.html` directly in a browser.
 
 ## Project layout
 
