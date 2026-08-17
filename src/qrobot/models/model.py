@@ -1,6 +1,13 @@
 from abc import ABC, abstractmethod
+from collections.abc import Generator, Sequence
+from typing import TypeAlias
+
 import numpy as np
+
 from qrobot.backends import QiskitBackend, QuantumBackend
+
+Scalar: TypeAlias = float | int
+TargetVector: TypeAlias = Sequence[Scalar] | Scalar
 
 
 class Model(ABC):
@@ -51,7 +58,7 @@ class Model(ABC):
         self.backend = backend or QiskitBackend()
         self.circ = self.backend.create_circuit(n)
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[tuple[str, object], None, None]:
         yield "model", self.__class__.__name__
         yield "n", self.n
         yield "tau", self.tau
@@ -62,7 +69,7 @@ class Model(ABC):
             out_str += f"{key}: {value}, "
         return out_str[:-2] + "]"
 
-    def _dim_index_check(self, dim) -> int:
+    def _dim_index_check(self, dim: int) -> int:
         """This method ensures that a dimension index `dim`
         is an integer between 0 and `n-1`, where `n` is the dimension
         of the model.
@@ -90,7 +97,7 @@ class Model(ABC):
         return dim
 
     @staticmethod
-    def _scalar_input_check(scalar_input) -> float:
+    def _scalar_input_check(scalar_input: Scalar) -> float:
         """This method ensures that a `scalar_input` for the model
         is an integer or a float between 0 and 1 (inclusive).
 
@@ -114,7 +121,7 @@ class Model(ABC):
             raise ValueError("scalar_input must be between 0 and 1 inclusive!")
         return float(scalar_input)
 
-    def _target_vector_check(self, target_vector) -> list:
+    def _target_vector_check(self, target_vector: TargetVector) -> list[float]:
         """This method ensures that a `target_vector` for the model
         is an `n`-dimensional vector (where `n` is the model's dimension).
 
@@ -136,8 +143,10 @@ class Model(ABC):
         # convert it in a single-element vector
         if isinstance(target_vector, (float, int)):
             target_vector = [target_vector]
+        else:
+            target_vector = list(target_vector)
         # Dimensionality check on the vector
-        if len(target_vector) is not self.n:
+        if len(target_vector) != self.n:
             raise ValueError(f"target_vector must be a {self.n}\
                              -dimensional vector!")
         for element in target_vector:
@@ -148,14 +157,14 @@ class Model(ABC):
             if element > 1 or element < 0:
                 raise ValueError("target_vector elements must be all between \
                     0 and 1 inclusive!")
-        return target_vector
+        return [float(element) for element in target_vector]
 
     def clear(self) -> None:
         """Re-initialize the model with an empty circuit."""
         self.circ = self.backend.create_circuit(self.n)
 
     @abstractmethod
-    def encode(self, scalar_input, dim) -> float:
+    def encode(self, scalar_input: Scalar, dim: int) -> float:
         """Encodes the scalar input in the correspondent qubit.
 
         Example
@@ -187,7 +196,7 @@ class Model(ABC):
         """Exploits the information encoded in the qubit."""
 
     @abstractmethod
-    def query(self, target_vector) -> None:
+    def query(self, target_vector: TargetVector) -> None:
         r"""Changes the basis of the quantum system choosing `target_vector`
         as the basis state \|00...0>."""
 
@@ -209,7 +218,8 @@ class Model(ABC):
         numpy.ndarray
             Model's density matrix.
         """
-        return self.backend.unitary(self.circ)
+        statevector = self.get_statevector()
+        return np.outer(statevector, statevector.conjugate())
 
     def print_circuit(self) -> None:
         """Prints the quantum circuit on which the model is implemented."""

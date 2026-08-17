@@ -1,6 +1,7 @@
 import numpy as np
 
 from .angularmodel import AngularModel
+from .model import Scalar
 
 
 class LinearModel(AngularModel):
@@ -17,7 +18,7 @@ class LinearModel(AngularModel):
     one of ``AngularModel``
     """
 
-    def encode(self, scalar_input, dim):
+    def encode(self, scalar_input: Scalar, dim: int) -> float:
         """Encodes the scalar input in the correspondent qubit
 
         Parameters
@@ -40,4 +41,4 @@ class LinearModel(AngularModel):
         # Apply rotation to the qubit
         angle = (np.arcsin(2 * scalar_input - 1) + np.pi / 2) / self.tau
         self.circ.ry(angle, dim)
-        return angle
+        return float(angle)

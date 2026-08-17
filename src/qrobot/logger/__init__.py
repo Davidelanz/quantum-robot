@@ -1,7 +1,5 @@
-from .logger import get_logger, log_dir, log_file
+"""quantum-robot logging utilities."""
 
-__all__ = [
-    "log_file",
-    "log_dir",
-    "get_logger",
-]
+from .logger import LoggingConfig, configure_logging, get_logger
+
+__all__ = ["LoggingConfig", "configure_logging", "get_logger"]

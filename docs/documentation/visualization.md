@@ -4,7 +4,7 @@
 
 ```{eval-rst}
 .. automodule:: qrobot_visualization
-   :members: graph, draw
+   :members: build_network, draw, graph
 ```
 
 ## Dashboard

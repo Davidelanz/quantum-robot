@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Any, cast
 
 import matplotlib as mpl
 import networkx as nx
@@ -14,7 +14,7 @@ def _hex_color(value: float) -> str:
     return hex_color
 
 
-def _positions(graph: nx.Graph) -> Dict[str, np.ndarray]:
+def _positions(graph: nx.Graph) -> dict[str, np.ndarray]:
     """Get positions for a input graph.
     Positions are provided as np.ndarray(x, y).
 
@@ -24,16 +24,16 @@ def _positions(graph: nx.Graph) -> Dict[str, np.ndarray]:
     Returns:
         dict: A dictionary of positions keyed by node
     """
-    return nx.planar_layout(graph)
+    return cast(dict[str, np.ndarray], nx.planar_layout(graph))
 
 
 def _edge_trace(
     pos_1: np.ndarray,
     pos_2: np.ndarray,
-    text,
+    text: str,
     width: int,
     font_size: int,
-    color: Tuple[float, float, float, float],
+    color: str,
 ) -> go.Scatter:
     """Create an edge between two nodes.
 
@@ -67,17 +67,17 @@ def _edge_trace(
 
 def _edge_traces(
     graph: nx.Graph,
-    positions: Dict[str, np.ndarray],
+    positions: dict[str, np.ndarray],
     width: int,
     font_size: int,
-) -> List[go.Scatter]:
+) -> list[go.Scatter]:
     """For each edge, generate a trace and append it to the returned list."""
     edge_traces = []
 
     for edge in graph.edges():
         node_1, node_2 = edge
 
-        edge_attributes: dict = graph.edges()[edge]
+        edge_attributes: dict[str, Any] = graph.edges()[edge]
         output = edge_attributes.get("output", None)
         output_str = f"{output}<br>" if output else ""
 
@@ -98,10 +98,10 @@ def _edge_traces(
 
 def _node_trace(
     graph: nx.Graph,
-    positions: Dict[str, np.ndarray],
+    positions: dict[str, np.ndarray],
     size: int,
     font_size: int,
-) -> List[go.Scatter]:
+) -> go.Scatter:
     """Generate the node trace."""
     node_trace = go.Scatter(
         x=[],
@@ -116,7 +116,7 @@ def _node_trace(
 
     # For each node in G, get the position and size and add to the node_trace
     for node in graph.nodes():
-        node_attributes: dict = graph.nodes()[node]
+        node_attributes: dict[str, Any] = graph.nodes()[node]
 
         node_class = node_attributes.get("class", None)
         query = node_attributes.get("query", None)
@@ -165,23 +165,14 @@ def _layout() -> go.Layout:
 
 def draw(
     graph: nx.Graph,
-    show: bool = True,
-    return_figure: bool = False,
-    static_plot: bool = True,
-) -> Optional[go.Figure]:
+) -> go.Figure:
     """Visualize a directed graph containing all the running units as connected nodes.
 
     Args:
         graph (nx.Graph): The directed graph.
-        show (bool, optional): Whether to show the generated plotly Figure.
-            Defaults to True.
-        return_figure (bool, optional): Whether to return the generated plotly Figure.
-            Defaults to False.
-        static_plot (bool, optional): Whether to have a static or interactive
-            plotly Figure. Defaults to True.
-
     Returns:
-        go.Figure: The generated plotly Figure (if ``return_figure`` is ``True``).
+        go.Figure: The generated Plotly figure. Call ``figure.show()`` in an
+            interactive application when display is wanted.
     """
     # Create figure
     fig = go.Figure(layout=_layout())
@@ -194,9 +185,4 @@ def draw(
     fig.add_trace(_node_trace(graph, positions, size=25, font_size=12))
     # Avoid text label clipping after adding al the traces
     fig.update_traces(cliponaxis=False)
-    # Show figure
-    if show:
-        config = {"staticPlot": static_plot}
-        fig.show(config=config)
-    if return_figure:
-        return fig
+    return fig

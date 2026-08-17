@@ -1,10 +1,13 @@
 import multiprocessing
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from time import sleep
+from typing import Any
 from uuid import uuid4
 
-from qrobot.logger.logger import get_logger
+from qrobot.logger import LoggingConfig, configure_logging, get_logger
 from . import redis_utils
+from .redis_utils import RedisConfig
 
 MIN_TS = 0.01
 """ float: Minimum time period allowed (in seconds).
@@ -19,7 +22,7 @@ class BaseUnit(ABC):
     ------------
     name : str
         The unit name
-    Ts : float
+    sampling_period : float
         The time period with wich the unit execute its task
 
     Attributes
@@ -28,14 +31,16 @@ class BaseUnit(ABC):
         The unique instance identifier of the unit
     name : str
         The unique instance identifier of the unit
-    Ts : float
+    sampling_period : float
         The time period for which the unit execute its task
     """
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         name: str,
-        Ts: float,  # pylint: disable=invalid-name
+        sampling_period: float | int,
+        redis_config: RedisConfig | None = None,
+        logging_config: LoggingConfig | None = None,
     ) -> None:
         # Create a instance unique identifier
         self.id = name + "-" + str(uuid4())[:6]  # pylint: disable=invalid-name
@@ -45,7 +50,9 @@ class BaseUnit(ABC):
 
         # Store the unit name and properties
         self.name = name
-        self.Ts = self._period_check(Ts)  # pylint: disable=invalid-name
+        self.sampling_period = self._period_check(sampling_period)
+        self.redis_config = redis_config or RedisConfig()
+        self.logging_config = logging_config
 
         # Initialize multiprocessing manager
         self._multiproc_manager = multiprocessing.Manager()
@@ -58,17 +65,17 @@ class BaseUnit(ABC):
         # process and makes the unit impossible to pickle.
         self._loop_thread: multiprocessing.Process | None = None
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         """Serialize manager proxies, but not their local manager process."""
         state = self.__dict__.copy()
         state["_multiproc_manager"] = None
         state["_loop_thread"] = None
         return state
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[tuple[str, object], None, None]:
         yield "name", self.name
         yield "id", self.id
-        yield "Ts", self.Ts
+        yield "sampling_period", self.sampling_period
 
     def __repr__(self) -> str:
         out_str = f'{self.__class__.__name__} "{self.id}"'
@@ -85,7 +92,7 @@ class BaseUnit(ABC):
         self._loop_thread = multiprocessing.Process(target=self._loop)
         self._loop_thread.start()
         # Add the unit with its class to redis
-        _r = redis_utils.get_redis()
+        _r = redis_utils.get_redis(self.redis_config)
         _r.mset({self.id + " class": self.__class__.__name__})
 
     def stop(self) -> None:
@@ -100,7 +107,7 @@ class BaseUnit(ABC):
         self._logger.info("Cleaning redis")
         self._clean_redis()
         # Remove the unit with its class from redis
-        _r = redis_utils.get_redis()
+        _r = redis_utils.get_redis(self.redis_config)
         _r.delete(self.id + " class")
 
     @abstractmethod
@@ -109,32 +116,36 @@ class BaseUnit(ABC):
 
     @abstractmethod
     def _unit_task(self) -> None:
-        """Task executed by the unit every TS time period."""
+        """Task executed by the unit every sampling period."""
 
     def _loop(self) -> None:
+        if self.logging_config is not None:
+            configure_logging(self.logging_config)
         while True:
             self._unit_task()
-            sleep(self.Ts)
+            sleep(self.sampling_period)
 
     @staticmethod
-    def _period_check(Ts) -> float:  # pylint: disable=invalid-name
-        """This method ensures that a `Ts` for the unit
-        is an integer or a float greater than the minimum allowed.
+    def _period_check(sampling_period: float | int) -> float:
+        """Ensure a sampling period is a number above the minimum allowed.
 
         Raises
         ---------
         TypeError:
-            `Ts` is nor a `int` or a `float`
+            ``sampling_period`` is not an ``int`` or ``float``.
         ValueError
-            `Ts` must not be lower than the minimum allowed
+            ``sampling_period`` must not be lower than the minimum allowed.
 
         Returns
         --------
         float
-            The time period `Ts`
+            The validated sampling period.
         """
-        if not isinstance(Ts, (float, int)):
-            raise TypeError(f"Ts must be an scalar number, not a {type(Ts)}!")
-        if Ts < MIN_TS:
-            raise ValueError(f"Ts must not be lower than {MIN_TS}!")
-        return float(Ts)
+        if not isinstance(sampling_period, (float, int)):
+            raise TypeError(
+                "sampling_period must be a scalar number, "
+                f"not a {type(sampling_period)}!"
+            )
+        if sampling_period < MIN_TS:
+            raise ValueError(f"sampling_period must not be lower than {MIN_TS}!")
+        return float(sampling_period)

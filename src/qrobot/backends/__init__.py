@@ -1,4 +1,4 @@
-"""Quantum execution backends used by qRobot models."""
+"""Quantum execution backends used by quantum-robot models."""
 
 from .base import QuantumBackend
 from .qiskit import QiskitBackend

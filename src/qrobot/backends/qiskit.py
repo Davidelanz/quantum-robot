@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 from qiskit import QuantumCircuit
-from qiskit.quantum_info import Operator, Statevector
+from qiskit.quantum_info import Statevector
 
 from .base import QuantumBackend
 
@@ -21,6 +21,3 @@ class QiskitBackend(QuantumBackend):
 
     def statevector(self, circuit: Any) -> np.ndarray:
         return np.asarray(Statevector.from_instruction(circuit).data)
-
-    def unitary(self, circuit: Any) -> np.ndarray:
-        return np.asarray(Operator(circuit).data)

@@ -1,5 +1,9 @@
 from . import redis_utils
 from .base import BaseUnit
+from .redis_utils import RedisConfig, RedisWriteError
+from qrobot.logger import LoggingConfig
+import redis
+from collections.abc import Generator
 
 
 class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
@@ -9,7 +13,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
     ------------
     name : str
         The SensorialUnit name
-    Ts : float
+    sampling_period : float
         The sampling time with wich the SensorialUnit reads the input
     default_input: float
         Default input for the scalar readings when the SensorialUnit
@@ -21,7 +25,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         The unique instance identifier of the SensorialUnit
     name : str
         The unique instance identifier of the SensorialUnit
-    Ts : float
+    sampling_period : float
         The sampling period for which the SensorialUnit samples an event
     default_input: float
         Default input for the scalar readings when the SensorialUnit
@@ -31,14 +35,16 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=too-many-arguments
         self,
         name: str,
-        Ts: float,  # pylint: disable=invalid-name
-        default_input: float = 0,
+        sampling_period: float | int,
+        default_input: float | None = None,
+        redis_config: RedisConfig | None = None,
+        logging_config: LoggingConfig | None = None,
     ) -> None:
         # Call the BaseUnit constructor
-        super().__init__(name, Ts)
+        super().__init__(name, sampling_period, redis_config, logging_config)
 
         # Store the SensorialUnit name and properties
-        self.default_input = default_input or 0.0
+        self.default_input = 0.0 if default_input is None else default_input
 
         # Initialize multiprocessing variables
         # - _scalar_reading array variable
@@ -47,10 +53,10 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         # Log properties
         self._logger.debug(f"Properties: {self}")
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[tuple[str, object], None, None]:
         yield "name", self.name
         yield "id", self.id
-        yield "Ts", self.Ts
+        yield "sampling_period", self.sampling_period
 
     @property
     def scalar_reading(self) -> float:
@@ -69,7 +75,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
-        _r = redis_utils.get_redis()
+        _r = redis_utils.get_redis(self.redis_config)
         _r.delete(self.id + " output")
 
     def _unit_task(self) -> None:
@@ -79,8 +85,12 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         self._logger.debug(f"scalar_reading={scalar_reading}")
         self._logger.debug("Writing input on redis")
         # Write it on redis
-        _r = redis_utils.get_redis()
-        if not (_r.mset({self.id + " output": self.scalar_reading})):
-            raise Exception(
-                f"Problem in writing SensorialUnit {self.id} output on Redis database!"
-            )
+        _r = redis_utils.get_redis(self.redis_config)
+        try:
+            written = _r.mset({self.id + " output": self.scalar_reading})
+        except redis.RedisError as exc:
+            raise RedisWriteError(
+                f"Unable to write SensorialUnit {self.id} output to Redis"
+            ) from exc
+        if not written:
+            raise RedisWriteError(f"Redis did not write SensorialUnit {self.id} output")

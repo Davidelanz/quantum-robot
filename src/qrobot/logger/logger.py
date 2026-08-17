@@ -1,47 +1,74 @@
-"""Module containing logging utilities."""
+"""Logging helpers for the quantum-robot library.
+
+Applications configure handlers, destinations, and verbosity. quantum-robot only
+returns named loggers and installs a ``NullHandler`` on its package logger so
+library use never changes the caller's global logging configuration.
+"""
 
 import logging
 import sys
-from logging.handlers import TimedRotatingFileHandler
+from dataclasses import dataclass
 from pathlib import Path
 
-FORMATTER = logging.Formatter(
-    "%(asctime)s — %(name)s — %(levelname)s — "
-    + "%(funcName)s:%(lineno)d — %(message)s"
-)
+_PACKAGE_LOGGER_NAME = "qrobot"
+logging.getLogger(_PACKAGE_LOGGER_NAME).addHandler(logging.NullHandler())
 
 
-def log_dir() -> Path:
-    """Return the path to the directory storing logs."""
-    return Path.cwd().joinpath(".qrobot_logs")
+@dataclass(frozen=True)
+class LoggingConfig:
+    """Optional application-owned logging configuration for quantum-robot.
+
+    Parameters
+    ----------
+    level : int
+        Standard-library logging level. Defaults to ``logging.INFO``.
+    file_path : Path | None
+        Optional destination for a rotating debug log. No file is created when
+        omitted.
+    console : bool
+        Whether to emit records to standard output. Defaults to ``True``.
+    """
+
+    level: int = logging.INFO
+    file_path: Path | None = None
+    console: bool = True
 
 
-def log_file() -> Path:
-    """Return the path to the current log file."""
-    return log_dir().joinpath("qrobot.log")
+def get_logger(logger_name: str) -> logging.Logger:
+    """Return a qrobot-namespaced logger without configuring any handlers."""
+    return logging.getLogger(f"{_PACKAGE_LOGGER_NAME}.{logger_name}")
 
 
-def get_console_handler():
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(FORMATTER)
-    console_handler.setLevel(logging.INFO)
-    return console_handler
+def configure_logging(config: LoggingConfig) -> logging.Logger:
+    """Configure quantum-robot logging explicitly for an application.
 
-
-def get_file_handler():
-    log_dir().mkdir(parents=True, exist_ok=True)
-    file_handler = TimedRotatingFileHandler(log_file(), when="midnight")
-    file_handler.setFormatter(FORMATTER)
-    file_handler.setLevel(logging.DEBUG)
-    return file_handler
-
-
-def get_logger(logger_name):
-    logger = logging.getLogger(logger_name)
-    # better to have too much log than not enough
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(get_console_handler())
-    logger.addHandler(get_file_handler())
-    # with this pattern, it's rarely necessary to propagate the error up to parent
+    Only handlers previously installed by this function are replaced. This
+    keeps repeated setup calls idempotent without changing unrelated logging
+    configuration owned by the application.
+    """
+    logger = logging.getLogger(_PACKAGE_LOGGER_NAME)
+    logger.setLevel(config.level)
     logger.propagate = False
+
+    for handler in logger.handlers[:]:
+        if getattr(handler, "_qrobot_managed", False):
+            logger.removeHandler(handler)
+            handler.close()
+
+    formatter = logging.Formatter(
+        "%(asctime)s — %(name)s — %(levelname)s — %(message)s"
+    )
+    if config.console:
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(formatter)
+        console_handler.setLevel(config.level)
+        console_handler._qrobot_managed = True  # type: ignore[attr-defined]
+        logger.addHandler(console_handler)
+    if config.file_path is not None:
+        config.file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_handler = logging.FileHandler(config.file_path)
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(config.level)
+        file_handler._qrobot_managed = True  # type: ignore[attr-defined]
+        logger.addHandler(file_handler)
     return logger
