@@ -9,10 +9,17 @@ build:
   jobs:
     post_install:
       - python -m pip install poetry
-      - python -m poetry config virtualenvs.create false --local
-      - python -m poetry install --extras docs --extras model-visualization --extras qunits --extras visualization --extras dashboard
-    pre_build:
-      - redis-server --daemonize yes
+      # Attach Poetry to RTD's active environment rather than letting it
+      # select or create a second one.
+      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m poetry install --extras docs --extras model-visualization --extras qunits --extras visualization --extras dashboard
+    # Replace RTD's default ``python -m sphinx`` job. The executable builder
+    # refreshes the MyST tutorials and runs through Poetry's environment.
+    build:
+      html:
+        - redis-server --daemonize yes
+        - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH python -m poetry run python scripts/build_docs.py
+        - mkdir -p "$READTHEDOCS_OUTPUT/html"
+        - cp -a docs/_build/html/. "$READTHEDOCS_OUTPUT/html/"
 
 sphinx:
   configuration: docs/conf.py
