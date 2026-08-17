@@ -21,6 +21,13 @@
    :members:
 ```
 
+## `ActuatorUnit`
+
+```{eval-rst}
+.. autoclass:: qrobot_qunits.ActuatorUnit
+   :members:
+```
+
 ## Redis utilities
 
 ```{eval-rst}
