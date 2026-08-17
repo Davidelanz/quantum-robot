@@ -20,12 +20,24 @@ Redis before building this page.
 ```
 
 ```{code-cell} ipython3
-from qrobot.logger import log_file
 from qrobot.bursts import OneBurst, ZeroBurst
+from qrobot.logger import LoggingConfig, configure_logging
 from qrobot.models import AngularModel
 from qrobot_qunits import QUnit, SensorialUnit, redis_utils
 from qrobot_visualization import draw, graph
+from pathlib import Path
 import time
+```
+
+```{code-cell} ipython3
+# This is application-owned logging. The library does not configure handlers
+# unless this opt-in helper is called.
+logging_config = LoggingConfig(
+    level=10,  # logging.DEBUG
+    file_path=Path(".qrobot_logs/qrobot-qunits-debug.log"),
+    console=False,  # keep executed-documentation output readable
+)
+configure_logging(logging_config)
 ```
 
 ## Set up a basic qBrain
@@ -36,7 +48,7 @@ First, define a sensorial input:
 
 ```{code-cell} ipython3
 # Layer 0 - Unit 0
-l0_unit0 = SensorialUnit("l0_unit_0", Ts=0.1)
+l0_unit0 = SensorialUnit("l0_unit_0", Ts=0.1, logging_config=logging_config)
 ```
 
 ```{code-cell} ipython3
@@ -72,6 +84,7 @@ l1_unit0 = QUnit(
     burst=OneBurst(),
     Ts=0.3,
     in_qunits={0: l0_unit0.id},  # Will receive Input from l0_unit0, dim 0
+    logging_config=logging_config,
 )
 
 # Layer 1 - Unit 1
@@ -81,6 +94,7 @@ l1_unit1 = QUnit(
     burst=ZeroBurst(),
     Ts=0.2,
     in_qunits={0: l0_unit0.id},  # Will receive input from l0_unit0, dim 1
+    logging_config=logging_config,
 )
 ```
 
@@ -253,35 +267,29 @@ ax.hlines(y=l1_unit1.query, xmin=t_start, xmax=30, linewidth=1, color="b", ls="d
 plt.show()
 ```
 
-## Detailed logs
+## Logging and debugging qUnits
 
-+++
-
-Print the last 30 lines of the log:
+Logging is opt-in. Configure a rotating-free debug file and the console in the
+application that creates qUnits:
 
 ```{code-cell} ipython3
-def print_log(filter_by: "list[str]" = None, n_lines: int = 30):
-    current_log_file = log_file()
-    i = 0
-    with open(current_log_file) as log:
-        for line in log.readlines()[-n_lines:]:
-            if filter_by is None or all(x in line for x in filter_by):
-                print(line, end="")
-                i += 1
-            if i >= n_lines:
-                break
-
-
-print_log()
+# The same config is passed to each unit above. This is important on platforms
+# using `spawn`, where workers do not inherit the parent process's handlers.
+logging_config
 ```
 
-Print the last lines of the log only for `l1_unit1`:
+The resulting log can be inspected without relying on a library-managed file:
 
 ```{code-cell} ipython3
-print_log(["l1_unit1"], 200)
+print("\n".join(logging_config.file_path.read_text().splitlines()[-20:]))
 ```
 
 ```{code-cell} ipython3
 print("Time window time:", l1_unit1.Ts * l1_unit1.model.tau, "seconds")
-print_log(["l1_unit1", "Output state = "], 1000)
+matching_lines = [
+    line
+    for line in logging_config.file_path.read_text().splitlines()
+    if "l1_unit1" in line and "Output state =" in line
+]
+print("\n".join(matching_lines[-10:]))
 ```
