@@ -28,7 +28,7 @@ def create_app(config_object_name: str = "qrobot_dashboard.config.Config") -> Fl
 
     my_dash_app = Dash(
         __name__,
-        server=server,
+        server=server,  # type: ignore[arg-type]  # Dash's stub omits Flask apps.
         url_base_pathname="/",
         assets_folder=server.config["DASH_ASSETS_DIR"],
         meta_tags=[meta_viewport],

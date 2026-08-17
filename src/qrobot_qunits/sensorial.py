@@ -2,6 +2,8 @@ from . import redis_utils
 from .base import BaseUnit
 from .redis_utils import RedisConfig, RedisWriteError
 from qrobot.logger import LoggingConfig
+import redis
+from collections.abc import Generator
 
 
 class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
@@ -33,7 +35,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=too-many-arguments
         self,
         name: str,
-        Ts: float,  # pylint: disable=invalid-name
+        Ts: float | int,  # pylint: disable=invalid-name
         default_input: float | None = None,
         redis_config: RedisConfig | None = None,
         logging_config: LoggingConfig | None = None,
@@ -51,7 +53,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         # Log properties
         self._logger.debug(f"Properties: {self}")
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[tuple[str, object], None, None]:
         yield "name", self.name
         yield "id", self.id
         yield "Ts", self.Ts
@@ -86,7 +88,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         _r = redis_utils.get_redis(self.redis_config)
         try:
             written = _r.mset({self.id + " output": self.scalar_reading})
-        except redis_utils.redis.RedisError as exc:
+        except redis.RedisError as exc:
             raise RedisWriteError(
                 f"Unable to write SensorialUnit {self.id} output to Redis"
             ) from exc

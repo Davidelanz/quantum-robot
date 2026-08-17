@@ -1,6 +1,6 @@
 import numpy as np
 
-from .model import Model
+from .model import Model, Scalar, TargetVector
 
 
 class AngularModel(Model):
@@ -8,7 +8,7 @@ class AngularModel(Model):
     information in the angle of the qubits' Bloch sphere representations
     """
 
-    def encode(self, scalar_input, dim) -> float:
+    def encode(self, scalar_input: Scalar, dim: int) -> float:
         """Encodes the scalar input in the correspondent qubit
 
         Parameters
@@ -34,7 +34,7 @@ class AngularModel(Model):
         self.circ.ry(angle, dim)
         return angle
 
-    def query(self, target_vector) -> None:
+    def query(self, target_vector: TargetVector) -> None:
         r"""Changes the basis of the quantum system choosing target_vector as
         the basis state \|00...0>
 
@@ -65,4 +65,4 @@ class AngularModel(Model):
         """
         measure_dict = self.measure()
         # Return the most measured state (only one measurement though)
-        return max(measure_dict, key=measure_dict.get)
+        return max(measure_dict, key=lambda state: measure_dict[state])

@@ -62,6 +62,7 @@ Run the standard quality checks through that environment:
 poetry check
 poetry run ruff check src tests scripts
 poetry run black --check src tests scripts
+poetry run mypy src
 poetry run pytest --cov=qrobot --cov-fail-under=100
 poetry build
 ```

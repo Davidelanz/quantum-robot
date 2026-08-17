@@ -43,6 +43,7 @@ jobs:
         run: |
           poetry run ruff check src tests scripts
           poetry run black --check src tests scripts
+          poetry run mypy src
 
       # test
       - name: Run tests with coverage

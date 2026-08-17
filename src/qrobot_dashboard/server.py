@@ -27,13 +27,13 @@ def register_callbacks(
     @dash_app.callback(
         Output("network-graph", "figure"), [Input("refresh-interval", "n_intervals")]
     )
-    def _update_network_graph(_):
+    def _update_network_graph(_: int) -> go.Figure:
         return build_network_figure(status_provider())
 
     @dash_app.callback(
         Output("refresh-interval", "interval"), [Input("refresh-slider", "value")]
     )
-    def _update_interval_rate(refresh_value):
+    def _update_interval_rate(refresh_value: float) -> float:
         return refresh_value * 1000  # seconds to milliseconds
 
     @dash_app.callback(
@@ -41,7 +41,7 @@ def register_callbacks(
         [Input("refresh-interval", "n_intervals")],
         [State("refresh-slider", "value")],
     )
-    def _update_refresh_interval(_, refresh_value):
+    def _update_refresh_interval(_: int, refresh_value: float) -> list[str]:
         return [f"Refresh: {refresh_value*1000}ms"]
 
     return dash_app

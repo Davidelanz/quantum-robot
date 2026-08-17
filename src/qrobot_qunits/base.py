@@ -1,6 +1,8 @@
 import multiprocessing
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from time import sleep
+from typing import Any
 from uuid import uuid4
 
 from qrobot.logger import LoggingConfig, configure_logging, get_logger
@@ -36,7 +38,7 @@ class BaseUnit(ABC):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         name: str,
-        Ts: float,  # pylint: disable=invalid-name
+        Ts: float | int,  # pylint: disable=invalid-name
         redis_config: RedisConfig | None = None,
         logging_config: LoggingConfig | None = None,
     ) -> None:
@@ -63,14 +65,14 @@ class BaseUnit(ABC):
         # process and makes the unit impossible to pickle.
         self._loop_thread: multiprocessing.Process | None = None
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         """Serialize manager proxies, but not their local manager process."""
         state = self.__dict__.copy()
         state["_multiproc_manager"] = None
         state["_loop_thread"] = None
         return state
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[tuple[str, object], None, None]:
         yield "name", self.name
         yield "id", self.id
         yield "Ts", self.Ts
@@ -124,7 +126,7 @@ class BaseUnit(ABC):
             sleep(self.Ts)
 
     @staticmethod
-    def _period_check(Ts) -> float:  # pylint: disable=invalid-name
+    def _period_check(Ts: float | int) -> float:  # pylint: disable=invalid-name
         """This method ensures that a `Ts` for the unit
         is an integer or a float greater than the minimum allowed.
 

@@ -1,5 +1,6 @@
 import json
-from typing import Dict, List, Optional
+from collections.abc import Generator
+import redis
 
 from qrobot.bursts import Burst
 from qrobot.logger import LoggingConfig
@@ -55,10 +56,10 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         name: str,
         model: Model,
         burst: Burst,
-        Ts: float,  # pylint: disable=invalid-name
-        query: List[float] | None = None,
-        in_qunits: Dict[int, str] | None = None,
-        default_input: List[float] | None = None,
+        Ts: float | int,  # pylint: disable=invalid-name
+        query: list[float] | None = None,
+        in_qunits: dict[int, str] | None = None,
+        default_input: list[float] | None = None,
         redis_config: RedisConfig | None = None,
         logging_config: LoggingConfig | None = None,
     ) -> None:
@@ -88,7 +89,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         # Log properties
         self._logger.debug(f"Properties: {self}")
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[tuple[str, object], None, None]:
         yield "name", self.name
         yield "id", self.id
         yield "model", str(self.model)
@@ -97,7 +98,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         yield "Ts", self.Ts
 
     @property
-    def query(self) -> List[float]:
+    def query(self) -> list[float]:
         """Current target state for the model queries
 
         Returns
@@ -108,7 +109,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         return list(self._query)
 
     @query.setter
-    def query(self, query: list) -> None:
+    def query(self, query: list[float]) -> None:
         """Set a new query state for the qunit
 
         Parameters
@@ -125,7 +126,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         self._logger.debug(f"_query={self._query}")
 
     @property
-    def in_qunits(self) -> Dict[int, str]:
+    def in_qunits(self) -> dict[int, str | None]:
         """Current output ``{dim : qunit_id}`` couplings.
 
         Returns
@@ -133,7 +134,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         dict
             The current output ``{dim : qunit_id}`` couplings dictionary
         """
-        in_qunits = {}
+        in_qunits: dict[int, str | None] = {}
         for dim in range(self.model.n):
             try:
                 in_qunits[dim] = self._in_qunits[dim]
@@ -142,7 +143,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         return in_qunits
 
     @property
-    def input_vector(self) -> List[float]:
+    def input_vector(self) -> list[float]:
         """The current input vector of the unit
 
         Returns
@@ -181,7 +182,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         self._in_qunits[dim] = qunit_id
         self._logger.debug(f"_in_qunits={self._in_qunits}")
 
-    def get_burst_output(self) -> Optional[float]:
+    def get_burst_output(self) -> float | None:
         """Get the latest burst output from the qUnit
 
         Returns
@@ -236,7 +237,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
                         self.id + " in_qunits": json.dumps(self.in_qunits),
                     }
                 )
-            except redis_utils.redis.RedisError as exc:
+            except redis.RedisError as exc:
                 raise RedisWriteError(
                     f"Unable to write qUnit {self.id} state to Redis"
                 ) from exc
