@@ -1,5 +1,7 @@
 from . import redis_utils
 from .base import BaseUnit
+from .redis_utils import RedisConfig, RedisWriteError
+from qrobot.logger import LoggingConfig
 
 
 class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
@@ -33,9 +35,11 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         name: str,
         Ts: float,  # pylint: disable=invalid-name
         default_input: float | None = None,
+        redis_config: RedisConfig | None = None,
+        logging_config: LoggingConfig | None = None,
     ) -> None:
         # Call the BaseUnit constructor
-        super().__init__(name, Ts)
+        super().__init__(name, Ts, redis_config, logging_config)
 
         # Store the SensorialUnit name and properties
         self.default_input = 0.0 if default_input is None else default_input
@@ -69,7 +73,7 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
-        _r = redis_utils.get_redis()
+        _r = redis_utils.get_redis(self.redis_config)
         _r.delete(self.id + " output")
 
     def _unit_task(self) -> None:
@@ -79,8 +83,12 @@ class SensorialUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         self._logger.debug(f"scalar_reading={scalar_reading}")
         self._logger.debug("Writing input on redis")
         # Write it on redis
-        _r = redis_utils.get_redis()
-        if not (_r.mset({self.id + " output": self.scalar_reading})):
-            raise Exception(
-                f"Problem in writing SensorialUnit {self.id} output on Redis database!"
-            )
+        _r = redis_utils.get_redis(self.redis_config)
+        try:
+            written = _r.mset({self.id + " output": self.scalar_reading})
+        except redis_utils.redis.RedisError as exc:
+            raise RedisWriteError(
+                f"Unable to write SensorialUnit {self.id} output to Redis"
+            ) from exc
+        if not written:
+            raise RedisWriteError(f"Redis did not write SensorialUnit {self.id} output")

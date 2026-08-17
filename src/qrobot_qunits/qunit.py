@@ -2,9 +2,11 @@ import json
 from typing import Dict, List, Optional
 
 from qrobot.bursts import Burst
+from qrobot.logger import LoggingConfig
 from qrobot.models import Model
 from . import redis_utils
 from .base import BaseUnit
+from .redis_utils import RedisConfig, RedisWriteError
 
 
 class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
@@ -57,9 +59,11 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         query: List[float] | None = None,
         in_qunits: Dict[int, str] | None = None,
         default_input: List[float] | None = None,
+        redis_config: RedisConfig | None = None,
+        logging_config: LoggingConfig | None = None,
     ) -> None:
         # Call the BaseUnit constructor
-        super().__init__(name, Ts)
+        super().__init__(name, Ts, redis_config, logging_config)
 
         # Store the qUnits name and properties
         self.model = model
@@ -150,7 +154,7 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         # values used by later temporal windows.
         input_vector = self.default_input.copy()
         for dim, qunit_id in self._in_qunits.items():
-            _r = redis_utils.get_redis()
+            _r = redis_utils.get_redis(self.redis_config)
             val = _r.get(qunit_id + " output")
             if val is not None:
                 input_vector[dim] = float(val)
@@ -185,13 +189,13 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
         float
             The latest burst output written by the unit on the Redis database
         """
-        global_status = redis_utils.redis_status()
+        global_status = redis_utils.redis_status(self.redis_config)
         out = global_status.get(f"{self.id} output", None)
         return float(out) if out is not None else None
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
-        _r = redis_utils.get_redis()
+        _r = redis_utils.get_redis(self.redis_config)
         _r.delete(self.id + " output")
         _r.delete(self.id + " state")
         _r.delete(self.id + " query")
@@ -221,17 +225,23 @@ class QUnit(BaseUnit):  # pylint: disable=too-many-instance-attributes
             self._logger.debug(f"Output state = {out_state}")
             # Write output on Redis database
             self._logger.debug("Opening a connection to redis...")
-            _r = redis_utils.get_redis()
+            _r = redis_utils.get_redis(self.redis_config)
             self._logger.debug(f"Redis connected: {_r}")
-            if not (
-                _r.mset({self.id + " output": self.burst(out_state)})
-                and _r.mset({self.id + " state": str(out_state)})
-                and _r.mset({self.id + " query": json.dumps(self.query)})
-                and _r.mset({self.id + " in_qunits": json.dumps(self.in_qunits)})
-            ):
-                raise Exception(
-                    f"Problem in writing qunit {self.id} output on Redis database!"
+            try:
+                written = _r.mset(
+                    {
+                        self.id + " output": self.burst(out_state),
+                        self.id + " state": str(out_state),
+                        self.id + " query": json.dumps(self.query),
+                        self.id + " in_qunits": json.dumps(self.in_qunits),
+                    }
                 )
+            except redis_utils.redis.RedisError as exc:
+                raise RedisWriteError(
+                    f"Unable to write qUnit {self.id} state to Redis"
+                ) from exc
+            if not written:
+                raise RedisWriteError(f"Redis did not write qUnit {self.id} state")
             # Initialize new temporal window
             self._logger.debug("Initializing a new temporal window")
             self.model.clear()

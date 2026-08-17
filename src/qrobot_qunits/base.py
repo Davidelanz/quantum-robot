@@ -3,8 +3,9 @@ from abc import ABC, abstractmethod
 from time import sleep
 from uuid import uuid4
 
-from qrobot.logger.logger import get_logger
+from qrobot.logger import LoggingConfig, configure_logging, get_logger
 from . import redis_utils
+from .redis_utils import RedisConfig
 
 MIN_TS = 0.01
 """ float: Minimum time period allowed (in seconds).
@@ -36,6 +37,8 @@ class BaseUnit(ABC):
         self,
         name: str,
         Ts: float,  # pylint: disable=invalid-name
+        redis_config: RedisConfig | None = None,
+        logging_config: LoggingConfig | None = None,
     ) -> None:
         # Create a instance unique identifier
         self.id = name + "-" + str(uuid4())[:6]  # pylint: disable=invalid-name
@@ -46,6 +49,8 @@ class BaseUnit(ABC):
         # Store the unit name and properties
         self.name = name
         self.Ts = self._period_check(Ts)  # pylint: disable=invalid-name
+        self.redis_config = redis_config or RedisConfig()
+        self.logging_config = logging_config
 
         # Initialize multiprocessing manager
         self._multiproc_manager = multiprocessing.Manager()
@@ -85,7 +90,7 @@ class BaseUnit(ABC):
         self._loop_thread = multiprocessing.Process(target=self._loop)
         self._loop_thread.start()
         # Add the unit with its class to redis
-        _r = redis_utils.get_redis()
+        _r = redis_utils.get_redis(self.redis_config)
         _r.mset({self.id + " class": self.__class__.__name__})
 
     def stop(self) -> None:
@@ -100,7 +105,7 @@ class BaseUnit(ABC):
         self._logger.info("Cleaning redis")
         self._clean_redis()
         # Remove the unit with its class from redis
-        _r = redis_utils.get_redis()
+        _r = redis_utils.get_redis(self.redis_config)
         _r.delete(self.id + " class")
 
     @abstractmethod
@@ -112,6 +117,8 @@ class BaseUnit(ABC):
         """Task executed by the unit every TS time period."""
 
     def _loop(self) -> None:
+        if self.logging_config is not None:
+            configure_logging(self.logging_config)
         while True:
             self._unit_task()
             sleep(self.Ts)

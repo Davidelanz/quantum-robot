@@ -7,7 +7,9 @@ from redis.exceptions import ConnectionError
 
 from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
-from qrobot_qunits import QUnit, SensorialUnit, redis_utils
+from qrobot_qunits import QUnit, RedisConfig, SensorialUnit, redis_utils
+
+TEST_REDIS_CONFIG = RedisConfig(database=15)
 
 # Using pytest_check for this test to allow the whole test
 # to execute and stop the multithreading via unit.stop()
@@ -19,18 +21,18 @@ from qrobot_qunits import QUnit, SensorialUnit, redis_utils
 def fixture_flush_redis() -> None:
     """Flush redis before starting the test."""
     try:
-        redis_utils.get_redis().ping()
+        redis_utils.get_redis(TEST_REDIS_CONFIG).ping()
     except ConnectionError:
         pytest.skip("Redis is not available on localhost:6379")
-    redis_utils.flush_redis()
-    check.equal(redis_utils.redis_status(), {})
+    redis_utils.flush_redis(TEST_REDIS_CONFIG)
+    check.equal(redis_utils.redis_status(TEST_REDIS_CONFIG), {})
 
 
 @pytest.fixture
 def fixture_q_brain() -> Tuple[QUnit, QUnit, QUnit]:
     """Initialize the qBrain."""
     # Layer 0
-    l0_unit0 = SensorialUnit(name="l0_unit0", Ts=0.05)
+    l0_unit0 = SensorialUnit(name="l0_unit0", Ts=0.05, redis_config=TEST_REDIS_CONFIG)
     check.equal(
         dict(l0_unit0),
         {
@@ -46,6 +48,7 @@ def fixture_q_brain() -> Tuple[QUnit, QUnit, QUnit]:
         burst=ZeroBurst(),
         Ts=0.2,
         in_qunits={0: l0_unit0.id},  # Will receive Input from l0_unit0, dim 0
+        redis_config=TEST_REDIS_CONFIG,
     )
     l1_unit1 = QUnit(
         name="l1_unit1",
@@ -53,6 +56,7 @@ def fixture_q_brain() -> Tuple[QUnit, QUnit, QUnit]:
         burst=ZeroBurst(),
         Ts=0.2,
         in_qunits={0: l0_unit0.id},  # Will receive input from l0_unit0, dim 1
+        redis_config=TEST_REDIS_CONFIG,
     )
     # Return qBrain
     q_brain = (l0_unit0, l1_unit0, l1_unit1)
@@ -125,10 +129,10 @@ def test_qunit(
 
         expected_output_keys = {f"{unit.id} output" for unit in units}
         deadline = monotonic() + 6
-        status = redis_utils.redis_status()
+        status = redis_utils.redis_status(TEST_REDIS_CONFIG)
         while monotonic() < deadline and not expected_output_keys.issubset(status):
             sleep(0.1)
-            status = redis_utils.redis_status()
+            status = redis_utils.redis_status(TEST_REDIS_CONFIG)
 
         assert expected_output_keys.issubset(status)
         assert l1_unit0.get_burst_output() is not None
@@ -141,4 +145,4 @@ def test_qunit(
         for unit in units:
             unit.stop()
 
-    assert redis_utils.redis_status() == {}
+    assert redis_utils.redis_status(TEST_REDIS_CONFIG) == {}
