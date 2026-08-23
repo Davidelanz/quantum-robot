@@ -1,4 +1,4 @@
-# Executable tutorials
+# Tutorials
 
 ```{toctree}
 :maxdepth: 2

@@ -13,6 +13,13 @@ kernelspec:
 
 # Monodimensional Angular Model
 
+```{admonition} Research provenance
+The model introduced here is presented in [*A Preliminary Study for a Quantum-like
+Robot Perception Model*](https://arxiv.org/abs/2006.02771) (2020), and later
+incorporated into [*Quantum-like Modeling of Cognitive Architectures for
+Robotics*](https://doi.org/10.5281/zenodo.22068511).
+```
+
 ```{code-cell} ipython3
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,7 +27,9 @@ from qiskit.visualization import plot_histogram
 from qrobot.models import AngularModel
 ```
 
-In this notebook we present a 1-dimensional ($n=1$) demo for the ``AngularModel`` class.
+In this notebook we present a 1-dimensional ($n=1$) demo for the
+`AngularModel` class. The model integrates a sequence of normalized sensor
+events in one qubit and produces a binary outcome when that qubit is measured.
 
 ```{code-cell} ipython3
 n = 1
@@ -32,9 +41,21 @@ Here, we considered a time window of $\tau > 1$.
 tau = 30
 ```
 
+For each event $x_t\in[0,1]$, the model applies a fractional rotation
+$R_y(\pi x_t/\tau)$. Since every rotation uses the same axis, the final angle is
+
+$$
+\theta=\frac{\pi}{\tau}\sum_t x_t=\pi\bar{x},
+$$
+
+where $\bar{x}$ is the mean input in the temporal window. Consequently,
+$P(0)=\cos^2(\theta/2)$ and $P(1)=\sin^2(\theta/2)$.
+
 ## Input definition
 
-We start by defining an arbirary input sequence:
+We start by defining an arbitrary continuous input sequence. Its first half
+spans the full normalized interval, while the second half is biased toward
+larger readings:
 
 ```{code-cell} ipython3
 sequence = list()
@@ -84,17 +105,26 @@ Given the input we defined above, the model is in the following state:
 model.plot_state_mat()
 ```
 
-**Density matrix** (from [Wikipedia](https://en.wikipedia.org/wiki/Density_matrix)): or a finite-dimensional function space, the most general density operator is of the form
+**Density matrix** (see [Wikipedia](https://en.wikipedia.org/wiki/Density_matrix)):
+for a finite-dimensional state space, the most general density operator is of
+the form
 
 $$\rho =\sum _{j}p_{j}|\psi _{j}\rangle \langle \psi _{j}|$$
 
 where the coefficients $p_{j}$ are non-negative and add up to one, and $|\psi _{j}\rangle \langle \psi _{j}|$ is an outer product written in bra-ket notation. This represents a mixed state, with probability $ p_{j}$ that the system is in the pure state $|\psi _{j}\rangle $.
 
-+++
-
 ## Measurement simulation
 
-We simulate ``shots`` measurements, and then we extract the relative frequencies for the two possible basis state outcomes $\lvert 0 \rangle ,\lvert 1 \rangle $.
+A single call to `model.decode()` performs one measurement and can be
+interpreted as one stochastic decision:
+
+```{code-cell} ipython3
+print(f"One-shot decision: |{model.decode()}⟩")
+```
+
+Now we instead simulate many `shots` to expose the probability distribution
+for the two possible basis-state outcomes $\lvert 0 \rangle$ and $\lvert 1 \rangle$
+and validate the information encoded by the temporal window:
 
 ```{code-cell} ipython3
 shots = 1000000
@@ -129,4 +159,10 @@ ax2.set_title("Probabilities")
 plt.show()
 ```
 
-(...)
+## References
+
+- D. Lanza, P. Solinas, and F. Mastrogiovanni, [*A Preliminary Study for a
+  Quantum-like Robot Perception Model*](https://arxiv.org/abs/2006.02771),
+  arXiv:2006.02771, 2020.
+- D. Lanza, [*Quantum-like Modeling of Cognitive Architectures for
+  Robotics*](https://doi.org/10.5281/zenodo.22068511), Zenodo, 2020.

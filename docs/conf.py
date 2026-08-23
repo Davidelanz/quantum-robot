@@ -15,7 +15,7 @@ import sphinx_rtd_theme  # ReadTheDocs theme
 # -- Project information -----------------------------------------------------
 
 project = "quantum-robot"
-copyright = "2020, Davide Lanza"
+copyright = "2020-2026, Davide Lanza"
 author = "Davide Lanza"
 
 # The short X.Y version

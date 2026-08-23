@@ -6,9 +6,13 @@
    </a>
 </div>
 <br>
+
 <div align="center" style="align:center; padding:20px; line-height:2;">
    <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml">
       <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml/badge.svg?branch=master"/>
+   </a>
+   <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml">
+      <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg?branch=master" alt="CodeQL"/>
    </a>
    <a href="https://codecov.io/gh/Davidelanz/quantum-robot" >
       <img src="https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU" alt="Code coverage"/>
@@ -16,14 +20,11 @@
    <a href='http://docs.quantum-robot.org/en/latest/?badge=latest'>
       <img src='https://readthedocs.org/projects/quantum-robot/badge/?version=latest' alt='Documentation Status' />
    </a>
-   <a href="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml">
-      <img src="https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg?branch=master" alt="CodeQL"/>
+   <a href="https://snyk.io/advisor/python/quantum-robot">
+      <img src="https://img.shields.io/badge/Snyk_Security-blue" alt="snyk">
    </a>
    <a href="https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability">
       <img src="https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability" alt="Maintainability"/>
-   </a>
-   <a href="https://snyk.io/advisor/python/quantum-robot">
-      <img src="https://snyk.io/advisor/python/quantum-robot/badge.svg" alt="snyk">
    </a>
    <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE">
       <img src="https://img.shields.io/badge/license-GNU_GPL_v3-blue" alt="License"/>

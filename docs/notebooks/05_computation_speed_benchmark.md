@@ -13,7 +13,12 @@ kernelspec:
 
 # Computation speed benchmark
 
-+++
+```{admonition} Scope
+This notebook is an environment-specific engineering benchmark. It helps estimate
+how statevector dimension affects the current local backend. Absolute timings should
+be compared only when the recorded machine and software environment are similar.
+```
+
 
 In this notebook, we tested the average computation speed for various models in different cases.
 
@@ -44,7 +49,7 @@ def get_cpu_model(spec="model name"):
             return subprocess.check_output(
                 ["sysctl", "-n", "machdep.cpu.brand_string"], text=True
             ).strip()
-        except (OSError, subprocess.CalledProcessError):
+        except OSError, subprocess.CalledProcessError:
             return platform.processor() or platform.machine()
     if platform.system() == "Linux":
         command = "cat /proc/cpuinfo"
@@ -181,7 +186,6 @@ def plot_results(df, title="Model"):
     plt.show()
 ```
 
-
 ## AngularModel
 We test initialization, encoding, and decoding for an input of .5 on each
 dimension. The executable documentation caps the statevector benchmark at
@@ -250,7 +254,6 @@ plot_results(df_linear, "LinearModel")
 ```{code-cell} ipython3
 df_linear
 ```
-
 
 ## Comparison
 

@@ -60,7 +60,7 @@ docs = [
     "networkx>=3.4",
     "plotly>=6.0",
 ]
-lint = ["black>=25.0", "build>=1.2", "ruff>=0.14"]
+lint = ["black>=25.0", "build>=1.2", "jupytext>=1.17", "ruff>=0.14"]
 
 [project.urls]
 Homepage = "http://quantum-robot.org/"
@@ -88,9 +88,13 @@ disable = ["too-few-public-methods", "logging-fstring-interpolation"]
 profile = "black"
 src_paths = ["src", "tests"]
 
+[tool.black]
+line-length = 100
+
 [tool.ruff]
 target-version = "py314"
 extend-exclude = ["docs/_build"]
+line-length = 100
 
 [tool.ruff.lint]
 # Correctness checks complement Black without duplicating its style rules.

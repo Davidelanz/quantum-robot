@@ -12,6 +12,8 @@ skim it) in order to grasp the big picture behind it:
   Model](https://arxiv.org/abs/2006.02771).
 - [Multi-sensory Integration in a Quantum-Like Robot Perception
   Model](https://arxiv.org/abs/2006.16404).
+- [Quantum-like Modeling of Cognitive Architectures for
+  Robotics](https://doi.org/10.5281/zenodo.22068511).
 
 ## Contribuiting
 
@@ -25,9 +27,18 @@ An example module with the docstring standard we adopted is available
 ## Citing
 
 If you use quantum-robot in a scientific publication, we would
-appreciate citations to the following paper:
+appreciate citations to the following:
 
 ``` bibtex
+@misc{lanza2020quantum,
+    author={Lanza, Davide},
+    title={Quantum-like Modeling of Cognitive Architectures for Robotics},
+    year={2020},
+    publisher={Zenodo},
+    doi={10.5281/zenodo.22068511},
+    url={https://doi.org/10.5281/zenodo.22068511},
+    note={Master's thesis for the EMARO+ (European Master on Advanced Robotics) programme.},
+}
 @misc{lanza2020preliminary,
     title={Multi-sensory Integration in a Quantum-Like Robot Perception Model},
     author={Davide Lanza and Paolo Solinas and Fulvio Mastrogiovanni},

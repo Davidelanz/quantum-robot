@@ -62,6 +62,7 @@ Run the standard quality checks through that environment:
 poetry check
 poetry run ruff check src tests scripts
 poetry run black --check src tests scripts
+poetry run python scripts/format_notebooks.py --check
 poetry run mypy src
 poetry run pytest --cov=qrobot --cov-fail-under=100
 poetry build
@@ -71,7 +72,12 @@ Apply the formatter when needed:
 
 ```console
 poetry run black src tests scripts
+poetry run python scripts/format_notebooks.py
 ```
+
+The notebook formatter converts each numbered MyST notebook through Jupytext,
+runs Ruff over its Python cells, and writes it back without creating committed
+`.ipynb` files.
 
 The qUnits integration tests and the executable qUnits tutorial require Redis
 on `localhost:6379`. Start a disposable local instance when running them:
