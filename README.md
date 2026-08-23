@@ -42,8 +42,20 @@ python -m pip install --upgrade quantum-robot
 Install optional capabilities only when needed:
 
 ```console
-python -m pip install --upgrade "quantum-robot[qunits,visualization,simulator]"
+python -m pip install --upgrade "quantum-robot[model-visualization,qunits,visualization,simulator,dashboard]"
 ```
+
+Python 3.14 is required. For an isolated installation, create and activate a
+virtual environment before running `pip`:
+
+```console
+python3.14 -m venv .venv
+source .venv/bin/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+```
+
+See the [getting-started guide](http://docs.quantum-robot.org/en/latest/getting_started/getting_started.html)
+for individual extras, Redis setup, and installation checks.
 
 ## Development
 
@@ -90,18 +102,22 @@ poetry run pytest
 
 Stop it with `docker stop qrobot-redis`.
 
-Run the live bug-like qBrain demo with Redis listening locally:
+Run either of the two embodied examples with Redis listening locally:
 
 ```console
+poetry run python examples/grasping_robot.py
 poetry run python examples/bug_world.py
 ```
 
-It opens a focused Matplotlib chessboard where the Redis-connected qBrain drives
-the bug through five actuator interfaces.
+`grasping_robot` presents an approaching ball, distance and touch interfaces,
+and a qBrain-controlled gripper. `bug_world` opens a predator/prey chessboard
+where the qBrain drives five behavioral actuator interfaces. Both are small
+live 2-D simulations; the foundational model demonstrations remain executable
+inside the notebooks.
 
 ## Documentation
 
-The documentation source is MyST Markdown, including executable tutorials.
+The documentation source is MyST Markdown, including tutorials.
 Building it runs those tutorials, renders MathJax formulas, and writes the
 resulting site to `docs/_build/html`:
 
@@ -119,12 +135,13 @@ src/
   qrobot/                 # core package and backend interface
   qrobot_qunits/          # optional Redis-based extension
   qrobot_visualization/   # optional graph/drawing extension
-  qrobot_simulator/       # optional lightweight 2-D robot simulator
+  qrobot_simulator/       # grasping_robot and bug_world 2-D simulators
   qrobot_dashboard/       # optional dashboard extension
+examples/                 # exactly two embodied example runners
 tests/
   core/
   extensions/
-docs/                     # MyST API docs and executable tutorials
+docs/                     # MyST API docs and tutorials
 ```
 
 ## Contributing and citation
@@ -132,15 +149,27 @@ docs/                     # MyST API docs and executable tutorials
 Contributions are welcome; see [the contributing guide](.github/CONTRIBUTING.md).
 For questions, contact [the maintainer](mailto:info@davidelanza.it).
 
-If you use quantum-robot in research, please cite:
+If you use quantum-robot in research, we would
+appreciate citations to the following:
 
-```bibtex
-@InProceedings{10.1007/978-3-030-71151-1_44,
-  author = {Lanza, Davide and Solinas, Paolo and Mastrogiovanni, Fulvio},
-  title = {Multi-sensory Integration in a Quantum-Like Robot Perception Model},
-  booktitle = {Experimental Robotics},
-  year = {2021},
-  pages = {502--509}
+``` bibtex
+@misc{lanza2020quantum,
+    author={Lanza, Davide},
+    title={Quantum-like Modeling of Cognitive Architectures for Robotics},
+    year={2020},
+    publisher={Zenodo},
+    doi={10.5281/zenodo.22068511},
+    url={https://doi.org/10.5281/zenodo.22068511},
+    note={Master's thesis for the EMARO+ (European Master on Advanced Robotics) programme.},
+}
+@misc{lanza2020preliminary,
+    title={Multi-sensory Integration in a Quantum-Like Robot Perception Model},
+    author={Davide Lanza and Paolo Solinas and Fulvio Mastrogiovanni},
+    year={2020},
+    eprint={2006.16404},
+    archivePrefix={arXiv},
+    primaryClass={cs.RO},
+    note={preprint at \url{https://arxiv.org/abs/2006.16404}},
 }
 ```
 
