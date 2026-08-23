@@ -12,7 +12,6 @@ import os
 
 import sphinx_rtd_theme  # ReadTheDocs theme
 
-
 # -- Project information -----------------------------------------------------
 
 project = "quantum-robot"

@@ -143,8 +143,7 @@ class BaseUnit(ABC):
         """
         if not isinstance(sampling_period, (float, int)):
             raise TypeError(
-                "sampling_period must be a scalar number, "
-                f"not a {type(sampling_period)}!"
+                f"sampling_period must be a scalar number, not a {type(sampling_period)}!"
             )
         if sampling_period < MIN_TS:
             raise ValueError(f"sampling_period must not be lower than {MIN_TS}!")

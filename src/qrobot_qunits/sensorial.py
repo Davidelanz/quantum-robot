@@ -67,9 +67,7 @@ class SensorialUnit(BaseUnit):
     def scalar_reading(self, value: float) -> None:
         """Set a new value for the input"""
         # Update accumulator
-        self._logger.debug(
-            f"Changing scalar reading from {self._scalar_reading.value} to {value}"
-        )
+        self._logger.debug(f"Changing scalar reading from {self._scalar_reading.value} to {value}")
         self._scalar_reading.value = value
         self._logger.debug(f"_scalar_reading={self._scalar_reading.value}")
 

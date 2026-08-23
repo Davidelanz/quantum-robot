@@ -1,4 +1,4 @@
-"""Tests for thesis-style Redis actuator interfaces."""
+"""Tests for Redis actuator interfaces."""
 
 from time import monotonic, sleep
 

@@ -209,9 +209,7 @@ class QUnit(BaseUnit):
     def _unit_task(self) -> None:
         """Single iteration of the processing loop."""
         # "_t_idx" is the event index of the temporal window
-        self._logger.debug(
-            f"Temporal window event {self._t_idx.value + 1}/{self.model.tau}"
-        )
+        self._logger.debug(f"Temporal window event {self._t_idx.value + 1}/{self.model.tau}")
         # Get input
         input_vector = self.input_vector
         self._logger.debug(f"input_vector={input_vector}")
@@ -242,9 +240,7 @@ class QUnit(BaseUnit):
                     }
                 )
             except redis.RedisError as exc:
-                raise RedisWriteError(
-                    f"Unable to write qUnit {self.id} state to Redis"
-                ) from exc
+                raise RedisWriteError(f"Unable to write qUnit {self.id} state to Redis") from exc
             if not written:
                 raise RedisWriteError(f"Redis did not write qUnit {self.id} state")
             # Initialize new temporal window

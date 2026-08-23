@@ -32,9 +32,7 @@ def fixture_flush_redis() -> None:
 def fixture_q_brain() -> Tuple[QUnit, QUnit, QUnit]:
     """Initialize the qBrain."""
     # Layer 0
-    l0_unit0 = SensorialUnit(
-        name="l0_unit0", sampling_period=0.05, redis_config=TEST_REDIS_CONFIG
-    )
+    l0_unit0 = SensorialUnit(name="l0_unit0", sampling_period=0.05, redis_config=TEST_REDIS_CONFIG)
     check.equal(
         dict(l0_unit0),
         {
@@ -139,10 +137,7 @@ def test_qunit(
         assert expected_output_keys.issubset(status)
         assert l1_unit0.get_burst_output() is not None
         assert l1_unit1.get_burst_output() is not None
-        assert all(
-            unit._loop_thread is not None and unit._loop_thread.is_alive()
-            for unit in units
-        )
+        assert all(unit._loop_thread is not None and unit._loop_thread.is_alive() for unit in units)
     finally:
         for unit in units:
             unit.stop()

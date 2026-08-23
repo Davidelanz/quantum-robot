@@ -121,9 +121,7 @@ class ActuatorUnit(BaseUnit):
                 }
             )
         except redis.RedisError as exc:
-            raise RedisWriteError(
-                f"Unable to write ActuatorUnit {self.id} state to Redis"
-            ) from exc
+            raise RedisWriteError(f"Unable to write ActuatorUnit {self.id} state to Redis") from exc
         if not written:
             raise RedisWriteError(f"Redis did not write ActuatorUnit {self.id} state")
 

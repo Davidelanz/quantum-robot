@@ -55,9 +55,7 @@ def configure_logging(config: LoggingConfig) -> logging.Logger:
             logger.removeHandler(handler)
             handler.close()
 
-    formatter = logging.Formatter(
-        "%(asctime)s — %(name)s — %(levelname)s — %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
     if config.console:
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(formatter)
