@@ -9,4 +9,6 @@
 04_linear_angular_model_comparison
 05_computation_speed_benchmark
 06_qunits_getting_started
+07_object_grasping_robot
+08_bug_like_robot
 ```
