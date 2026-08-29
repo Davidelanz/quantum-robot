@@ -23,13 +23,18 @@ maintained by Davide Lanza.
 The project is one Poetry distribution with a dependency-light `qrobot` core
 and optional extension import packages:
 
-| Capability | Install extra | Import package |
-| --- | --- | --- |
-| Core models and Qiskit backend | — | `qrobot` |
-| qUnits / Redis integration | `qunits` | `qrobot_qunits` |
-| Graph and drawing tools | `visualization` | `qrobot_visualization` |
-| Lightweight 2-D robot simulator | `simulator` | `qrobot_simulator` |
-| Dashboard | `dashboard` | `qrobot_dashboard` |
+| Capability | Install extra | Import package | Status |
+| --- | --- | --- | --- |
+| Core models and Qiskit backend | — | `qrobot` | Supported |
+| qUnits / Redis integration | `qunits` | `qrobot_qunits` | Supported |
+| Graph and drawing tools | `visualization` | `qrobot_visualization` | Experimental |
+| Lightweight 2-D robot simulator | `simulator` | `qrobot_simulator` | Experimental |
+| Dashboard | `dashboard` | `qrobot_dashboard` | Experimental |
+
+> [!WARNING]
+> `qrobot_simulator`, `qrobot_visualization`, and `qrobot_dashboard` are
+> experimental extensions. Their public interfaces, configuration, and output
+> may change between minor releases while their contracts are being defined.
 
 ## Install
 

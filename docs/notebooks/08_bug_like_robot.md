@@ -13,6 +13,12 @@ kernelspec:
 
 # Bug world: a live predator/prey qBrain
 
+```{warning}
+`qrobot_simulator` is experimental. This tutorial uses scenario-specific
+predator/prey, sensing, movement, and rendering interfaces that may change
+between minor releases.
+```
+
 ```{admonition} Research provenance
 This tutorial implements the bug-like architecture in
 [*Quantum-like Modeling of Cognitive Architectures for

@@ -13,6 +13,12 @@ kernelspec:
 
 # Grasping robot: a live object-grasping qBrain
 
+```{warning}
+`qrobot_simulator` is experimental. This tutorial uses scenario-specific
+grasping, sensing, movement, and rendering interfaces that may change between
+minor releases.
+```
+
 ```{admonition} Research provenance
 This tutorial implements the object-grasping
 architecture in [*Quantum-like Modeling of Cognitive Architectures for

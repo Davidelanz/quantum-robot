@@ -1,5 +1,10 @@
 # Embodied simulators
 
+```{warning}
+`qrobot_simulator` is experimental. Its public interfaces and configuration may
+change between minor releases while common simulator contracts are defined.
+```
+
 The simulator extension contains two examples: the stationary
 `grasping_robot` and the mobile `bug_world`.
 Both separate physical world state, a self-contained Redis-connected robot,

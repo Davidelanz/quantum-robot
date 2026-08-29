@@ -1,5 +1,9 @@
 """Run a bug-like qBrain in a live two-dimensional ecosystem.
 
+Warning: ``qrobot_simulator`` is experimental. This example implements the
+predator/prey research scenario with simplified two-dimensional kinematics and
+sensing; its simulator interfaces may change between minor releases.
+
 An interactive chessboard shows two blue prey robots, one red predator, and a
 self-contained brown BugRobot whose sensors, qUnits, and actuators communicate
 through Redis. Matplotlib renders the world, while a local Redis server carries

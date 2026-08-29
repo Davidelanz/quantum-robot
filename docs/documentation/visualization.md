@@ -1,5 +1,10 @@
 # Visualization
 
+```{warning}
+`qrobot_visualization` is experimental. Graph construction, layout, rendering,
+and compatibility aliases may change between minor releases.
+```
+
 ## Graph tools
 
 ```{eval-rst}
@@ -10,7 +15,8 @@
 ## Dashboard
 
 ```{warning}
-The dashboard remains experimental.
+`qrobot_dashboard` is experimental. Its application factory, configuration,
+layout, and callbacks may change between minor releases.
 ```
 
 ```{eval-rst}

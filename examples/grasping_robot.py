@@ -1,5 +1,10 @@
 """Run the object-grasping qBrain in a live two-dimensional world.
 
+Warning: ``qrobot_simulator`` is experimental. This example implements the
+object-grasping research scenario with simplified two-dimensional kinematics,
+sensing, and contact rules; its simulator interfaces may change between minor
+releases.
+
 A blue ball wanders between near and far destinations in front of a stationary
 brown robot whose distance and touch interfaces feed independently timed qUnits
 and a Redis-connected gripper actuator. The example implements its arena,
