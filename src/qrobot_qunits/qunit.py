@@ -163,10 +163,20 @@ class QUnit(BaseUnit):
             _r = redis_utils.get_redis(self.redis_config)
             val = _r.get(qunit_id + " output")
             if val is not None:
-                input_vector[dim] = float(val)
+                input_vector[dim] = self._normalize_input(dim, val)
             else:
                 self._logger.info(f"Unable to read {qunit_id} input")
         return input_vector
+
+    def _normalize_input(self, dim: int, value: object) -> float:
+        """Return a normalized Redis input, falling back when invalid."""
+        try:
+            normalized = float(value)  # type: ignore[arg-type]
+        except TypeError, ValueError:
+            normalized = self.default_input[dim]
+        if not 0.0 <= normalized <= 1.0:
+            normalized = self.default_input[dim]
+        return normalized
 
     def set_input(self, dim: int, input_id: str) -> None:
         """Connect a new input to the specified dimension to the qUnit.

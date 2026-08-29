@@ -27,7 +27,7 @@ def fixture_flush_redis() -> None:
 
 
 @pytest.fixture
-def fixture_q_brain() -> Tuple[QUnit, QUnit, QUnit]:
+def fixture_q_brain() -> Tuple[SensorialUnit, QUnit, QUnit]:
     """Initialize the qBrain."""
     # Layer 0
     l0_unit0 = SensorialUnit(name="l0_unit0", sampling_period=0.05, redis_config=TEST_REDIS_CONFIG)
@@ -64,7 +64,7 @@ def fixture_q_brain() -> Tuple[QUnit, QUnit, QUnit]:
 @pytest.mark.redis
 def test_init_qunits(
     fixture_flush_redis,
-    fixture_q_brain: Tuple[QUnit, QUnit, QUnit],
+    fixture_q_brain: Tuple[SensorialUnit, QUnit, QUnit],
 ) -> None:
     l0_unit0, l1_unit0, l1_unit1 = fixture_q_brain
 
@@ -110,6 +110,10 @@ def test_init_qunits(
     input_vector = l1_unit0.input_vector
     input_vector[0] = 1.0
     check.equal(l1_unit0.default_input, [0.0])
+
+    # A non-normalozed input value falls back the default value
+    redis_utils.get_redis(TEST_REDIS_CONFIG).set(f"{l0_unit0.id} output", "1.01")
+    check.equal(l1_unit0.input_vector, [0.0])
 
 
 @pytest.mark.redis
