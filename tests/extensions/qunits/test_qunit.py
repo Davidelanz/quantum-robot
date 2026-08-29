@@ -11,10 +11,8 @@ from qrobot_qunits import QUnit, RedisConfig, SensorialUnit, redis_utils
 
 TEST_REDIS_CONFIG = RedisConfig(database=15)
 
-# Using pytest_check for this test to allow the whole test
-# to execute and stop the multithreading via unit.stop()
-# methods instead of closing the main thread
-# and leaving the unit subprocesses open.
+# Soft assertions via pytest_check let the test reach its explicit
+# worker cleanup even when an earlier expectation fails.
 
 
 @pytest.fixture

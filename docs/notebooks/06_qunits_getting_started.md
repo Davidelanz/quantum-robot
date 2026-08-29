@@ -144,7 +144,8 @@ The important direction of time is:
 Therefore, an output drawn just after time $t$ describes the completed window
 immediately **before** $t$. It is not a decision about the current sensor sample.
 
-Now we will run the system in real time wile storing the time evolution of the system each `refresh_time`. During that time, we will be changing the sensor reading every second via `l0_unit0.scalar_reading`:
+The next cell runs the system in real time, records a snapshot every
+`refresh_time`, and changes `l0_unit0.scalar_reading` once per second:
 
 ```{code-cell} ipython3
 import time
@@ -185,7 +186,7 @@ finally:
         unit.stop()
 ```
 
-This is the state of the network graph of the qBrain at the last moment we recorded:
+This graph shows the final recorded qBrain network state:
 
 ```{code-cell} ipython3
 qbrain_graph = build_network(status_dict=statuses[-1])
@@ -215,7 +216,7 @@ redis_utils.redis_status()
 ## Visualize the results
 
 
-We can visualize the time evolution of such time period:
+The recorded values show how signals evolve over that interval:
 
 ```{code-cell} ipython3
 :tags: [hide-input]
@@ -310,7 +311,7 @@ input, and the dashed lines are the two queries. The middle and bottom rows are
 the binary decision streams coming from each qUnit.
 
 
-Each qUnit's turns the previous time window history of input values into one
+Each qUnit turns the previous temporal window of input values into one
 query-relative, probabilistic decision.
 
 For the "fast" unit `l1_unit0`:
@@ -328,7 +329,9 @@ print(l1_unit0)
 plot_unit_decisions([fast_plot])
 ```
 
-The output value of `l1_unit0` should be `0` when the input value is closer to `0.0`, while should be `1` when the input value is farther from `0.0`. Since **this is not a classic system**, the uncertainty of measurement is still there and deviations might occurr along the way. **qUnits do not duly integrate the inputs into a reproducible way** like a mean- or median-based system would do.
+With query `0.0`, `l1_unit0` tends to emit `0` for windows near `0.0` and `1`
+for windows farther from `0.0`. Each output comes from a finite quantum
+measurement, so repeated runs can differ even when their inputs match.
 
 Focusing on `l1_unit1`:
 
@@ -337,7 +340,9 @@ print(l1_unit1)
 plot_unit_decisions([slow_plot])
 ```
 
-The output value of `l1_unit0` should be `1` when the input value is closer to `0.8`, while should be `0` when the input value is farther from `0.8`. Since **this is not a classic system**, the uncertainty of measurement is still there and deviations might occurr along the way. **qUnits do not duly integrate the inputs into a reproducible way** like a mean- or median-based system would do.
+With query `0.8`, the zero-bit `ZeroBurst` tends to emit `1` for windows near
+`0.8` and `0` for more distant windows. Finite measurement makes individual
+outputs stochastic rather than a reproducible arithmetic summary such as a mean.
 
 ## Logging and debugging qUnits
 

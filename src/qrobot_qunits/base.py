@@ -10,29 +10,30 @@ from . import redis_utils
 from .redis_utils import RedisConfig
 
 MIN_TS = 0.01
-""" float: Minimum time period allowed (in seconds).
-"""
+"""Minimum supported sampling period, in seconds."""
 
 
 class BaseUnit(ABC):
-    """Base abstract class defining the multithreading and redis
-    festures implemented by all the units.
+    """Base class for periodically scheduled, Redis-connected units.
+
+    Each unit runs ``_unit_task`` in a child process at ``sampling_period``
+    intervals and publishes its externally visible state under its unique ID.
 
     Parameters
     ------------
     name : str
-        The unit name
+        Human-readable unit name used as the ID prefix.
     sampling_period : float
-        The time period with wich the unit execute its task
+        Seconds between task executions. The minimum is :data:`MIN_TS`.
 
     Attributes
     ----------
     id : str
-        The unique instance identifier of the unit
+        Unique instance identifier composed from ``name`` and a random suffix.
     name : str
-        The unique instance identifier of the unit
+        Human-readable unit name.
     sampling_period : float
-        The time period for which the unit execute its task
+        Seconds between task executions.
     """
 
     def __init__(
@@ -42,9 +43,8 @@ class BaseUnit(ABC):
         redis_config: RedisConfig | None = None,
         logging_config: LoggingConfig | None = None,
     ) -> None:
-        # Create a instance unique identifier
+        # The random suffix lets units with the same display name coexist.
         self.id = name + "-" + str(uuid4())[:6]
-        # use it for logging purposes
         self._logger = get_logger(self.id)
         self._logger.debug(f"Initializing {self.__class__.__name__} {self.id}")
 
@@ -54,7 +54,7 @@ class BaseUnit(ABC):
         self.redis_config = redis_config or RedisConfig()
         self.logging_config = logging_config
 
-        # Initialize multiprocessing manager
+        # Subclasses store state shared with their worker process in this manager.
         self._multiproc_manager = multiprocessing.Manager()
         # To define managed variables:
         # -> self.name = self._multiproc_manager.list(value)
@@ -84,7 +84,7 @@ class BaseUnit(ABC):
         return out_str
 
     def start(self) -> None:
-        """Starts the unit's background threads"""
+        """Start the unit's background process and publish its type."""
         if self._loop_thread is not None and self._loop_thread.is_alive():
             self._logger.warning(f"{self.__class__.__name__} is already started")
             return
@@ -96,7 +96,7 @@ class BaseUnit(ABC):
         _r.mset({self.id + " class": self.__class__.__name__})
 
     def stop(self) -> None:
-        """Stops the unit's background threads"""
+        """Terminate the worker process and delete the unit's Redis keys."""
         if self._loop_thread is None or not self._loop_thread.is_alive():
             self._logger.warning(f"{self.__class__.__name__} is not running")
             return

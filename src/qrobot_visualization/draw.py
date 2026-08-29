@@ -1,22 +1,21 @@
 from typing import Any, cast
 
-import matplotlib as mpl
+from matplotlib import colors, colormaps
 import networkx as nx
 import numpy as np
 import plotly.graph_objects as go
 
 
 def _hex_color(value: float) -> str:
-    """Convert a value in the interval [0.0, 1.0] to the HEX color given the Colormap."""
-    cmap: mpl.colors.Colormap = mpl.colormaps["coolwarm"]
+    """Map a normalized value to a hexadecimal color from ``coolwarm``."""
+    cmap: colors.Colormap = colormaps["coolwarm"]
     rgb_tuple = cmap(value)
-    hex_color = mpl.colors.to_hex(rgb_tuple)
+    hex_color = colors.to_hex(rgb_tuple)
     return hex_color
 
 
 def _positions(graph: nx.Graph) -> dict[str, np.ndarray]:
-    """Get positions for a input graph.
-    Positions are provided as np.ndarray(x, y).
+    """Calculate planar ``(x, y)`` positions for the graph nodes.
 
     Args:
         graph (nx.Graph): The input graph
@@ -52,7 +51,6 @@ def _edge_trace(
     x2, y2 = pos_2
     mid_x = np.average([x1, x2])
     mid_y = np.average([y1, y2])
-    # TODO: evaluate https://github.com/redransil/plotly-dirgraph/ to add the arrow
     return go.Scatter(
         x=[x1, mid_x, x2],
         y=[y1, mid_y, y2],
@@ -114,7 +112,7 @@ def _node_trace(
         marker=dict(color=[], size=[], line=None),
     )
 
-    # For each node in G, get the position and size and add to the node_trace
+    # Plotly stores all node coordinates and labels in one scatter trace.
     for node in graph.nodes():
         node_attributes: dict[str, Any] = graph.nodes()[node]
 
@@ -183,6 +181,6 @@ def draw(
         fig.add_trace(trace)
     # Add node trace
     fig.add_trace(_node_trace(graph, positions, size=25, font_size=12))
-    # Avoid text label clipping after adding al the traces
+    # Keep labels visible when they extend past the axis bounds.
     fig.update_traces(cliponaxis=False)
     return fig

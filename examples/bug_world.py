@@ -2,7 +2,8 @@
 
 An interactive chessboard shows two blue prey robots, one red predator, and a
 self-contained brown BugRobot whose sensors, qUnits, and actuators communicate
-through Redis. No ROS, CoppeliaSim, or physical hardware is needed.
+through Redis. Matplotlib renders the world, while a local Redis server carries
+signals between the independently scheduled qBrain units.
 
 Reference: D. Lanza, "Quantum-like Modeling of Cognitive Architectures for Robotics",
 Zenodo, 2020, https://doi.org/10.5281/zenodo.22068511.

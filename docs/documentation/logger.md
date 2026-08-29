@@ -9,9 +9,7 @@ from pathlib import Path
 
 from qrobot.logger import LoggingConfig, configure_logging
 
-configure_logging(
-    LoggingConfig(level=10, file_path=Path("qrobot-debug.log"), console=True)
-)
+configure_logging(LoggingConfig(level=10, file_path=Path("qrobot-debug.log"), console=True))
 ```
 
 ```{eval-rst}

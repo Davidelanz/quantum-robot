@@ -87,7 +87,7 @@ model = AngularModel(n, tau)
 Using the ``encode`` method, we can encode each event's data in the model (for multidimensional inputs, a second loop is needed in order to loop through the $n$ dimensions of the input).
 
 ```{code-cell} ipython3
-model.clear()  # to re-initialize the model (allows re-runing this cell without double the encoding)
+model.clear()  # Keep this cell repeatable by discarding any earlier encoding.
 
 for t in range(0, model.tau):  # loop throug the event sequence
     model.encode(sequence[t], dim=0)

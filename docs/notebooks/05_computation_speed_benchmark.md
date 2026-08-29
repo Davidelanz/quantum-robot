@@ -20,7 +20,8 @@ be compared only when the recorded machine and software environment are similar.
 ```
 
 
-In this notebook, we tested the average computation speed for various models in different cases.
+The benchmark measures mean execution time for several model operations and
+dimensions under the recorded environment.
 
 ```{code-cell} ipython3
 import multiprocessing

@@ -20,37 +20,37 @@ class QUnit(BaseUnit):
     Parameters
     ------------
     name : str
-        The qUnit name
+        Human-readable qUnit name.
     model : qrobot.models.Model
-        The model the qUnit implements
+        Quantum-like model used to encode each temporal window.
     burst : qrobot.bursts.Burst
-        The burst the qUnit implements
+        Rule that converts a decoded state to a normalized output.
     sampling_period : float
-        The sampling time with wich the qUnit reads the input
+        Seconds between input samples.
     query : list, optional
-        The target state for the model queries. Defaults to ``None``
-    in_units : dict[int, str], optional
-        Dictionary containing {``dim`` : ``qunit_id``} inputs
-        couplings, i.e. ``qunit_id`` output is the input for dimension
-        ``dim``. Defaults to ``None``.
+        Query target with one value per model dimension. Defaults to the
+        all-zero vector.
+    in_qunits : dict[int, str], optional
+        Mapping from model dimensions to upstream unit IDs. Each mapped unit's
+        Redis output supplies that dimension.
     default_input: List[float]
         Default input vector of scalar values to use as default value
-        when qunit does not have an available one.
-        Defaults to ``model.n*[0.0]``
+        when qUnit does not have an available one.
+        Defaults to one zero per model dimension.
 
     Attributes
     ----------
     id : str
-        The unique instance identifier of the qUnit
+        Unique qUnit instance identifier.
     name : str
-        The unique instance identifier of the qUnit
+        Human-readable qUnit name.
     model : qrobot.models.Model
-        The model which the qUnit implements
+        Model used to encode temporal windows.
     burst : qrobot.bursts.Burst
-        The burst the qUnit implements
+        Rule used to convert decoded states to outputs.
     sampling_period : float
-        The sampling period for which the qUnit samples an event
-    default_input: List[float]
+        Seconds between input samples.
+    default_input : list[float]
         Default input vector of scalar values to use as default value
         when qunit does not have an available one
     """
@@ -103,23 +103,23 @@ class QUnit(BaseUnit):
 
     @property
     def query(self) -> list[float]:
-        """Current target state for the model queries
+        """Return the current query target.
 
         Returns
         -------
         list
-            The query target state array in the computational basis
+            Normalized target value for each model dimension.
         """
         return list(self._query)
 
     @query.setter
     def query(self, query: list[float]) -> None:
-        """Set a new query state for the qunit
+        """Set the query target used at the end of each temporal window.
 
         Parameters
         -----------
         query : list
-            The query target state array in the computational basis
+            Normalized target value for each model dimension.
         """
         # Check arguments
         query = self.model._target_vector_check(query)
@@ -131,12 +131,12 @@ class QUnit(BaseUnit):
 
     @property
     def in_qunits(self) -> dict[int, str | None]:
-        """Current output ``{dim : qunit_id}`` couplings.
+        """Return input unit IDs indexed by model dimension.
 
         Returns
         -------
         dict
-            The current output ``{dim : qunit_id}`` couplings dictionary
+            Complete dimension mapping; unconnected dimensions map to ``None``.
         """
         in_qunits: dict[int, str | None] = {}
         for dim in range(self.model.n):
@@ -148,12 +148,13 @@ class QUnit(BaseUnit):
 
     @property
     def input_vector(self) -> list[float]:
-        """The current input vector of the unit
+        """Read the current input vector from input Redis outputs.
 
         Returns
         -------
         list
-            The current input vector
+            One normalized value per model dimension. Missing input outputs
+            use the corresponding ``default_input`` value.
         """
         # Inputs received from Redis must not alter the configured fallback
         # values used by later temporal windows.
@@ -167,32 +168,32 @@ class QUnit(BaseUnit):
                 self._logger.info(f"Unable to read {qunit_id} input")
         return input_vector
 
-    def set_input(self, dim: int, qunit_id: str) -> None:
-        """Set a new input qunit for the desired dimension
+    def set_input(self, dim: int, input_id: str) -> None:
+        """Connect a new input to the specified dimension to the qUnit.
 
         Parameters
         -----------
         dim : int
             The input dimension index
-        qunit_id : str
-            The input qunit id
+        input_id : str
+            The new input unit ID
         """
         # Check arguments
         dim = self.model._dim_index_check(dim)
         # Update accumulator
         self._logger.debug(
-            f"Changing dim {dim} input from " + f"{self.in_qunits[dim]} to {qunit_id}"
+            f"Changing dim {dim} input from " + f"{self.in_qunits[dim]} to {input_id}"
         )
-        self._in_qunits[dim] = qunit_id
+        self._in_qunits[dim] = input_id
         self._logger.debug(f"_in_qunits={self._in_qunits}")
 
     def get_burst_output(self) -> float | None:
-        """Get the latest burst output from the qUnit
+        """Return the latest burst output published by the qUnit.
 
         Returns
         -------
-        float
-            The latest burst output written by the unit on the Redis database
+        float or None
+            The latest burst output written by the unit on the Redis database.
         """
         global_status = redis_utils.redis_status(self.redis_config)
         out = global_status.get(f"{self.id} output", None)

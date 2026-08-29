@@ -5,29 +5,25 @@ from .model import Scalar
 
 
 class LinearModel(AngularModel):
-    """``LinearModel`` corrects the ``AngularModel`` the encoding, allowing
-    a linear decoding for single-event sequencies (tau=1).
+    """Map a single normalized input linearly to measurement probability.
 
     Warning
     ----------
-    The current implementation of ``LinearModel`` provides a linear
-    dependency between encoded input and decoding probabilities
-    only for tau = 1 (or for tau > 1 if and only if the input is always
-    the same one). For a time-varying sequencee (tau > 1)
-    the results obtained are again nonlinear, and similar to the
-    one of ``AngularModel``
+    For ``tau == 1``, measuring ``1`` has probability ``scalar_input``. A
+    constant input repeated over a longer window has the same relationship.
+    Time-varying windows accumulate inverse-sine rotation angles, so their
+    measurement probability is generally not the arithmetic mean of the inputs.
     """
 
     def encode(self, scalar_input: Scalar, dim: int) -> float:
-        """Encodes the scalar input in the correspondent qubit
+        """Encode one scalar input using the linear-probability angle map.
 
         Parameters
         ----------
         scalar_input : float
-            The scalar input for a certain dimension, must be a number between
-            0 and 1 inclusive.
+            Normalized input in the interval ``[0, 1]``.
         dim : int
-            The model's dimension which the scalar input belongs.
+            Zero-based input dimension.
 
         Returns
         ----------

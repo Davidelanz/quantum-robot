@@ -85,10 +85,12 @@ We initialize the model by instantiating an object with $n$ and $\tau$
 model = AngularModel(n, tau)
 ```
 
-Using the ``encode`` method, we  encode the event's tridimensional data in the model. Since we have a multidimensional inputs, two  loops are needed -in general- in order to loop through the $n$ dimensions of the input and then through time. Despite this, we considered $\tau = 1$, hence only one loop is needed:
+Encoding a general multidimensional sequence requires one loop over its temporal
+samples and another over its $n$ dimensions. This example has $\tau = 1$, so
+the single event requires only the dimension loop:
 
 ```{code-cell} ipython3
-model.clear()  # to re-initialize the model (allows re-runing this cell without double the encoding)
+model.clear()  # Keep this cell repeatable by discarding any earlier encoding.
 
 for dim in range(model.n):
     model.encode(input_data[dim], dim)
@@ -351,16 +353,18 @@ $$
 This maps an input equal to the query onto $|000\rangle$. After this basis
 change, the state vectors can no longer be mapped to an RGB color. For each channel,
 alignment makes the `0` outcome more probable and mismatch makes the `1` outcome more
-probable. Hence, when we measured a state, we can use the `ZeroBurst` to extract
-the match intensity, i.e., "how much the input is similar to my query":
+probable. After measuring a state, `ZeroBurst` converts its zero-bit fraction
+into a match intensity: how closely the sampled outcome matches the query.
 
 $$
 B_0(s)=\frac{\text{number of zeros in }s}{3}.
 $$
 
-If we would use instead `OneBurst`, we would have the complementary mismatch intensity,  i.e., "how much the input is different to my query".
+`OneBurst` provides the complementary mismatch intensity: the sampled outcome's
+fraction of bits that differ from the query-mapped zero state.
 
-In order to show this, we encode the fixed input, apply the query to our moduel, and sample the queried model:
+The next cell encodes a fixed input, applies the query transformation, and
+samples the queried model:
 
 ```{code-cell} ipython3
 queried_model = AngularModel(n=3, tau=1)

@@ -14,7 +14,7 @@ kernelspec:
 # Bug world: a live predator/prey qBrain
 
 ```{admonition} Research provenance
-This is a dependency-light reimplementation of the bug-like architecture in
+This tutorial implements the bug-like architecture in
 [*Quantum-like Modeling of Cognitive Architectures for
 Robotics*](https://doi.org/10.5281/zenodo.22068511). The robot, environment, and
 architecture images are archival assets of this master's thesis work. The live
@@ -31,9 +31,9 @@ left, and rotate right.
 | :---: | :---: |
 | ![Archival CoppeliaSim rendering of the bug-like robot](./08_imgs/bug_robot.png) | ![Archival CoppeliaSim world containing prey, predator, and RGB sensor rays](./08_imgs/bug_world.png) |
 
-The original implementation in the master's thesis used CoppeliaSim and ROS.
-This example retains the perceptual and cognitive architecture while using the
-small packaged `qrobot_simulator` world.
+The master's thesis evaluated the architecture in CoppeliaSim with ROS. This
+tutorial evaluates the same perceptual and cognitive signal graph in the
+packaged `qrobot_simulator` world.
 
 ## Architecture
 
@@ -74,7 +74,7 @@ activations still produce retreat rather than cancelling each other.
 
 ## qBrain
 
-Let's build the qBrain so we can analyse it:
+The qBrain can be constructed independently of the physical world for inspection:
 
 ```{code-cell} ipython3
 from pprint import pprint
@@ -84,13 +84,13 @@ from qrobot_simulator.bug_world.robots.bug_robot import build_bug_qbrain
 sensors, qunits, actuators = build_bug_qbrain(RedisConfig())
 ```
 
-We have 7 **sensory** units transport the normalized world readings:
+Seven **sensorial** units transport normalized world readings:
 
 ```{code-cell} ipython3
 sensors
 ```
 
-We have 5 **perceptual** units and 2 **cognitive** units:
+Five **perceptual** units and two **cognitive** units process those readings:
 
 ```{code-cell} ipython3
 qunits

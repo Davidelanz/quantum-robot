@@ -20,7 +20,7 @@ The angular model originates in [*A Preliminary Study for a Quantum-like Robot
 Perception Model*](https://arxiv.org/abs/2006.02771).
 ```
 
-In this notebook, simple 1-dimensional models are tested and compared.
+This notebook compares the one-dimensional `AngularModel` and `LinearModel`.
 
 ```{code-cell} ipython3
 from qrobot.models import LinearModel, AngularModel
@@ -115,7 +115,8 @@ plt.show()
 
 ## Input Test
 
-This test will compare the state outcome probability for the Angular (left) and the Linear (right) models for a certain number of input samples $x$ between 0 and 1 include given a fixed $\tau$
+This experiment compares outcome probabilities for the Angular model (left)
+and Linear model (right) over inputs $x \in [0,1]$ at fixed $\tau$.
 
 ```{code-cell} ipython3
 input_samples = 10
@@ -227,7 +228,9 @@ plot_versus(df_angular_input, df_linear_input, x_label="input")
 
 ## Queries Test
 
-This test will compare the state outcome probability for the Angular (left) and the Linear (right) models for input samples $x=0.5$ after a query between 0 and 1 performed on the system (the plots represent different queries sampled between 0 and 1). $\tau$ is considered fixed at $\tau = 1$
+This experiment fixes $x=0.5$ and $\tau=1$, then compares outcome probabilities
+after applying query values sampled from $[0,1]$. The Angular model is shown on
+the left and the Linear model on the right.
 
 ```{code-cell} ipython3
 query_samples = 10

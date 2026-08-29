@@ -2,8 +2,8 @@
 
 A blue ball wanders between near and far destinations in front of a stationary
 brown robot whose distance and touch interfaces feed independently timed qUnits
-and a Redis-connected gripper actuator. No ROS, LEGO hardware, or physics
-engine is required.
+and a Redis-connected gripper actuator. The example implements its arena,
+movement, sensing, grasping, and rendering directly in Python.
 
 Reference: D. Lanza, "Quantum-like Modeling of Cognitive Architectures for Robotics",
 Zenodo, 2020, https://doi.org/10.5281/zenodo.22068511.
@@ -50,9 +50,7 @@ def parse_args() -> argparse.Namespace:
         "--speed",
         type=float,
         default=DEFAULT_SPEED,
-        help=(
-            "Simulation/real-time ratio in " f"(0, {GRIPPER_ROBOT_CONFIG.max_simulation_speed:g}]."
-        ),
+        help=(f"Simulation/real-time ratio in (0, {GRIPPER_ROBOT_CONFIG.max_simulation_speed:g}]."),
     )
     parser.add_argument("--fps", type=float, default=DEFAULT_FPS)
     parser.add_argument("--seed", type=int, help="Seed for reproducible random ball movement.")

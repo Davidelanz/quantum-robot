@@ -2,11 +2,11 @@ from .burst import Burst
 
 
 class OneBurst(Burst):
-    """When called, ``OneBurst`` converts a measured state into
-    a float number which is:
+    """Return the fraction of measured bits equal to one.
 
     .. math::
 
+        \\text{Burst} =
         \\frac{
             \\text{Number of 1s for the state in the computational base}
         }{

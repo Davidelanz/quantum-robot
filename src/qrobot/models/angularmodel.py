@@ -4,21 +4,21 @@ from .model import Model, Scalar, TargetVector
 
 
 class AngularModel(Model):
-    """``AngularModel`` is a kind of ``Model`` which encodes the perceptual
-    information in the angle of the qubits' Bloch sphere representations
+    """Encode normalized inputs as Bloch-sphere rotation angles.
+
+    Each sample contributes ``scalar_input * pi / tau`` to the qubit assigned
+    to its input dimension.
     """
 
     def encode(self, scalar_input: Scalar, dim: int) -> float:
-        """Encodes the scalar input in the correspondent qubit
+        """Encode one scalar input as a fractional y-axis rotation.
 
         Parameters
         ----------
-        input : float
-            The scalar input for a certain dimension, must be a number
-            between 0 and 1 inclusive.
+        scalar_input : float
+            Normalized input in the interval ``[0, 1]``.
         dim : int
-            The model's dimension which the input belongs (values
-            between ``0`` and ``n-1``)
+            Zero-based input dimension.
 
         Returns
         ----------
@@ -35,14 +35,12 @@ class AngularModel(Model):
         return angle
 
     def query(self, target_vector: TargetVector) -> None:
-        r"""Changes the basis of the quantum system choosing target_vector as
-        the basis state \|00...0>
+        r"""Change basis so ``target_vector`` maps to state \|00...0>.
 
         Parameters
         ----------
         target_vector : list
-            The target_vector state, it must be a list containing n floats
-            (between 0 and 1 inclusive).
+            Normalized target value for every model dimension.
         """
         # Check the arguments
         target_vector = self._target_vector_check(target_vector)
@@ -55,14 +53,14 @@ class AngularModel(Model):
             self.circ.ry(angle, i)
 
     def decode(self) -> str:
-        """The decoding for the ``AngularModel`` is a single measurement.
+        """Decode the model with one computational-basis measurement.
 
         Returns
         --------
         str
-            The string label corresponding to the decoded state
+            Measured basis-state bit string.
 
         """
         measure_dict = self.measure()
-        # Return the most measured state (only one measurement though)
+        # A one-shot count dictionary contains one observed state.
         return max(measure_dict, key=lambda state: measure_dict[state])

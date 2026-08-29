@@ -43,7 +43,8 @@ The basic components of ``quantum-robot`` are the following:
 :align: center
 ```
 
-In order to understand how these components work, we need first a conceptual example.
+The following conceptual example introduces the interpretation shared by these
+components.
 
 ## Concepts
 
@@ -84,7 +85,7 @@ the two situations)
 
 **Quantum-like (QL) perception models** in cognitive sciences reproduce this behavior by
 exploiting quantum systems properties. Considering the most simple quantum system, the
-qubit, QL models can mimic behaviors like the one we just saw.
+qubit, QL models can represent this kind of uncertain belief state.
 
 A **qubit** is a two-state quantum-mechanical system (e.g., the spin of the electron in which
 the two states can be taken as spin up and spin down).
@@ -170,7 +171,7 @@ model demonstration.
 
 ### Sensorial Input
 
-Considering a time window of 4 events, let's start with a sequence of binary events:
+Consider a temporal window containing four binary events:
 
 ```{code-cell} ipython3
 tau = 4
@@ -198,11 +199,14 @@ plt.show()
 
 ### Model
 
-The model acquires binary data inside a specific temporal window, encodes it by rotating its state vector, and finally the measurement give us a binary outcome following quantum measurement probability.
+The model accumulates binary data over a temporal window and encodes it by
+rotating a state vector. Measurement then produces a binary outcome sampled
+from the resulting quantum probability distribution.
 
 #### Information encoding
 
-We use here a single qubit model ($n=1$) to encode our binary input for our temporal window of $\tau = 4$:
+A single-qubit model ($n=1$) encodes the binary input over a temporal window of
+$\tau = 4$ samples:
 
 ```{code-cell} ipython3
 from qrobot.models import AngularModel
@@ -287,7 +291,7 @@ We can see in our temporal window how the qubit's state vector evolves in the Bl
 With the `quantum-robot` package, we can use the `encode` method of our `model` object to encode event data in the model:
 
 ```{code-cell} ipython3
-model.clear()  # to re-initialize the model (allows re-runing this cell without double the encoding)
+model.clear()  # Keep this cell repeatable by discarding any earlier encoding.
 
 for t in range(0, model.tau):  # loop throug the event sequence
     model.encode(sequence[t], dim=0)
@@ -301,7 +305,7 @@ model.print_circuit()
 
 From the diagram it is possible to notice how we have a rotation for every $\lvert 1 \rangle$ event and a null rotation for every $\lvert 0 \rangle$ event.
 
-Given our input sequece, at the end of the temporal window our model is in the following state:
+After encoding the input sequence, the model has the following state:
 
 ```{code-cell} ipython3
 model.plot_state_mat()
@@ -309,7 +313,8 @@ model.plot_state_mat()
 
 ### Information decoding
 
-At this point, we have information encoded in our model's qubit. There are many way of extracting and exploit such information.
+The input distribution is now encoded in the model's qubit. Decoding defines
+how that representation becomes an observable result.
 
 One can use indirect techniques (Nielsen and Chuang 2010; K. M. Hangos and Ruppert 2011) or direct measurements as a decisions based on the belief state  $\lvert\psi\rangle$ (Caves et al. 2002)
 
