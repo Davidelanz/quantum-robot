@@ -1,6 +1,4 @@
-"""
-Dashboard webapp to monitor current qUnits sharing the same redis server.
-"""
+"""Dash web application for monitoring qUnits on a shared Redis server."""
 
 import os
 
@@ -12,12 +10,11 @@ from qrobot_dashboard.server import register_callbacks
 
 
 def create_app(config_object_name: str = "qrobot_dashboard.config.Config") -> Flask:
-    """Factory function for the Dashboard app.
+    """Create the Flask server and mount the qUnit dashboard on it.
 
     Run the app via ``FLASK_APP=qrobot_dashboard.app:create_app flask run``."""
     server = Flask(__name__, static_folder="static")
 
-    # Configure flask app/server here
     server.config.from_object(config_object_name)
 
     # Meta tags for viewport responsiveness
@@ -46,8 +43,7 @@ def create_app(config_object_name: str = "qrobot_dashboard.config.Config") -> Fl
         )
         my_dash_app = register_callbacks(my_dash_app)
 
-    # If running on gunicorn with multiple workers, this message should print once
-    # for each worker if preload_app is set to False
+    # Report the process that owns this app instance in multi-worker deployments.
     print(f"Flask With Dash Apps Built Successfully with PID {str(os.getpid())}.")
 
     return server

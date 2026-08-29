@@ -14,12 +14,12 @@ ATTRIBUTES = [
 
 
 def _is_id(candidate_key: str) -> bool:
-    """Check if a candidate Redis key contains a unit id."""
+    """Return whether a Redis key belongs to a published unit attribute."""
     return any(attribute in candidate_key for attribute in ATTRIBUTES)
 
 
 def _get_id(key: str) -> str:
-    """Get unit id from a Redis key."""
+    """Remove the attribute suffix from a unit's Redis key."""
     for attr in ATTRIBUTES:
         key = key.replace(attr, "")
     return key
@@ -49,14 +49,13 @@ def _write_edge(graph: nx.Graph, node_id: str, key: str, value: Any) -> None:
 
 
 def build_network(status_dict: Mapping[str, str]) -> nx.DiGraph:
-    """Given the Redis status dictionary, generate a `networkx` directed graph
-    containing all the units connected as nodes.
+    """Build a directed unit network from a Redis status snapshot.
 
     Args:
-        status_dict (dict): The Redis status dictionary.
+        status_dict (Mapping[str, str]): Decoded Redis keys and values.
 
     Returns:
-        networkx.DiGraph: The `networkx` directed graph
+        networkx.DiGraph: Units as nodes and input couplings as edges.
     """
     graph = nx.DiGraph()
 

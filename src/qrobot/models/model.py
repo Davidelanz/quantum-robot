@@ -11,16 +11,19 @@ TargetVector: TypeAlias = Sequence[Scalar] | Scalar
 
 
 class Model(ABC):
-    """``Model`` is an abstract class which embeds the general features
-    needed in a model for QL perception.
+    """Base class for quantum-like perception models.
+
+    A model encodes an ``n``-dimensional sequence over ``tau`` samples in a
+    quantum circuit. Subclasses define the input-to-rotation mapping, query
+    transformation, and decoding rule.
 
 
     Parameters
     ----------
     n : int
-        Model's dimension (must be greater than 0, 1 is a scalar)
+        Number of input dimensions. Each dimension is represented by one qubit.
     tau : int
-        Number of samples of the temporal window (must be greater than 0)
+        Number of samples encoded in one temporal window.
 
     Attributes
     ----------
@@ -29,11 +32,11 @@ class Model(ABC):
     tau : int
         Number of samples of the temporal window.
     circ : object
-        Backend-specific circuit which implements the model.
+        Backend-specific circuit containing the encoded window.
     """
 
     def __init__(self, n: int, tau: int, backend: QuantumBackend | None = None) -> None:
-        """Initialize the class"""
+        """Create an empty ``n``-qubit model for ``tau`` samples."""
 
         # Check the argument n
         if isinstance(n, int):
@@ -68,18 +71,16 @@ class Model(ABC):
         return out_str[:-2] + "]"
 
     def _dim_index_check(self, dim: int) -> int:
-        """This method ensures that a dimension index `dim`
-        is an integer between 0 and `n-1`, where `n` is the dimension
-        of the model.
+        """Validate and return an input-dimension index.
 
         Raises
         ---------
         TypeError
             `dim` is not an integer `int`
         ValueError
-            `dim` is not greater than 0
+            ``dim`` is negative.
         IndexError
-            `dim` is greater than the model dimension `n`
+            ``dim`` is greater than or equal to ``n``.
 
         Returns
         --------
@@ -96,13 +97,12 @@ class Model(ABC):
 
     @staticmethod
     def _scalar_input_check(scalar_input: Scalar) -> float:
-        """This method ensures that a `scalar_input` for the model
-        is an integer or a float between 0 and 1 (inclusive).
+        """Validate and normalize one scalar model input.
 
         Raises
         ---------
         TypeError:
-            `scalar_input` is nor a `int` or a `float`
+            ``scalar_input`` is neither an ``int`` nor a ``float``.
         ValueError
             `scalar_input` is not between 0 and 1 inclusive
 
@@ -112,16 +112,16 @@ class Model(ABC):
             The `scalar_input`
         """
         if not isinstance(scalar_input, (float, int)):
-            raise TypeError(
-                f"input must be an scalar number, not a {type(scalar_input)}!"
-            )
+            raise TypeError(f"input must be a scalar number, not a {type(scalar_input)}!")
         if scalar_input > 1 or scalar_input < 0:
             raise ValueError("scalar_input must be between 0 and 1 inclusive!")
         return float(scalar_input)
 
     def _target_vector_check(self, target_vector: TargetVector) -> list[float]:
-        """This method ensures that a `target_vector` for the model
-        is an `n`-dimensional vector (where `n` is the model's dimension).
+        """Validate a query target and return it as a list of floats.
+
+        A scalar target is accepted for a one-dimensional model. Vector
+        targets must contain exactly one normalized value per model dimension.
 
         Raises
         ---------
@@ -130,31 +130,26 @@ class Model(ABC):
         ValueError
             `target_vector` dimension does not match model's dimension `n`
         ValueError
-            `target_vector` elements are not not all between 0 and 1 inclusive
+            A ``target_vector`` element is outside the interval ``[0, 1]``.
 
         Returns
         ----------
         list
             The `target_vector`
         """
-        # If target_vector is a single number,
-        # convert it in a single-element vector
+        # Use the same validation path for scalar and vector targets.
         if isinstance(target_vector, (float, int)):
             target_vector = [target_vector]
         else:
             target_vector = list(target_vector)
         # Dimensionality check on the vector
         if len(target_vector) != self.n:
-            raise ValueError(f"target_vector must be a {self.n}\
-                             -dimensional vector!")
+            raise ValueError(f"target_vector must be a {self.n}-dimensional vector!")
         for element in target_vector:
             if not isinstance(element, (float, int)):
-                raise TypeError(
-                    "target_vector elements must be all integers or floats!"
-                )
+                raise TypeError("target_vector elements must be all integers or floats!")
             if element > 1 or element < 0:
-                raise ValueError("target_vector elements must be all between \
-                    0 and 1 inclusive!")
+                raise ValueError("target_vector elements must be all between 0 and 1 inclusive!")
         return [float(element) for element in target_vector]
 
     def clear(self) -> None:
@@ -163,7 +158,7 @@ class Model(ABC):
 
     @abstractmethod
     def encode(self, scalar_input: Scalar, dim: int) -> float:
-        """Encodes the scalar input in the correspondent qubit.
+        """Encode one normalized input in the qubit for ``dim``.
 
         Example
         -------
@@ -191,12 +186,11 @@ class Model(ABC):
 
     @abstractmethod
     def decode(self) -> str:
-        """Exploits the information encoded in the qubit."""
+        """Measure and decode the model state as a basis-state label."""
 
     @abstractmethod
     def query(self, target_vector: TargetVector) -> None:
-        r"""Changes the basis of the quantum system choosing `target_vector`
-        as the basis state \|00...0>."""
+        r"""Change basis so ``target_vector`` maps to state \|00...0>."""
 
     def get_statevector(self) -> np.ndarray:
         """Returns the simulated state vector of the model.
@@ -224,8 +218,7 @@ class Model(ABC):
         print(self.circ)
 
     def plot_state_mat(self) -> None:
-        """Plots the state and density matrix of the quantum system
-        (just the real parts).
+        """Plot the real parts of the state vector and density matrix.
 
         Example
         -------
@@ -252,8 +245,7 @@ class Model(ABC):
                 + "(too much for a reasonable plot)!"
             )
 
-        # Import plotting libraries only for this optional presentation method.
-        # This keeps numerical modelling usable without a notebook/plotting stack.
+        # Plotting dependencies are loaded at the presentation boundary.
         try:
             import matplotlib.pyplot as plt
             import pandas as pd

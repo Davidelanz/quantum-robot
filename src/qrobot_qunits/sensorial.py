@@ -12,21 +12,20 @@ class SensorialUnit(BaseUnit):
     Parameters
     ------------
     name : str
-        The SensorialUnit name
+        Human-readable sensor name.
     sampling_period : float
-        The sampling time with wich the SensorialUnit reads the input
+        Seconds between Redis publications.
     default_input: float
-        Default input for the scalar readings when the SensorialUnit
-        does not have an available one. Defaults to 0
+        Initial scalar reading. Defaults to ``0.0``.
 
     Attributes
     ----------
     id : str
-        The unique instance identifier of the SensorialUnit
+        Unique sensor instance identifier.
     name : str
-        The unique instance identifier of the SensorialUnit
+        Human-readable sensor name.
     sampling_period : float
-        The sampling period for which the SensorialUnit samples an event
+        Seconds between Redis publications.
     default_input: float
         Default input for the scalar readings when the SensorialUnit
         does not have an available one
@@ -67,9 +66,7 @@ class SensorialUnit(BaseUnit):
     def scalar_reading(self, value: float) -> None:
         """Set a new value for the input"""
         # Update accumulator
-        self._logger.debug(
-            f"Changing scalar reading from {self._scalar_reading.value} to {value}"
-        )
+        self._logger.debug(f"Changing scalar reading from {self._scalar_reading.value} to {value}")
         self._scalar_reading.value = value
         self._logger.debug(f"_scalar_reading={self._scalar_reading.value}")
 

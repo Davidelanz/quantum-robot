@@ -2,11 +2,11 @@ from .burst import Burst
 
 
 class ZeroBurst(Burst):
-    """When called, ``ZeroBurst`` converts a measured state into
-    a float number which is:
+    """Return the fraction of measured bits equal to zero.
 
     .. math::
 
+        \\text{Burst} =
         \\frac{
             \\text{Number of 0s for the state in the computational base}
         }{

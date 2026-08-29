@@ -13,36 +13,56 @@ kernelspec:
 
 # Introduction to ``quantum-robot``
 
-``quantum-robot`` is a Python package for quantum-like perception modeling for robotics. The package exploits [Qiskit framework](https://qiskit.org/), implementing the models on quantum circuits which can be simulated on a classical computer or sent to a quantum backend (service provided by IBM Quantum Experience).
+```{admonition} Research provenance
+This tutorial introduces the architecture developed in
+[*Quantum-like Modeling of Cognitive Architectures for
+Robotics*](https://doi.org/10.5281/zenodo.22068511). The one-qubit model is
+presented and evaluated in [*A Preliminary Study for a Quantum-like Robot
+Perception Model*](https://arxiv.org/abs/2006.02771). The multi-sensory extension
+is published in [*Multi-sensory Integration in a Quantum-Like Robot Perception
+Model*](https://doi.org/10.1007/978-3-030-71151-1_44).
+
+Historical experiments in these papers also used IBM Quantum simulators and hardware;
+remote hardware execution is not part of the current package backend.
+```
+
+``quantum-robot`` is a Python package for quantum-like perception modeling for
+robotics. Its bundled Qiskit backend builds quantum circuits and samples their
+statevectors locally on a classical computer.
 
 The basic components of ``quantum-robot`` are the following:
 
-- QUnits (the basic element of our architecture, processing sensory data returning processed outputs)
-- Models (the internal quantum model which define how the qUnit deals with input data)
-- Bursts (which define how the qUnit exploits the internal quantum model, providing the qUnit's output)
+- **Models**, which encode a temporal window and produce a measured state;
+- **bursts**, which turn that state into a normalized scalar signal;
+- **qUnits**, which run a model and burst together as an independently timed
+  processing unit.
 
+```{image} ./01_imgs/components.png
+:alt: Components diagram
+:width: 600px
+:align: center
+```
 
-![Components diagram](./01_imgs/components.png)
-
-In order to understand how these components work, we need first a conceptual example.
-
-+++
+The following conceptual example introduces the interpretation shared by these
+components.
 
 ## Concepts
 
-+++
-
 ### The sleeping dead cat
 
-A man is in his living room. 
-He sees his cat standing still on a shelf. 
-Nothing but some light movements of the 
-cat's fur is noticed by the man, 
-who cannot decide whether the cat is **dead** 
-(and the perceived movement is due to an air current) 
+A man is in his living room.
+He sees his cat standing still on a shelf.
+Nothing but some light movements of the
+cat's fur is noticed by the man,
+who cannot decide whether the cat is **dead**
+(and the perceived movement is due to an air current)
 or if it is just **asleep**.
 
-![Concept Image 1](./01_imgs/concept1.jpg)
+```{image} ./01_imgs/concept1.jpg
+:alt: Man observing a motionless cat
+:width: 360px
+:align: center
+```
 
 Right now he is experiencing a **superposition**
 of conscious states, because the perceptual
@@ -55,29 +75,33 @@ superposition states (at least, until he does not receive a
 stronger stimulus that makes him certain about one of
 the two situations)
 
-![Concept Image 2](./01_imgs/concept2.jpg)
-
-+++
+```{image} ./01_imgs/concept2.jpg
+:alt: Alternative sleeping and dead cat perceptions
+:width: 600px
+:align: center
+```
 
 ### Modeling Consciousness with Quantum Mechanics
 
 **Quantum-like (QL) perception models** in cognitive sciences reproduce this behavior by
 exploiting quantum systems properties. Considering the most simple quantum system, the
-qubit, QL models can mimic behaviors like the one we just saw.
+qubit, QL models can represent this kind of uncertain belief state.
 
 A **qubit** is a two-state quantum-mechanical system (e.g., the spin of the electron in which
 the two states can be taken as spin up and spin down).
 
-![Concept Image 3](./01_imgs/concept3.jpg)
+```{image} ./01_imgs/concept3.jpg
+:alt: Qubit superposition concept
+:width: 280px
+:align: center
+```
 
 In quantum computing, a qubit is the basic unit of
-quantum information —the quantum version of the
-classical binary bit. Whether in a classical system a bit
+quantum information (the quantum version of the
+classical binary bit). Whether in a classical system a bit
 has to be in one state or the other (namely, 0 or 1), a
 qubit can be in a **coherent superposition of both
 states** simultaneously.
-
-+++
 
 **Measuring** the qubit' state causes its **collapse** on one
 of the two states, i.e., the qubit' state pass from a
@@ -86,8 +110,11 @@ A measurement **stops the evolution** of the system over time and forces its sta
 two basis states (the ones in superposition). When the system is not observed anymore, it
 **resumes** its evolution over time.
 
-![Concept Image 4](./01_imgs/concept4.jpg)
-
+```{image} ./01_imgs/concept4.jpg
+:alt: Qubit measurement concept
+:width: 620px
+:align: center
+```
 
 > \[Through the superposition\] *"the two alternatives exist at the perceptual-cognitive level. Then, they
 > pass at the decisional and conscientious level towards a selection of the two subsisting
@@ -96,44 +123,55 @@ two basis states (the ones in superposition). When the system is not observed an
 
 In this alternative logical structure, out cat is dead and yet sleeps simultaneously.
 
-+++
+The package uses the same mathematical structure to model the robot's belief and
+decision mechanism:
 
-What we do with robots is to reproduce this behavior through 
-simulated quantum systems:
-
-![Concept Image 5](./01_imgs/concept5.jpg)
+```{image} ./01_imgs/concept5.jpg
+:alt: Quantum-like robot perception concept
+:width: 480px
+:align: center
+```
 
 Based on the perceptual stimuli received, the
 robot represents its knowledge by means of a
 simulated quantum system. When a **measure**
 occurs, the system collapses to a defined state,
-which is the robot's **current "conscious" state**.
-Hence, after collecting sensorial data for a 
+which is the robot's **current measured decision state** or "conscious" state.
+Hence, after collecting sensorial data for a
 specific period of time $\Delta T$, a measurement occurs:
 
-![Concept Image 6](./01_imgs/concept6.jpg)  
-
-+++
+```{image} ./01_imgs/concept6.jpg
+:alt: Sensor history leading to a measured robot decision
+:width: 620px
+:align: center
+```
 
 ## Implementation
 
-How we actually implemented such a system? As stated before, we have:
+The executable example below follows one signal through the two operations
+that later run inside a qUnit:
 
-- Our **sensorial input** (e.g. the binary signal 0/1 for "cat seems asleep"/"cat seems dead" that we receive from the outer world)
-- A QL **model** which retains information for a period of time $\Delta T$ (**encoding**) and then performs a single measurement on that information (**decoding**)
-- A so-called **burst** which returns an output signal based on the decoding (e.g. the binary signal 0/1 for "cat is asleep!"/"cat is dead!")
+- The **sensorial input** is a normalized signal from the outside world. For
+  example, `0`/`1` for "cat seems dead"/"cat seems asleep."
+- A quantum-like **model** accumulates that input for a temporal window
+  $\Delta T$ (encoding) and then measures the encoded state (decoding).
+- A **burst** translates the decoded state into the normalized output that can
+  be passed onward.
 
-The QL model and the burst are wrapped into a **qUnit**, which is a handy object which allow real-time encoding/decoding on a separate python process.
+In a running architecture, a **qUnit** wraps the model and burst and repeats
+this sequence in its own timed process. Here we perform the same steps directly
+so each operation remains visible; the qUnit itself is introduced after the
+model demonstration.
 
-+++
-
-![Components diagram 2](./01_imgs/components.png)
-
-+++
+```{image} ./01_imgs/components.png
+:alt: Model, burst, and qUnit component relationship
+:width: 600px
+:align: center
+```
 
 ### Sensorial Input
 
-Considering a time window of 4 events, let's start with a sequence of binary events:
+Consider a temporal window containing four binary events:
 
 ```{code-cell} ipython3
 tau = 4
@@ -161,15 +199,14 @@ plt.show()
 
 ### Model
 
-The model acquires binary data inside a specific temporal window, encodes it by rotating its state vector, and finally the measurement give us a binary outcome following quantum measurement probability. 
-
-+++
+The model accumulates binary data over a temporal window and encodes it by
+rotating a state vector. Measurement then produces a binary outcome sampled
+from the resulting quantum probability distribution.
 
 #### Information encoding
 
-+++
-
-We use here a single qubit model ($n=1$) to encode our binary input for our temporal window of $\tau = 4$:
+A single-qubit model ($n=1$) encodes the binary input over a temporal window of
+$\tau = 4$ samples:
 
 ```{code-cell} ipython3
 from qrobot.models import AngularModel
@@ -184,13 +221,13 @@ In order to understand how such model works, we can define our event sequence
 :align: center
 ```
 
-as follows: 
+as follows:
 
 $$
 \Sigma = [1, 0, 1, 1]
 $$
 
-As previously said, we associate the binary event $\alpha_i = 0$ ("the cat is dead") with the basis state $\lvert 0 \rangle$ and the binary event $\alpha_i = 1$ ("the cat is asleep") with the basis state $\lvert 1 \rangle$. 
+As previously said, we associate the binary event $\alpha_i = 0$ ("the cat is dead") with the basis state $\lvert 0 \rangle$ and the binary event $\alpha_i = 1$ ("the cat is asleep") with the basis state $\lvert 1 \rangle$.
 
 We define the frequency of an event associated with a basis state as:
 
@@ -232,14 +269,14 @@ To apply to a qubit a fractional rotation around the $y$ axis of the Bloch spher
 The correspondent operator is the unitary operator $R_y$:
 
 $$
-R_y(\theta) 
+R_y(\theta)
 =
 \exp\left({-i\frac{\theta}{2}Y}\right)
 =
 \begin{bmatrix}
-\cos \frac{\theta}{2}& 
+\cos \frac{\theta}{2}&
 -\sin \frac{\theta}{2}\\
-\sin \frac{\theta}{2}& 
+\sin \frac{\theta}{2}&
 \cos \frac{\theta}{2}
 \end{bmatrix}.
 $$
@@ -247,16 +284,14 @@ $$
 We can see in our temporal window how the qubit's state vector evolves in the Bloch sphere representation:
 
 ```{image} ./01_imgs/block_sphere_sequence.jpg
-:width: 1200px
+:width: 760px
 :align: center
 ```
-
-+++
 
 With the `quantum-robot` package, we can use the `encode` method of our `model` object to encode event data in the model:
 
 ```{code-cell} ipython3
-model.clear()  # to re-initialize the model (allows re-runing this cell without double the encoding)
+model.clear()  # Keep this cell repeatable by discarding any earlier encoding.
 
 for t in range(0, model.tau):  # loop throug the event sequence
     model.encode(sequence[t], dim=0)
@@ -270,35 +305,30 @@ model.print_circuit()
 
 From the diagram it is possible to notice how we have a rotation for every $\lvert 1 \rangle$ event and a null rotation for every $\lvert 0 \rangle$ event.
 
-+++
-
-Given our input sequece, at the end of the temporal window our model is in the following state:
+After encoding the input sequence, the model has the following state:
 
 ```{code-cell} ipython3
 model.plot_state_mat()
 ```
 
-## Information decoding
+### Information decoding
 
-+++
-
-At this point, we have information encoded in our model's qubit. There are many way of extracting and exploit such information.
+The input distribution is now encoded in the model's qubit. Decoding defines
+how that representation becomes an observable result.
 
 One can use indirect techniques (Nielsen and Chuang 2010; K. M. Hangos and Ruppert 2011) or direct measurements as a decisions based on the belief state  $\lvert\psi\rangle$ (Caves et al. 2002)
 
 In here, we consider the **measurement** itself **as the decoding process** for the model. Indeed, for a single qubit we have the following probabilities of measuring one of the two basis states:
 
 $$
-P(\lvert0\rangle) = \cos \left(\frac{\theta}{2}\right)
+P(\lvert0\rangle) = \cos^2 \left(\frac{\theta}{2}\right)
 \quad\quad
-P(\lvert1\rangle) = \sin \left(\frac{\theta}{2}\right)
+P(\lvert1\rangle) = \sin^2 \left(\frac{\theta}{2}\right)
 $$
 
 This inherently provides a way of interpolate low-level data in a belief state (the $\lvert\psi\rangle$ state) and then operate a **decision** on it. In fact, the information carried by the qubits represents a certain degree of belief (represented by the $\theta$ encoding), and a single measurement represents a decision based on this knowledge (decision-making interpretation of the measurement).
 
-+++
-
-With ``quantum-robot``, we can easily operate the measurement on the model after having encoded our data into it: 
+With ``quantum-robot``, we can easily operate the measurement on the model after having encoded our data into it:
 
 ```{code-cell} ipython3
 counts = model.measure()
@@ -346,22 +376,88 @@ ax2.set_title("Probabilities")
 plt.show()
 ```
 
-## Burst
+### Burst
 
-(...)
-
-+++
-
-## qUnit
-
-(...)
-
-+++
-
-## Connecting the brain
-
-(...)
+The model above ends with a measured bit string. A **burst** is the small rule
+that translates such a state into the normalized scalar signal used by the
+rest of the architecture. For example, `OneBurst` returns the fraction of bits
+measured as `1`, while `ZeroBurst` returns the fraction measured as `0`:
 
 ```{code-cell} ipython3
+from qrobot.bursts import OneBurst, ZeroBurst
 
+measured_state = model.decode()
+print("Measured state:", measured_state)
+print("OneBurst output:", OneBurst()(measured_state))
+print("ZeroBurst output:", ZeroBurst()(measured_state))
 ```
+
+This is the bridge between the quantum-like representation and an ordinary
+signal: the model decides *which state was measured*, and the burst decides
+*how that state should be read*. In the one-dimensional cat example, either
+burst produces `0.0` or `1.0`; with multiple dimensions it can also produce an
+intermediate value.
+
+## Architecture framework
+
+### qUnit
+
+A **qUnit** packages the operations demonstrated above into a repeating worker:
+it samples input, lets its model accumulate one temporal window, applies the
+query and measurement, converts the measured state with its burst, and
+publishes the resulting scalar. Thus the model and burst are not parallel
+stages outside the qUnit; they are the qUnit's internal processing mechanism.
+
+The following creates, but does not start, a basic qUnit with the same
+one-dimensional model and four-sample temporal window used above:
+
+```{code-cell} ipython3
+from qrobot_qunits import QUnit
+
+basic_qunit = QUnit(
+    name="basic_perception",
+    model=AngularModel(n=1, tau=tau),
+    burst=OneBurst(),
+    sampling_period=0.1,
+)
+basic_qunit
+```
+
+At this point the qUnit is only configured: no worker has been started and no
+Redis connection is needed. The [qUnits
+tutorial](06_qunits_getting_started.md) gives the complete overview creating
+sensorial interfaces, connecting qUnits into layers, starting and stopping
+their workers, inspecting Redis state, and visualizing the resulting network.
+
+### From qUnits to a qBrain
+
+A **qBrain** is the connected processing architecture formed when qUnits are
+wired between the robot's sensor and actuator interfaces. It is not a separate
+quantum model. It is the whole signal network that organizes models operating
+at one or more temporal and cognitive levels:
+
+- a **sensorial interface** publishes a normalized reading from the world;
+- a **perceptual qUnit** integrates those readings and publishes a burst;
+- a **cognitive qUnit** can integrate bursts from perceptual or other cognitive
+  qUnits, potentially over a different temporal window;
+- an **actuator interface** combines selected final bursts, applies its
+  activation rule, and exposes a command to simulated or physical behavior.
+
+The following diagram from
+[*Quantum-like Modeling of Cognitive Architectures for
+  Robotics*](https://doi.org/10.5281/zenodo.22068511)
+is included as a system-level illustration of
+these relationships. It shows the larger bug-like qBrain rather than the small
+cat example above: sensor interfaces $s_i$ feed perceptual qUnits $p_i$, their bursts feed
+cognitive qUnits $c_i$, and selected outputs drive actuator interfaces $a_i$.
+
+```{image} ./08_imgs/bug_architecture.png
+:alt: Thesis bug-like qBrain showing sensor interfaces, perceptual and cognitive qUnits, and actuator interfaces
+:width: 720px
+:align: center
+```
+
+Following one arrow through that diagram gives the complete connection to the
+earlier sections:
+
+- Sensor reading $\rightarrow$ qUnit\[*Model Encoding $\rightarrow$ Measurement $\rightarrow$ Burst*\] $\rightarrow$ Another qUnit or actuator interface

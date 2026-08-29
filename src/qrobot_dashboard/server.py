@@ -30,9 +30,7 @@ def register_callbacks(
     def _update_network_graph(_: int) -> go.Figure:
         return build_network_figure(status_provider())
 
-    @dash_app.callback(
-        Output("refresh-interval", "interval"), [Input("refresh-slider", "value")]
-    )
+    @dash_app.callback(Output("refresh-interval", "interval"), [Input("refresh-slider", "value")])
     def _update_interval_rate(refresh_value: float) -> float:
         return refresh_value * 1000  # seconds to milliseconds
 

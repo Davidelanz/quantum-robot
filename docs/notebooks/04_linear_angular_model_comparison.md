@@ -13,9 +13,14 @@ kernelspec:
 
 # Differences between ``AngularModel`` and ``LinearModel``
 
-+++
+```{admonition} Research provenance
+This comparison supports the model discussion in [*Quantum-like Modeling
+of Cognitive Architectures for Robotics*](https://doi.org/10.5281/zenodo.22068511).
+The angular model originates in [*A Preliminary Study for a Quantum-like Robot
+Perception Model*](https://arxiv.org/abs/2006.02771).
+```
 
-In this notebook, simple 1-dimensional models are tested and compared.
+This notebook compares the one-dimensional `AngularModel` and `LinearModel`.
 
 ```{code-cell} ipython3
 from qrobot.models import LinearModel, AngularModel
@@ -75,9 +80,16 @@ plt.grid()
 plt.show()
 ```
 
-**BEWARE**: for $\tau > 1$ the ``LinearModel`` loses its linearity:
+**BEWARE:** For $\tau > 1$, one *individual* fractional rotation no longer maps its input
+directly to a linear measurement probability (i.e., the ``LinearModel`` loses its linearity):
 
-$$ \text{Prob. } \lvert 1 \rangle = \sin^2 \left(\frac{\sin^{-1}(2x-1)+\frac{\pi}{2}}{2 \tau} \right) \neq x !!!$$
+$$ \text{Prob. } \lvert 1 \rangle = \sin^2 \left(\frac{\sin^{-1}(2x-1)+\frac{\pi}{2}}{2 \tau} \right) \neq x.$$
+
+This does not mean every longer window is nonlinear in the same way. If the
+same value $x$ is repeated for all $\tau$ events, the fractional angles add
+back to the $\tau=1$ angle and $P(1)=x$. For a window containing different
+values, however, the accumulated inverse-sine angles generally do not encode
+the arithmetic mean linearly. The plots below expose that distinction.
 
 ```{code-cell} ipython3
 ---
@@ -89,23 +101,22 @@ max_tau = 3
 X = [x / 100 for x in range(0, 101)]
 Y = list()
 for tau in range(1, max_tau + 1):
-    Y.append(
-        [np.square(np.sin((np.arcsin(2 * x - 1) + np.pi / 2) / 2 * tau)) for x in X]
-    )
+    Y.append([np.square(np.sin((np.arcsin(2 * x - 1) + np.pi / 2) / 2 * tau)) for x in X])
 
 plt.figure(figsize=(15, 7), dpi=150)
 labels = list()
 for i in range(0, max_tau):
     plt.plot(X, Y[i])
     plt.grid()
-    labels.append(f"tau = {i+1}")
+    labels.append(f"tau = {i + 1}")
 plt.legend(labels)
 plt.show()
 ```
 
 ## Input Test
 
-This test will compare the state outcome probability for the Angular (left) and the Linear (right) models for a certain number of input samples $x$ between 0 and 1 include given a fixed $\tau$
+This experiment compares outcome probabilities for the Angular model (left)
+and Linear model (right) over inputs $x \in [0,1]$ at fixed $\tau$.
 
 ```{code-cell} ipython3
 input_samples = 10
@@ -217,7 +228,9 @@ plot_versus(df_angular_input, df_linear_input, x_label="input")
 
 ## Queries Test
 
-This test will compare the state outcome probability for the Angular (left) and the Linear (right) models for input samples $x=0.5$ after a query between 0 and 1 performed on the system (the plots represent different queries sampled between 0 and 1). $\tau$ is considered fixed at $\tau = 1$
+This experiment fixes $x=0.5$ and $\tau=1$, then compares outcome probabilities
+after applying query values sampled from $[0,1]$. The Angular model is shown on
+the left and the Linear model on the right.
 
 ```{code-cell} ipython3
 query_samples = 10
@@ -250,7 +263,7 @@ plot_versus(df_angular_query, df_linear_query, x_label="query")
 
 ## $\tau_{\uparrow}$ Test
 
-$\tau_{\uparrow} \leq  \tau$ is the number of events $x=$ ``intensity`` in a sequence of $\tau$ events (the remaining events are $x=0$). 
+$\tau_{\uparrow} \leq  \tau$ is the number of events $x=$ ``intensity`` in a sequence of $\tau$ events (the remaining events are $x=0$).
 
 For example, considering a sequence long $\tau = 5$, with $\tau_{\uparrow} = 3$ events of ``intensity`` $=0.8$, a possible actual sequence could be:
 
