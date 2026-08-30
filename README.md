@@ -40,20 +40,20 @@ and optional extension import packages:
 
 Install the published core package:
 
-```console
+```sh
 python -m pip install --upgrade quantum-robot
 ```
 
 Install optional capabilities only when needed:
 
-```console
+```sh
 python -m pip install --upgrade "quantum-robot[model-visualization,qunits,visualization,simulator,dashboard]"
 ```
 
 Python 3.14 is required. For an isolated installation, create and activate a
 virtual environment before running `pip`:
 
-```console
+```sh
 python3.14 -m venv .venv
 source .venv/bin/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
@@ -67,7 +67,7 @@ for individual extras, Redis setup, and installation checks.
 Use [Poetry](https://python-poetry.org/) with Python 3.14. The following
 installs every development capability into Poetry’s project environment:
 
-```console
+```sh
 git clone https://github.com/Davidelanz/quantum-robot.git
 cd quantum-robot
 poetry env use 3.14
@@ -76,7 +76,7 @@ poetry install --all-extras
 
 Run the standard quality checks through that environment:
 
-```console
+```sh
 poetry check
 poetry run ruff check src tests scripts
 poetry run python scripts/check_docstrings.py src
@@ -89,7 +89,7 @@ poetry build
 
 Apply the formatter when needed:
 
-```console
+```sh
 poetry run black src tests scripts
 poetry run python scripts/format_notebooks.py
 ```
@@ -101,7 +101,7 @@ runs Ruff over its Python cells, and writes it back without creating committed
 The qUnits integration tests and the executable qUnits tutorial require Redis
 on `localhost:6379`. Start a disposable local instance when running them:
 
-```console
+```sh
 docker run --rm --name qrobot-redis -p 6379:6379 -d redis:7-alpine
 poetry run pytest
 ```
@@ -110,7 +110,7 @@ Stop it with `docker stop qrobot-redis`.
 
 Run either of the two embodied examples with Redis listening locally:
 
-```console
+```sh
 poetry run python examples/grasping_robot.py
 poetry run python examples/bug_world.py
 ```
@@ -127,7 +127,7 @@ The documentation source is MyST Markdown, including tutorials.
 Building it runs those tutorials, renders MathJax formulas, and writes the
 resulting site to `docs/_build/html`:
 
-```console
+```sh
 docker run --rm --name qrobot-redis -p 6379:6379 -d redis:7-alpine
 poetry run python scripts/build_docs.py
 ```
@@ -168,7 +168,7 @@ appreciate citations to the following:
     url={https://doi.org/10.5281/zenodo.22068511},
     note={Master's thesis for the EMARO+ (European Master on Advanced Robotics) programme.},
 }
-@misc{lanza2020preliminary,
+@misc{lanza2020multisensory,
     title={Multi-sensory Integration in a Quantum-Like Robot Perception Model},
     author={Davide Lanza and Paolo Solinas and Fulvio Mastrogiovanni},
     year={2020},
@@ -177,6 +177,15 @@ appreciate citations to the following:
     primaryClass={cs.RO},
     note={preprint at \url{https://arxiv.org/abs/2006.16404}},
 }
+```
+
+## Release on PyPi
+
+To publish a new release on PyPi:
+
+```sh
+git tag -a x.y.z -m "quantum-robot x.y.z"
+git push origin x.y.z
 ```
 
 ## License
