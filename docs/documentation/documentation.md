@@ -6,7 +6,8 @@
 models
 bursts
 qunits
-simulator
 visualization
+simulator
+dashboard
 logger
 ```
