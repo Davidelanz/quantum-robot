@@ -42,6 +42,11 @@ def test_actuator_reads_bursts_and_publishes_activation():
         redis_config=TEST_REDIS_CONFIG,
     )
     try:
+        # A non-normalozed input value falls back the default value
+        client.set("p1 output", 1.1)
+        assert actuator.input_vector == [0.0, 1.0]
+        client.set("p1 output", 1.0)
+
         # Verify the input qUnits are correctly indexed for visualization
         assert actuator.in_qunits == {0: "p1", 1: "p2"}
         # Start the actuator background task

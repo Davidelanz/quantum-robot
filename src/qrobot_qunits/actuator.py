@@ -86,7 +86,7 @@ class ActuatorUnit(BaseUnit):
         values = []
         for unit_id in self._in_qunits:
             value = client.get(unit_id + " output")
-            values.append(self.default_input if value is None else float(value))
+            values.append(self.default_input if value is None else self._normalize_input(value))
         return values
 
     @property
@@ -132,6 +132,16 @@ class ActuatorUnit(BaseUnit):
         if not 0.0 <= value <= 1.0:
             raise ValueError(f"{name} must be between 0 and 1")
         return float(value)
+
+    def _normalize_input(self, value: object) -> float:
+        """Return a normalized Redis burst, falling back when invalid."""
+        try:
+            normalized = float(value)  # type: ignore[arg-type]
+        except TypeError, ValueError:
+            normalized = self.default_input
+        if not 0.0 <= normalized <= 1.0:
+            normalized = self.default_input
+        return normalized
 
 
 def threshold_activation(normalized_sum: float, threshold: float = 0.5) -> float:

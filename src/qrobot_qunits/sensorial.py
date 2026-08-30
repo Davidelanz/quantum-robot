@@ -42,8 +42,9 @@ class SensorialUnit(BaseUnit):
         # Call the BaseUnit constructor
         super().__init__(name, sampling_period, redis_config, logging_config)
 
-        # Store the SensorialUnit name and properties
-        self.default_input = 0.0 if default_input is None else default_input
+        self.default_input = 0.0
+        if default_input is not None:
+            self.default_input = self._normalize_input(default_input)
 
         # Initialize multiprocessing variables
         # - _scalar_reading array variable
@@ -63,12 +64,22 @@ class SensorialUnit(BaseUnit):
         return self._scalar_reading.value
 
     @scalar_reading.setter
-    def scalar_reading(self, value: float) -> None:
+    def scalar_reading(self, value: float | int) -> None:
         """Set a new value for the input"""
-        # Update accumulator
+        value = self._normalize_input(value)
         self._logger.debug(f"Changing scalar reading from {self._scalar_reading.value} to {value}")
         self._scalar_reading.value = value
         self._logger.debug(f"_scalar_reading={self._scalar_reading.value}")
+
+    def _normalize_input(self, value: object) -> float:
+        """Return a normalized reading, falling back when invalid."""
+        try:
+            normalized = float(value)  # type: ignore[arg-type]
+        except TypeError, ValueError:
+            normalized = self.default_input
+        if not 0.0 <= normalized <= 1.0:
+            normalized = self.default_input
+        return normalized
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
