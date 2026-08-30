@@ -3,7 +3,6 @@
 import multiprocessing
 from abc import ABC, abstractmethod
 from collections.abc import Generator
-from time import sleep
 from typing import Any
 from uuid import uuid4
 
@@ -13,6 +12,9 @@ from .redis_utils import RedisConfig
 
 MIN_TS = 0.01
 """Minimum supported sampling period, in seconds."""
+
+STOP_TIMEOUT = 5.0
+"""Seconds to wait for a worker to stop before terminating it."""
 
 
 class BaseUnit(ABC):
@@ -58,6 +60,8 @@ class BaseUnit(ABC):
 
         # Subclasses store state shared with their worker process in this manager.
         self._multiproc_manager = multiprocessing.Manager()
+        # Used to gracefully stop the worker letting it finish its current task.
+        self._stop_event = multiprocessing.Event()
         # To define managed variables:
         # -> self.name = self._multiproc_manager.list(value)
 
@@ -93,20 +97,40 @@ class BaseUnit(ABC):
             self._logger.warning(f"{self.__class__.__name__} is already started")
             return
         self._logger.info(f"Starting {self.__class__.__name__}")
+        self._stop_event.clear()
         self._loop_thread = multiprocessing.Process(target=self._loop)
         self._loop_thread.start()
         # Add the unit with its class to redis
         _r = redis_utils.get_redis(self.redis_config)
         _r.mset({self.id + " class": self.__class__.__name__})
 
-    def stop(self) -> None:
-        """Terminate the worker process and delete the unit's Redis keys."""
-        if self._loop_thread is None or not self._loop_thread.is_alive():
+    def stop(self, timeout: float = STOP_TIMEOUT) -> None:
+        """Stop the worker and delete its Redis keys.
+
+        The worker finishes its current task before exiting. If it does not
+        exit within ``timeout`` seconds, it is terminated as a last resort.
+        Redis keys owned by the unit are removed after either a graceful or
+        forced exit.
+
+        Parameters
+        ----------
+        timeout : float
+            Seconds to wait for a graceful exit before forcing termination.
+        """
+        if timeout < 0:
+            raise ValueError("timeout must not be negative")
+        if self._loop_thread is None:
             self._logger.warning(f"{self.__class__.__name__} is not running")
             return
         self._logger.info(f"Stopping {self.__class__.__name__}")
-        self._loop_thread.terminate()
-        self._loop_thread.join()
+        self._stop_event.set()
+        self._loop_thread.join(timeout)
+        if self._loop_thread.is_alive():
+            self._logger.warning(
+                f"{self.__class__.__name__} did not stop within {timeout} seconds; terminating"
+            )
+            self._loop_thread.terminate()
+            self._loop_thread.join()
         self._loop_thread = None
         self._logger.info("Cleaning redis")
         self._clean_redis()
@@ -127,9 +151,9 @@ class BaseUnit(ABC):
     def _loop(self) -> None:
         if self.logging_config is not None:
             configure_logging(self.logging_config)
-        while True:
+        while not self._stop_event.is_set():
             self._unit_task()
-            sleep(self.sampling_period)
+            self._stop_event.wait(self.sampling_period)
 
     @staticmethod
     def _period_check(sampling_period: float | int) -> float:
