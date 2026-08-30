@@ -12,7 +12,20 @@ from qrobot_dashboard.server import register_callbacks
 def create_app(config_object_name: str = "qrobot_dashboard.config.Config") -> Flask:
     """Create the Flask server and mount the qUnit dashboard on it.
 
-    Run the app via ``FLASK_APP=qrobot_dashboard.app:create_app flask run``."""
+    Parameters
+    ----------
+    config_object_name : str
+        Import path of the Flask configuration object.
+
+    Returns
+    -------
+    flask.Flask
+        Configured Flask server containing the Dash application.
+
+    Notes
+    -----
+    Run the app via ``FLASK_APP=qrobot_dashboard.app:create_app flask run``.
+    """
     server = Flask(__name__, static_folder="static")
 
     server.config.from_object(config_object_name)

@@ -1,3 +1,5 @@
+"""Redis-connected quantum-like processing unit."""
+
 import json
 from collections.abc import Generator
 import redis
@@ -18,7 +20,7 @@ class QUnit(BaseUnit):
     output back to Redis.
 
     Parameters
-    ------------
+    ----------
     name : str
         Human-readable qUnit name.
     model : qrobot.models.Model
@@ -94,6 +96,7 @@ class QUnit(BaseUnit):
         self._logger.debug(f"Properties: {self}")
 
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
+        """Yield the qUnit configuration as key-value pairs."""
         yield "name", self.name
         yield "id", self.id
         yield "model", str(self.model)
@@ -117,7 +120,7 @@ class QUnit(BaseUnit):
         """Set the query target used at the end of each temporal window.
 
         Parameters
-        -----------
+        ----------
         query : list
             Normalized target value for each model dimension.
         """
@@ -182,7 +185,7 @@ class QUnit(BaseUnit):
         """Connect a new input to the specified dimension to the qUnit.
 
         Parameters
-        -----------
+        ----------
         dim : int
             The input dimension index
         input_id : str

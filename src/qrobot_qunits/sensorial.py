@@ -1,3 +1,5 @@
+"""Redis-connected normalized sensor interface."""
+
 from . import redis_utils
 from .base import BaseUnit
 from .redis_utils import RedisConfig, RedisWriteError
@@ -10,7 +12,7 @@ class SensorialUnit(BaseUnit):
     """Unit periodically sending normalized scalar readings.
 
     Parameters
-    ------------
+    ----------
     name : str
         Human-readable sensor name.
     sampling_period : float
@@ -54,6 +56,7 @@ class SensorialUnit(BaseUnit):
         self._logger.debug(f"Properties: {self}")
 
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
+        """Yield the sensorial-unit configuration as key-value pairs."""
         yield "name", self.name
         yield "id", self.id
         yield "sampling_period", self.sampling_period
@@ -65,7 +68,7 @@ class SensorialUnit(BaseUnit):
 
     @scalar_reading.setter
     def scalar_reading(self, value: float | int) -> None:
-        """Set a new value for the input"""
+        """Set the reading published by subsequent unit tasks."""
         value = self._normalize_input(value)
         self._logger.debug(f"Changing scalar reading from {self._scalar_reading.value} to {value}")
         self._scalar_reading.value = value

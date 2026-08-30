@@ -1,3 +1,5 @@
+"""NetworkX graph construction from qUnit Redis status data."""
+
 import json
 from collections.abc import Mapping
 from typing import Any
@@ -51,11 +53,15 @@ def _write_edge(graph: nx.Graph, node_id: str, key: str, value: Any) -> None:
 def build_network(status_dict: Mapping[str, str]) -> nx.DiGraph:
     """Build a directed unit network from a Redis status snapshot.
 
-    Args:
-        status_dict (Mapping[str, str]): Decoded Redis keys and values.
+    Parameters
+    ----------
+    status_dict : collections.abc.Mapping[str, str]
+        Decoded Redis keys and values.
 
-    Returns:
-        networkx.DiGraph: Units as nodes and input couplings as edges.
+    Returns
+    -------
+    networkx.DiGraph
+        Units as nodes and input couplings as edges.
     """
     graph = nx.DiGraph()
 
@@ -76,6 +82,18 @@ def build_network(status_dict: Mapping[str, str]) -> nx.DiGraph:
 def graph(status_dict: Mapping[str, str]) -> nx.DiGraph:
     """Build a network graph from Redis status data.
 
+    Parameters
+    ----------
+    status_dict : collections.abc.Mapping[str, str]
+        Decoded Redis keys and values.
+
+    Returns
+    -------
+    networkx.DiGraph
+        Units as nodes and input couplings as edges.
+
+    Notes
+    -----
     Deprecated alias for :func:`build_network`. It remains available so
     existing applications can move to the less ambiguous public name.
     """

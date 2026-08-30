@@ -1,3 +1,5 @@
+"""Angular quantum-like perception model."""
+
 import numpy as np
 
 from .model import Model, Scalar, TargetVector
@@ -21,7 +23,7 @@ class AngularModel(Model):
             Zero-based input dimension.
 
         Returns
-        ----------
+        -------
         float
             The rotation angle applied to the qubit.
         """
@@ -56,7 +58,7 @@ class AngularModel(Model):
         """Decode the model with one computational-basis measurement.
 
         Returns
-        --------
+        -------
         str
             Measured basis-state bit string.
 

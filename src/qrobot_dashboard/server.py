@@ -1,6 +1,4 @@
-"""
-Dashboard webapp Dash server callbacks.
-"""
+"""Dashboard web application callbacks."""
 
 from collections.abc import Callable, Mapping
 
@@ -13,7 +11,18 @@ from qrobot_visualization import build_network, draw
 
 
 def build_network_figure(status: Mapping[str, str]) -> go.Figure:
-    """Build the dashboard figure from a Redis status mapping."""
+    """Build the dashboard figure from a Redis status mapping.
+
+    Parameters
+    ----------
+    status : collections.abc.Mapping[str, str]
+        Decoded qUnit Redis status.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Rendered qUnit network figure.
+    """
     network = build_network(status)
     return draw(network)
 
@@ -22,7 +31,20 @@ def register_callbacks(
     dash_app: dash.Dash,
     status_provider: Callable[[], Mapping[str, str]] = redis_status,
 ) -> dash.Dash:
-    """Register server callback functions to the Dash app."""
+    """Register server callback functions with a Dash application.
+
+    Parameters
+    ----------
+    dash_app : dash.Dash
+        Application that owns the callbacks.
+    status_provider : collections.abc.Callable
+        Zero-argument function returning decoded qUnit status.
+
+    Returns
+    -------
+    dash.Dash
+        The same application after callback registration.
+    """
 
     @dash_app.callback(
         Output("network-graph", "figure"), [Input("refresh-interval", "n_intervals")]

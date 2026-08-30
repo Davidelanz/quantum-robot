@@ -1,13 +1,15 @@
 """
-This file has an example function, with a documentation string which should
-serve as a template for quantum-robot docstrings.
+This file defines the NumPy-style documentation standard used by public
+quantum-robot APIs. Public docstrings use a one-line imperative summary and
+document every parameter, return value, raised exception, physical unit, and
+lifecycle constraint that callers need to use the API safely.
 
 Adapted from https://gist.github.com/jakevdp/3808292
 """
 
 
 def qrobot_template(X, y, a=1, flag=True, f=None, **kwargs):
-    """This is where a short one-line description goes
+    """Describe the operation with a short imperative summary.
 
     This is where a longer, multi-line description goes.  It's not
     required, but might be helpful if more information is needed.
@@ -24,14 +26,14 @@ def qrobot_template(X, y, a=1, flag=True, f=None, **kwargs):
         Array of shape (n_samples,).  Other information about the
         array here.  Keep it to ~2 lines: refer to Notes section for more.
 
-    a : int (optional, default=1)
+    a : int, optional
         Description of what a does
 
-    flag : bool (optional, default=True)
+    flag : bool, optional
         If true, then do one thing.
         If false, then do another thing.
 
-    f : callable (optional, default=None)
+    f : callable, optional
         Call-back function.  If not specified, then some other function
         will be used
 
@@ -50,6 +52,11 @@ def qrobot_template(X, y, a=1, flag=True, f=None, **kwargs):
 
     optional_info : dict
         returned only if flag is True.  More info about this return value.
+
+    Raises
+    ------
+    ValueError
+        If an argument has the right type but an unsupported value.
 
     Examples
     --------

@@ -1,8 +1,10 @@
+"""Burst strategy based on the fraction of measured one bits."""
+
 from .burst import Burst
 
 
 class OneBurst(Burst):
-    """Return the fraction of measured bits equal to one.
+    r"""Return the fraction of measured bits equal to one.
 
     .. math::
 
@@ -23,4 +25,5 @@ class OneBurst(Burst):
     """
 
     def __call__(self, state: str) -> float:
+        """Return the fraction of ``state`` characters equal to ``"1"``."""
         return state.count("1") / len(state)

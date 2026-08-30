@@ -1,3 +1,5 @@
+"""Burst strategies for converting measured states to scalar signals."""
+
 from .burst import Burst
 from .oneburst import OneBurst
 from .zeroburst import ZeroBurst

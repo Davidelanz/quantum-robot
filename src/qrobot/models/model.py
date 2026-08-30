@@ -1,3 +1,5 @@
+"""Abstract quantum-like perception model and shared operations."""
+
 from abc import ABC, abstractmethod
 from collections.abc import Generator, Sequence
 from typing import TypeAlias
@@ -37,7 +39,6 @@ class Model(ABC):
 
     def __init__(self, n: int, tau: int, backend: QuantumBackend | None = None) -> None:
         """Create an empty ``n``-qubit model for ``tau`` samples."""
-
         # Check the argument n
         if isinstance(n, int):
             if n > 0:
@@ -60,11 +61,13 @@ class Model(ABC):
         self.circ = self.backend.create_circuit(n)
 
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
+        """Yield the model configuration as key-value pairs."""
         yield "model", self.__class__.__name__
         yield "n", self.n
         yield "tau", self.tau
 
     def __repr__(self) -> str:
+        """Return a compact representation of the model configuration."""
         out_str = "["
         for key, value in dict(self).items():
             out_str += f"{key}: {value}, "
@@ -74,7 +77,7 @@ class Model(ABC):
         """Validate and return an input-dimension index.
 
         Raises
-        ---------
+        ------
         TypeError
             `dim` is not an integer `int`
         ValueError
@@ -83,7 +86,7 @@ class Model(ABC):
             ``dim`` is greater than or equal to ``n``.
 
         Returns
-        --------
+        -------
         int
             The dimension index `dim`
         """
@@ -100,14 +103,14 @@ class Model(ABC):
         """Validate and normalize one scalar model input.
 
         Raises
-        ---------
+        ------
         TypeError:
             ``scalar_input`` is neither an ``int`` nor a ``float``.
         ValueError
             `scalar_input` is not between 0 and 1 inclusive
 
         Returns
-        --------
+        -------
         float
             The `scalar_input`
         """
@@ -124,7 +127,7 @@ class Model(ABC):
         targets must contain exactly one normalized value per model dimension.
 
         Raises
-        ---------
+        ------
         TypeError
             `target_vector` elements are not all integers or floats
         ValueError
@@ -133,7 +136,7 @@ class Model(ABC):
             A ``target_vector`` element is outside the interval ``[0, 1]``.
 
         Returns
-        ----------
+        -------
         list
             The `target_vector`
         """
@@ -177,8 +180,9 @@ class Model(ABC):
         ----------
         shots : int
             Number of times to repeat the measurement shot
+
         Returns
-        ----------
+        -------
         dict
             State occurrences counts in the form {"state": count}
         """
@@ -193,20 +197,20 @@ class Model(ABC):
         r"""Change basis so ``target_vector`` maps to state \|00...0>."""
 
     def get_statevector(self) -> np.ndarray:
-        """Returns the simulated state vector of the model.
+        """Return the simulated state vector of the model.
 
         Returns
-        ---------
+        -------
         numpy.ndarray
             Model's state vector.
         """
         return self.backend.statevector(self.circ)
 
     def get_density_matrix(self) -> np.ndarray:
-        """Returns the simulated density matrix of the model.
+        """Return the simulated density matrix of the model.
 
         Returns
-        ---------
+        -------
         numpy.ndarray
             Model's density matrix.
         """
@@ -214,7 +218,7 @@ class Model(ABC):
         return np.outer(statevector, statevector.conjugate())
 
     def print_circuit(self) -> None:
-        """Prints the quantum circuit on which the model is implemented."""
+        """Print the quantum circuit on which the model is implemented."""
         print(self.circ)
 
     def plot_state_mat(self) -> None:
@@ -234,7 +238,7 @@ class Model(ABC):
 
 
         Raises
-        ----------
+        ------
         OverflowError
             If the dimension of the model is 6 or greater, plotting fails
             due to the high number of basis states.

@@ -10,7 +10,8 @@
 
 import os
 
-import sphinx_rtd_theme  # ReadTheDocs theme
+# Import the theme explicitly so Sphinx can discover its package metadata.
+import sphinx_rtd_theme  # noqa: F401
 
 # -- Project information -----------------------------------------------------
 

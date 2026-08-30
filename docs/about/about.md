@@ -15,7 +15,7 @@ skim it) in order to grasp the big picture behind it:
 - [Quantum-like Modeling of Cognitive Architectures for
   Robotics](https://doi.org/10.5281/zenodo.22068511).
 
-## Contribuiting
+## Contributing
 
 If you are interested in the project, we welcome new contributors of all
 experience levels. For any question, [contact the

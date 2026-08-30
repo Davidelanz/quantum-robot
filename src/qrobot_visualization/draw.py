@@ -1,3 +1,5 @@
+"""Plotly rendering for quantum-robot network graphs."""
+
 from typing import Any, cast
 
 from matplotlib import colors, colormaps
@@ -17,11 +19,15 @@ def _hex_color(value: float) -> str:
 def _positions(graph: nx.Graph) -> dict[str, np.ndarray]:
     """Calculate planar ``(x, y)`` positions for the graph nodes.
 
-    Args:
-        graph (nx.Graph): The input graph
+    Parameters
+    ----------
+    graph : networkx.Graph
+        Graph whose nodes need positions.
 
-    Returns:
-        dict: A dictionary of positions keyed by node
+    Returns
+    -------
+    dict[str, numpy.ndarray]
+        Node positions keyed by node identifier.
     """
     return cast(dict[str, np.ndarray], nx.planar_layout(graph))
 
@@ -36,16 +42,25 @@ def _edge_trace(
 ) -> go.Scatter:
     """Create an edge between two nodes.
 
-    Args:
-        node_1 (np.ndarray): Position (x,y) of the first node.
-        node_2 (np.ndarray(x, y): Position (x,y) of the second node.
-        text (str): Annotation text for the edge.
-        width (int): Edge width.
-        font_size (int): Annotation text font size.
-        color (str): Edge color (HEX string format).
+    Parameters
+    ----------
+    pos_1 : numpy.ndarray
+        ``(x, y)`` position of the source node.
+    pos_2 : numpy.ndarray
+        ``(x, y)`` position of the destination node.
+    text : str
+        Annotation displayed on the edge.
+    width : int
+        Edge width in pixels.
+    font_size : int
+        Annotation font size in pixels.
+    color : str
+        Edge color as a hexadecimal string.
 
-    Returns:
-        go.Scatter: Edge scatter trace
+    Returns
+    -------
+    plotly.graph_objects.Scatter
+        Scatter trace representing the edge.
     """
     x1, y1 = pos_1
     x2, y2 = pos_2
@@ -141,7 +156,7 @@ def _node_trace(
 
 
 def _layout() -> go.Layout:
-    """Custom layout for the generated figure."""
+    """Return the layout used by generated figures."""
     return go.Layout(
         paper_bgcolor="rgba(0,0,0,0)",  # transparent background
         plot_bgcolor="rgba(0,0,0,0)",  # transparent 2nd background
@@ -166,11 +181,16 @@ def draw(
 ) -> go.Figure:
     """Visualize a directed graph containing all the running units as connected nodes.
 
-    Args:
-        graph (nx.Graph): The directed graph.
-    Returns:
-        go.Figure: The generated Plotly figure. Call ``figure.show()`` in an
-            interactive application when display is wanted.
+    Parameters
+    ----------
+    graph : networkx.Graph
+        Directed qUnit network to render.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Generated figure. Call ``figure.show()`` from an interactive application
+        to display it.
     """
     # Create figure
     fig = go.Figure(layout=_layout())

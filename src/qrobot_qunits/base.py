@@ -1,3 +1,5 @@
+"""Shared lifecycle for periodically scheduled Redis-connected units."""
+
 import multiprocessing
 from abc import ABC, abstractmethod
 from collections.abc import Generator
@@ -20,7 +22,7 @@ class BaseUnit(ABC):
     intervals and publishes its externally visible state under its unique ID.
 
     Parameters
-    ------------
+    ----------
     name : str
         Human-readable unit name used as the ID prefix.
     sampling_period : float
@@ -73,11 +75,13 @@ class BaseUnit(ABC):
         return state
 
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
+        """Yield the unit configuration as key-value pairs."""
         yield "name", self.name
         yield "id", self.id
         yield "sampling_period", self.sampling_period
 
     def __repr__(self) -> str:
+        """Return the unit identifier and configuration."""
         out_str = f'{self.__class__.__name__} "{self.id}"'
         for key, value in dict(self).items():
             out_str += f"\n     {key}:\t{value}"
@@ -130,14 +134,14 @@ class BaseUnit(ABC):
         """Ensure a sampling period is a number above the minimum allowed.
 
         Raises
-        ---------
+        ------
         TypeError:
             ``sampling_period`` is not an ``int`` or ``float``.
         ValueError
             ``sampling_period`` must not be lower than the minimum allowed.
 
         Returns
-        --------
+        -------
         float
             The validated sampling period.
         """

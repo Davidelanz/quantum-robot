@@ -1,6 +1,4 @@
-"""
-Dashboard webapp Dash layout.
-"""
+"""Dashboard web application layout."""
 
 from dash import dcc, html
 

@@ -1,3 +1,5 @@
+"""Abstract interface for quantum-like burst strategies."""
+
 from abc import ABC, abstractmethod
 
 

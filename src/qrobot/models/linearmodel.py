@@ -1,3 +1,5 @@
+"""Linear-probability quantum-like perception model."""
+
 import numpy as np
 
 from .angularmodel import AngularModel
@@ -26,7 +28,7 @@ class LinearModel(AngularModel):
             Zero-based input dimension.
 
         Returns
-        ----------
+        -------
         float
             The rotation angle applied to the qubit.
         """

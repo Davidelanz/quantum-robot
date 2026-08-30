@@ -1,8 +1,10 @@
+"""Burst strategy based on the fraction of measured zero bits."""
+
 from .burst import Burst
 
 
 class ZeroBurst(Burst):
-    """Return the fraction of measured bits equal to zero.
+    r"""Return the fraction of measured bits equal to zero.
 
     .. math::
 
@@ -23,4 +25,5 @@ class ZeroBurst(Burst):
     """
 
     def __call__(self, state: str) -> float:
+        """Return the fraction of ``state`` characters equal to ``"0"``."""
         return state.count("0") / len(state)

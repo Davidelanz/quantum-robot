@@ -1,3 +1,5 @@
+"""Redis-connected processing units for qBrain networks."""
+
 from . import redis_utils
 from .qunit import QUnit
 from .actuator import ActuatorUnit

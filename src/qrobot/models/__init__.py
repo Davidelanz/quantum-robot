@@ -1,3 +1,5 @@
+"""Quantum-like perception model implementations."""
+
 from .angularmodel import AngularModel
 from .linearmodel import LinearModel
 from .model import Model

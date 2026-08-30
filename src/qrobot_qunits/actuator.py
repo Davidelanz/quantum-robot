@@ -68,6 +68,7 @@ class ActuatorUnit(BaseUnit):
         self.default_input = self._normalized_value(default_input, "default_input")
 
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
+        """Yield the actuator configuration as key-value pairs."""
         yield "name", self.name
         yield "id", self.id
         yield "in_qunits", self.in_qunits
