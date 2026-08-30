@@ -5,7 +5,8 @@ from time import monotonic, sleep
 import pytest
 from redis.exceptions import ConnectionError
 
-from qrobot_qunits import ActuatorUnit, RedisConfig, redis_utils
+from qrobot_qunits import ActuatorUnit, RedisConfig
+from qrobot_qunits.redis import get_redis, redis_status
 from qrobot_qunits.actuator import threshold_activation
 
 TEST_REDIS_CONFIG = RedisConfig(database=15)
@@ -24,7 +25,7 @@ def test_actuator_threshold_is_strict_and_normalized():
 @pytest.mark.redis
 def test_actuator_reads_bursts_and_publishes_activation():
     # Initialize Redis client and check connection availability
-    client = redis_utils.get_redis(TEST_REDIS_CONFIG)
+    client = get_redis(TEST_REDIS_CONFIG)
     try:
         client.ping()
     except ConnectionError:
@@ -69,4 +70,4 @@ def test_actuator_reads_bursts_and_publishes_activation():
         client.delete("p1 output", "p2 output")
 
     # Verify that all actuator data was properly cleaned up from Redis
-    assert redis_utils.redis_status(TEST_REDIS_CONFIG) == {}
+    assert redis_status(TEST_REDIS_CONFIG) == {}

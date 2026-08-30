@@ -4,7 +4,8 @@ from dataclasses import dataclass
 
 from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
-from qrobot_qunits import ActuatorUnit, QUnit, RedisConfig, SensorialUnit, redis_utils
+from qrobot_qunits import ActuatorUnit, QUnit, RedisConfig, SensorialUnit
+from qrobot_qunits.redis import get_redis
 
 from .config import GRIPPER_ROBOT_CONFIG
 
@@ -117,7 +118,7 @@ class GraspingRobot:
             return
         for unit in reversed(units):
             unit.stop()
-        client = redis_utils.get_redis(self.redis_config)
+        client = get_redis(self.redis_config)
         keys = [key for unit in units for key in client.scan_iter(match=f"{unit.id} *")]
         if keys:
             client.delete(*keys)

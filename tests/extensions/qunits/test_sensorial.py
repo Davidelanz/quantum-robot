@@ -6,7 +6,8 @@ from time import monotonic, sleep
 import pytest
 from redis.exceptions import ConnectionError
 
-from qrobot_qunits import RedisConfig, SensorialUnit, redis_utils
+from qrobot_qunits import RedisConfig, SensorialUnit
+from qrobot_qunits.redis import get_redis, redis_status
 
 TEST_REDIS_CONFIG = RedisConfig(database=15)
 
@@ -42,7 +43,7 @@ def test_sensorial_initialization_and_input(sensor: SensorialUnit) -> None:
 
 @pytest.mark.redis
 def test_sensorial_publishes_and_cleans_up(sensor: SensorialUnit) -> None:
-    client = redis_utils.get_redis(TEST_REDIS_CONFIG)
+    client = get_redis(TEST_REDIS_CONFIG)
     try:
         client.ping()
     except ConnectionError:
@@ -63,4 +64,4 @@ def test_sensorial_publishes_and_cleans_up(sensor: SensorialUnit) -> None:
     finally:
         sensor.stop()
 
-    assert redis_utils.redis_status(TEST_REDIS_CONFIG) == {}
+    assert redis_status(TEST_REDIS_CONFIG) == {}

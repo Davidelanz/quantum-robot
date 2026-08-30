@@ -1,9 +1,10 @@
 """Redis-connected normalized sensor interface."""
 
-from . import redis_utils
+from .redis import get_redis
 from .base import BaseUnit
-from .redis_utils import RedisConfig, RedisWriteError
+from .redis import RedisConfig, RedisWriteError
 from qrobot.logger import LoggingConfig
+from .redis import RedisAttribute, build_redis_key
 import redis
 from collections.abc import Generator
 
@@ -86,8 +87,8 @@ class SensorialUnit(BaseUnit):
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
-        _r = redis_utils.get_redis(self.redis_config)
-        _r.delete(self.id + " output")
+        _r = get_redis(self.redis_config)
+        _r.delete(build_redis_key(self.id, RedisAttribute.OUTPUT))
 
     def _unit_task(self) -> None:
         """Single iteration of the processing loop."""
@@ -96,9 +97,11 @@ class SensorialUnit(BaseUnit):
         self._logger.debug(f"scalar_reading={scalar_reading}")
         self._logger.debug("Writing input on redis")
         # Write it on redis
-        _r = redis_utils.get_redis(self.redis_config)
+        _r = get_redis(self.redis_config)
         try:
-            written = _r.mset({self.id + " output": self.scalar_reading})
+            written = _r.mset(
+                {build_redis_key(self.id, RedisAttribute.OUTPUT): self.scalar_reading}
+            )
         except redis.RedisError as exc:
             raise RedisWriteError(
                 f"Unable to write SensorialUnit {self.id} output to Redis"

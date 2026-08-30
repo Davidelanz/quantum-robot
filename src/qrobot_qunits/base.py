@@ -7,8 +7,9 @@ from typing import Any
 from uuid import uuid4
 
 from qrobot.logger import LoggingConfig, configure_logging, get_logger
-from . import redis_utils
-from .redis_utils import RedisConfig
+from .redis import RedisAttribute, build_redis_key
+from .redis import get_redis
+from .redis import RedisConfig
 
 MIN_TS = 0.01
 """Minimum supported sampling period, in seconds."""
@@ -101,8 +102,8 @@ class BaseUnit(ABC):
         self._loop_thread = multiprocessing.Process(target=self._loop)
         self._loop_thread.start()
         # Add the unit with its class to redis
-        _r = redis_utils.get_redis(self.redis_config)
-        _r.mset({self.id + " class": self.__class__.__name__})
+        _r = get_redis(self.redis_config)
+        _r.mset({build_redis_key(self.id, RedisAttribute.CLASS): self.__class__.__name__})
 
     def stop(self, timeout: float = STOP_TIMEOUT) -> None:
         """Stop the worker and delete its Redis keys.
@@ -135,8 +136,8 @@ class BaseUnit(ABC):
         self._logger.info("Cleaning redis")
         self._clean_redis()
         # Remove the unit with its class from redis
-        _r = redis_utils.get_redis(self.redis_config)
-        _r.delete(self.id + " class")
+        _r = get_redis(self.redis_config)
+        _r.delete(build_redis_key(self.id, RedisAttribute.CLASS))
 
     @abstractmethod
     def _clean_redis(self) -> None:

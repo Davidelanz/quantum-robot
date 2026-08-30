@@ -7,7 +7,8 @@ from redis.exceptions import ConnectionError
 
 from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
-from qrobot_qunits import QUnit, RedisConfig, SensorialUnit, redis_utils
+from qrobot_qunits import QUnit, RedisConfig, SensorialUnit
+from qrobot_qunits.redis import flush_redis, get_redis, redis_status
 
 TEST_REDIS_CONFIG = RedisConfig(database=15)
 
@@ -19,11 +20,11 @@ TEST_REDIS_CONFIG = RedisConfig(database=15)
 def fixture_flush_redis() -> None:
     """Flush redis before starting the test."""
     try:
-        redis_utils.get_redis(TEST_REDIS_CONFIG).ping()
+        get_redis(TEST_REDIS_CONFIG).ping()
     except ConnectionError:
         pytest.skip("Redis is not available on localhost:6379")
-    redis_utils.flush_redis(TEST_REDIS_CONFIG)
-    check.equal(redis_utils.redis_status(TEST_REDIS_CONFIG), {})
+    flush_redis(TEST_REDIS_CONFIG)
+    check.equal(redis_status(TEST_REDIS_CONFIG), {})
 
 
 @pytest.fixture
@@ -112,7 +113,7 @@ def test_init_qunits(
     check.equal(l1_unit0.default_input, [0.0])
 
     # A non-normalozed input value falls back the default value
-    redis_utils.get_redis(TEST_REDIS_CONFIG).set(f"{l0_unit0.id} output", "1.01")
+    get_redis(TEST_REDIS_CONFIG).set(f"{l0_unit0.id} output", "1.01")
     check.equal(l1_unit0.input_vector, [0.0])
 
 
@@ -131,10 +132,10 @@ def test_qunit(
 
         expected_output_keys = {f"{unit.id} output" for unit in units}
         deadline = monotonic() + 6
-        status = redis_utils.redis_status(TEST_REDIS_CONFIG)
+        status = redis_status(TEST_REDIS_CONFIG)
         while monotonic() < deadline and not expected_output_keys.issubset(status):
             sleep(0.1)
-            status = redis_utils.redis_status(TEST_REDIS_CONFIG)
+            status = redis_status(TEST_REDIS_CONFIG)
 
         assert expected_output_keys.issubset(status)
         assert l1_unit0.get_burst_output() is not None
@@ -144,4 +145,4 @@ def test_qunit(
         for unit in units:
             unit.stop()
 
-    assert redis_utils.redis_status(TEST_REDIS_CONFIG) == {}
+    assert redis_status(TEST_REDIS_CONFIG) == {}

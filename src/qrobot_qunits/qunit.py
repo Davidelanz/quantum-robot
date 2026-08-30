@@ -7,9 +7,10 @@ import redis
 from qrobot.bursts import Burst
 from qrobot.logger import LoggingConfig
 from qrobot.models import Model
-from . import redis_utils
+from .redis import RedisAttribute, build_redis_key
+from .redis import get_redis, redis_status
 from .base import BaseUnit
-from .redis_utils import RedisConfig, RedisWriteError
+from .redis import RedisConfig, RedisWriteError
 
 
 class QUnit(BaseUnit):
@@ -163,8 +164,8 @@ class QUnit(BaseUnit):
         # values used by later temporal windows.
         input_vector = self.default_input.copy()
         for dim, qunit_id in self._in_qunits.items():
-            _r = redis_utils.get_redis(self.redis_config)
-            val = _r.get(qunit_id + " output")
+            _r = get_redis(self.redis_config)
+            val = _r.get(build_redis_key(qunit_id, RedisAttribute.OUTPUT))
             if val is not None:
                 input_vector[dim] = self._normalize_input(dim, val)
             else:
@@ -208,17 +209,19 @@ class QUnit(BaseUnit):
         float or None
             The latest burst output written by the unit on the Redis database.
         """
-        global_status = redis_utils.redis_status(self.redis_config)
-        out = global_status.get(f"{self.id} output", None)
+        global_status = redis_status(self.redis_config)
+        out = global_status.get(build_redis_key(self.id, RedisAttribute.OUTPUT))
         return float(out) if out is not None else None
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
-        _r = redis_utils.get_redis(self.redis_config)
-        _r.delete(self.id + " output")
-        _r.delete(self.id + " state")
-        _r.delete(self.id + " query")
-        _r.delete(self.id + " in_qunits")
+        _r = get_redis(self.redis_config)
+        _r.delete(
+            build_redis_key(self.id, RedisAttribute.OUTPUT),
+            build_redis_key(self.id, RedisAttribute.STATE),
+            build_redis_key(self.id, RedisAttribute.QUERY),
+            build_redis_key(self.id, RedisAttribute.IN_QUNITS),
+        )
 
     def _unit_task(self) -> None:
         """Single iteration of the processing loop."""
@@ -240,15 +243,17 @@ class QUnit(BaseUnit):
             self._logger.debug(f"Output state = {out_state}")
             # Write output on Redis database
             self._logger.debug("Opening a connection to redis...")
-            _r = redis_utils.get_redis(self.redis_config)
+            _r = get_redis(self.redis_config)
             self._logger.debug(f"Redis connected: {_r}")
             try:
                 written = _r.mset(
                     {
-                        self.id + " output": self.burst(out_state),
-                        self.id + " state": str(out_state),
-                        self.id + " query": json.dumps(self.query),
-                        self.id + " in_qunits": json.dumps(self.in_qunits),
+                        build_redis_key(self.id, RedisAttribute.OUTPUT): self.burst(out_state),
+                        build_redis_key(self.id, RedisAttribute.STATE): str(out_state),
+                        build_redis_key(self.id, RedisAttribute.QUERY): json.dumps(self.query),
+                        build_redis_key(self.id, RedisAttribute.IN_QUNITS): json.dumps(
+                            self.in_qunits
+                        ),
                     }
                 )
             except redis.RedisError as exc:

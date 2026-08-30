@@ -31,7 +31,8 @@ dashboard.
 from qrobot.bursts import OneBurst, ZeroBurst
 from qrobot.logger import LoggingConfig, configure_logging
 from qrobot.models import AngularModel
-from qrobot_qunits import QUnit, SensorialUnit, redis_utils
+from qrobot_qunits import QUnit, SensorialUnit
+from qrobot_qunits.redis import flush_redis, redis_status
 from qrobot_visualization import build_network, draw
 from IPython.display import HTML
 from pathlib import Path
@@ -168,7 +169,7 @@ try:
         if i % int(input_change_period / refresh_time) == 0:
             l0_unit0.scalar_reading = randint(0, 1000) / 1000
 
-        status = redis_utils.redis_status()
+        status = redis_status()
         statuses.append(status)
         print(json.dumps(status, indent=1, sort_keys=True))
         print(round((i + 1) * refresh_time, 2), f"/{run_duration} seconds")
@@ -191,14 +192,14 @@ latest_bursts
 `stop()` already removes the keys owned by each unit:
 
 ```{code-cell} ipython3
-redis_utils.redis_status()
+redis_status()
 ```
 
 To flush the redis to clean all traces (should not be necessary if the qUnits processing loops stopped correctly):
 
 ```{code-cell} ipython3
-redis_utils.flush_redis()
-redis_utils.redis_status()
+flush_redis()
+redis_status()
 ```
 
 ## Visualize the results

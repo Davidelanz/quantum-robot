@@ -102,7 +102,7 @@ docker rm qrobot-redis
 To check whether Redis is reachable, run:
 
 ```console
-python -c "from qrobot_qunits.redis_utils import redis_status; print(redis_status())"
+python -c "from qrobot_qunits.redis.utils import redis_status; print(redis_status())"
 ```
 
 With Redis running, try one of the packaged simulations from a repository

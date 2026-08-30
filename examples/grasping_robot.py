@@ -20,7 +20,8 @@ from time import monotonic, sleep
 
 from redis.exceptions import ConnectionError
 
-from qrobot_qunits import RedisConfig, redis_utils
+from qrobot_qunits import RedisConfig
+from qrobot_qunits.redis import get_redis
 from qrobot_simulator.grasping_robot import (
     GraspingRobot,
     GraspingWorld,
@@ -163,7 +164,7 @@ def main() -> None:
     validate_args(args)
     redis_config = RedisConfig()
     try:
-        redis_utils.get_redis(redis_config).ping()
+        get_redis(redis_config).ping()
     except ConnectionError as exc:
         raise RuntimeError("Redis must be running on localhost:6379") from exc
 

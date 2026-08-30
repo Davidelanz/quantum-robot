@@ -6,7 +6,7 @@ import dash
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output, State
 
-from qrobot_qunits.redis_utils import redis_status
+from qrobot_qunits.redis.utils import redis_status
 from qrobot_visualization import build_network, draw
 
 

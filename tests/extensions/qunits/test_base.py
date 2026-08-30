@@ -40,7 +40,7 @@ def test_stop_signals_and_joins_before_cleanup(monkeypatch: pytest.MonkeyPatch) 
     process.is_alive.return_value = False
     unit = _unit(process)
     client = Mock()
-    monkeypatch.setattr("qrobot_qunits.base.redis_utils.get_redis", Mock(return_value=client))
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=client))
 
     unit.stop(timeout=0.25)
 
@@ -57,7 +57,7 @@ def test_stop_terminates_only_after_timeout(monkeypatch: pytest.MonkeyPatch) -> 
     process = Mock()
     process.is_alive.return_value = True
     unit = _unit(process)
-    monkeypatch.setattr("qrobot_qunits.base.redis_utils.get_redis", Mock(return_value=Mock()))
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=Mock()))
 
     unit.stop(timeout=0.1)
 
@@ -74,7 +74,7 @@ def test_stop_reaps_abnormally_exited_worker(monkeypatch: pytest.MonkeyPatch) ->
     process.exitcode = 1
     unit = _unit(process)
     client = Mock()
-    monkeypatch.setattr("qrobot_qunits.base.redis_utils.get_redis", Mock(return_value=client))
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=client))
 
     unit.stop()
 
