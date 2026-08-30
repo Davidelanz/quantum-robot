@@ -27,14 +27,14 @@ and optional extension import packages:
 | --- | --- | --- | --- |
 | Core models and Qiskit backend | — | `qrobot` | Supported |
 | qUnits / Redis integration | `qunits` | `qrobot_qunits` | Supported |
-| Graph and drawing tools | `visualization` | `qrobot_visualization` | Experimental |
+| Graph and drawing tools | `visualization` | `qrobot_visualization` | Supported |
 | Lightweight 2-D robot simulator | `simulator` | `qrobot_simulator` | Experimental |
 | Dashboard | `dashboard` | `qrobot_dashboard` | Experimental |
 
 > [!WARNING]
-> `qrobot_simulator`, `qrobot_visualization`, and `qrobot_dashboard` are
-> experimental extensions. Their public interfaces, configuration, and output
-> may change between minor releases while their contracts are being defined.
+> `qrobot_simulator` and `qrobot_dashboard` are experimental extensions. Their
+> public interfaces, configuration, and output may change between minor
+> releases while their contracts are being defined.
 
 ## Install
 

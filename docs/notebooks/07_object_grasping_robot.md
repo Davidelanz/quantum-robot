@@ -23,7 +23,8 @@ minor releases.
 This tutorial implements the object-grasping
 architecture in [*Quantum-like Modeling of Cognitive Architectures for
 Robotics*](https://doi.org/10.5281/zenodo.22068511). The architecture diagram
-and robot photograph are archival assets of this master's thesis work.
+is reproduced by the executable graph below; the robot photographs are
+archival assets of this master's thesis work.
 The two-dimensional world is rendered by
 `examples/grasping_robot.py` using the current Redis-connected qUnit implementation.
 ```
@@ -41,25 +42,41 @@ the signal path from distance and touch readings to gripper actuation.
 
 ## Architecture
 
-```{image} ./07_imgs/grasping_architecture.png
-:alt: Diagram showing two sensor interfaces, two perceptual qUnits, and a gripper actuator
-:width: 680px
-:align: center
+```{code-cell} ipython3
+from IPython.display import HTML
+from qrobot_qunits import RedisConfig
+from qrobot_simulator.grasping_robot import build_grasping_qbrain
+from qrobot_visualization import build_network, draw
+
+sensors, qunits, actuator = build_grasping_qbrain(redis_config=RedisConfig())
+architecture = draw(build_network((sensors, qunits, actuator)))
+HTML(
+    architecture.to_html(
+        include_plotlyjs="cdn",
+        full_html=False,
+        config={"responsive": True},
+        default_width="100%",
+    )
+)
 ```
 
-The network uses the package's three explicit runtime roles:
+Read the graph from left to right. Blue nodes are sensor interfaces or
+perceptual qUnits, and the green node is the actuator. The arrows show the
+direction in which each unit consumes the previous unit's output. The graph is
+interactive, so it can be zoomed and panned when inspecting labels or wiring.
 
-1. An ultrasonic sensor measures a continuous distance in centimetres. Its
-   interface normalizes that measurement to the interval $[0,1]$: `1` means
-   closest and `0` means farthest or out of range.
-2. A touch interface produces `1` while the gripper is empty and `0` when its
-   internal switch is pressed.
-3. Perceptual qUnit $p_1$ integrates 10 samples at $T_s=0.1$ s, so its
-   effective window is 1 second.
-4. Perceptual qUnit $p_2$ integrates 50 samples at the same rate, producing a
-   slower 5-second assessment.
-5. The actuator averages the two bursts and closes only when the normalized
-   sum is strictly greater than `0.5`.
+The signal path has three stages:
+
+1. **Sensors.** `grasp_distance` normalizes ultrasonic distance to $[0,1]$;
+   `1` means closest and `0` means farthest or out of range. `grasp_touch`
+   produces `1` while the gripper is empty and `0` while its internal switch
+   is pressed.
+2. **Perception.** `grasp_proximity` compares a one-second distance history
+   with query `[1.0]`. `grasp_empty` compares a five-second touch history with
+   the same query. Both publish a stochastic binary `ZeroBurst` after a
+   complete temporal window.
+3. **Actuation.** `grasp_gripper` averages the two bursts and closes only when
+   their mean is strictly greater than its `0.5` threshold.
 
 The **touch sensor is inside the gripper**. It reports contact only after the
 jaws have closed around prey. In the carnivorous-plant analogy, that contact is
@@ -135,45 +152,6 @@ touch_axis.set(ylabel="Normalized signal", ylim=(0, 1.05), title="Touch interfac
 fig.tight_layout()
 plt.show()
 ```
-
-## qBrain
-
-The `GraspingRobot` internal components are the following:
-
-```{code-cell} ipython3
-from qrobot_qunits import RedisConfig
-from qrobot_simulator.grasping_robot import build_grasping_qbrain
-
-sensors, qunits, actuator = build_grasping_qbrain(redis_config=RedisConfig())
-```
-
-```{code-cell} ipython3
-sensors
-```
-
-The two `SensorialUnit` workers publish the latest normalized interface values
-to Redis. `grasp_distance` receives the continuous proximity value described
-above; `grasp_touch` receives `1` while the internal switch is not pressed and
-`0` when contact presses it. They transport readings but do not perform the
-temporal decision themselves.
-
-```{code-cell} ipython3
-qunits
-```
-
-The perceptual qUnits independently sample those Redis values. `grasp_proximity`
-compares a 1-second distance history with query `[1.0]` (the closest-object
-target). `grasp_empty` compares a 5-second touch history with `[1.0]` (the
-empty-gripper target). Each publishes a stochastic binary `ZeroBurst`; a `1`
-therefore means that the window matched that unit's target closely enough for
-the sampled measurement to be zero.
-
-```{code-cell} ipython3
-actuator
-```
-
-- the `ActuatorUnit` averages its incoming bursts, then sends the activation signal
-  only when the result is strictly greater than its threshold.
 
 ## Live demo
 

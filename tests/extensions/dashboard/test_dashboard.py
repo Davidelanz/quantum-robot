@@ -17,4 +17,6 @@ def test_build_network_figure_accepts_partial_status() -> None:
     figure = build_network_figure({"sensor class": "SensorialUnit"})
 
     assert figure is not None
-    assert len(figure.data) == 1
+    assert [trace.mode for trace in figure.data] == ["markers", "text"]
+    assert list(figure.data[0].x) == [0.0]
+    assert list(figure.data[1].text) == ["<b>sensor</b>"]

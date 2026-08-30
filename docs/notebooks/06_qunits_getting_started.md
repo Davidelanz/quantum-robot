@@ -33,7 +33,7 @@ from qrobot.logger import LoggingConfig, configure_logging
 from qrobot.models import AngularModel
 from qrobot_qunits import QUnit, SensorialUnit, redis_utils
 from qrobot_visualization import build_network, draw
-from IPython.display import HTML, display
+from IPython.display import HTML
 from pathlib import Path
 import time
 ```
@@ -91,40 +91,36 @@ l1_unit1 = QUnit(
 )
 ```
 
-```{image} ./06_imgs/tutorial_qunits_basicnetwork.png
-:width: 300px
-:align: center
+Modify `l1_unit1`'s query, then inspect the complete architecture:
+
+```{code-cell} ipython3
+l1_unit1.query = [0.8]
 ```
 
 ```{code-cell} ipython3
-l0_unit0
+:tags: [hide-input]
+
+architecture = draw(build_network(([l0_unit0], [l1_unit0, l1_unit1], [])))
+HTML(
+    architecture.to_html(
+        include_plotlyjs="cdn",
+        full_html=False,
+        config={"responsive": True},
+        default_width="100%",
+    )
+)
 ```
 
-```{code-cell} ipython3
-l1_unit0
-```
-
-```{code-cell} ipython3
-l1_unit1
-```
+Read the graph from left to right. The blue sensorial unit publishes one scalar
+reading to both perceptual qUnits. Each arrow identifies that input dependency.
+The two qUnits use different temporal windows and bursts, which are summarized
+directly in their node labels; `l1_unit1` also shows the query set above. You can
+zoom or pan the graph to inspect the labels.
 
 Check the default input for `l0_unit0`:
 
 ```{code-cell} ipython3
 l0_unit0.scalar_reading
-```
-
-The input units for each qUnit are:
-
-```{code-cell} ipython3
-print(l1_unit0.in_qunits)
-print(l1_unit1.in_qunits)
-```
-
-Modify `l1_unit1` query:
-
-```{code-cell} ipython3
-l1_unit1.query = [0.8]
 ```
 
 ## Real-time processing
@@ -184,14 +180,6 @@ try:
 finally:
     for unit in reversed(units):
         unit.stop()
-```
-
-This graph shows the final recorded qBrain network state:
-
-```{code-cell} ipython3
-qbrain_graph = build_network(status_dict=statuses[-1])
-qbrain_figure = draw(qbrain_graph)
-display(HTML(qbrain_figure.to_html(full_html=False, include_plotlyjs=True)))
 ```
 
 These are the latest outputs that were captured before stopping the units:
