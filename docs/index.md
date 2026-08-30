@@ -73,6 +73,7 @@ It is currently maintained by
 :caption: Contents
 
 getting_started/getting_started
+glossary/glossary
 notebooks/notebooks
 documentation/documentation
 about/about
