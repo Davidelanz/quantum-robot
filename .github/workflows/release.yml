@@ -23,13 +23,13 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v6
+      - name: Install Poetry
+        run: pipx install poetry
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
           cache: poetry
           cache-dependency-path: poetry.lock
-      - name: Install Poetry
-        run: pipx install poetry
       - name: Require tag and package versions to match
         env:
           RELEASE_TAG: ${{ github.ref_name }}
