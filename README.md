@@ -188,6 +188,12 @@ git tag -a x.y.z -m "quantum-robot x.y.z"
 git push origin x.y.z
 ```
 
+To remove a failed tag (before a new attempt):
+```sh
+git tag -d x.y.z
+git push origin :refs/tags/x.y.z
+```
+
 ## License
 
 [GPL-3.0-or-later](LICENSE)
