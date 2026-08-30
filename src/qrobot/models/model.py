@@ -9,6 +9,7 @@ import numpy as np
 from qrobot.backends import QiskitBackend, QuantumBackend
 
 Scalar: TypeAlias = float | int
+InputVector: TypeAlias = Sequence[Scalar]
 TargetVector: TypeAlias = Sequence[Scalar] | Scalar
 
 
@@ -161,17 +162,45 @@ class Model(ABC):
 
     @abstractmethod
     def encode(self, scalar_input: Scalar, dim: int) -> float:
-        """Encode one normalized input in the qubit for ``dim``.
+        """Encode one normalized scalar in a single model dimension.
 
-        Example
-        -------
-        To encode a `sequence` of input vectors, given `tau` and `n`::
-
-            for t in range(model.tau): # loop through time
-                for dim in range(model.n): # loop through dimensions
-                    model.encode(sequence[t][dim], dim)
-
+        Subclasses implement the mapping from a normalized input to their
+        backend operation. Implementations apply that operation to ``dim`` and
+        return the numeric encoding parameter they used.
         """
+        raise NotImplementedError
+
+    def encode_vector(self, input_vector: InputVector) -> list[float]:
+        """Encode one input value for every model dimension.
+
+        This is the multidimensional counterpart of :meth:`encode`. The value
+        at each vector index is passed to the model's :meth:`encode`
+        implementation for the matching dimension.
+
+        Parameters
+        ----------
+        input_vector : sequence of float or int
+            Exactly one model-specific scalar input per dimension.
+
+        Returns
+        -------
+        list of float
+            Numeric encoding parameters per dimension.
+
+        Raises
+        ------
+        TypeError
+            ``input_vector`` is not iterable, or :meth:`encode` rejects one of its elements.
+        ValueError
+            The vector length differs from ``n``, or :meth:`encode` rejects one of its elements.
+        """
+        try:
+            values = list(input_vector)
+        except TypeError as exc:
+            raise TypeError("input_vector must be iterable!") from exc
+        if len(values) != self.n:
+            raise ValueError(f"input_vector must be a {self.n}-dimensional vector!")
+        return [self.encode(value, dim) for dim, value in enumerate(values)]
 
     def measure(self, shots: int = 1) -> dict[str, int]:
         """Measure the qubits using the configured backend.
@@ -191,10 +220,12 @@ class Model(ABC):
     @abstractmethod
     def decode(self) -> str:
         """Measure and decode the model state as a basis-state label."""
+        raise NotImplementedError
 
     @abstractmethod
     def query(self, target_vector: TargetVector) -> None:
         r"""Change basis so ``target_vector`` maps to state \|00...0>."""
+        raise NotImplementedError
 
     def get_statevector(self) -> np.ndarray:
         """Return the simulated state vector of the model.
@@ -231,8 +262,7 @@ class Model(ABC):
             model = Model(n, tau) # change Model with the desired child class
 
             for t in range(0,model.tau): # loop through time
-                for dim in range(model.n): # loop through dimensions
-                    model.encode(.5, dim)
+                model.encode_vector([.5] * model.n)
 
             model.plot_state_mat()
 

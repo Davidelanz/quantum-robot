@@ -12,11 +12,14 @@ class QuantumBackend(ABC):
     @abstractmethod
     def create_circuit(self, qubits: int) -> Any:
         """Return a circuit with ``qubits`` quantum bits."""
+        raise NotImplementedError
 
     @abstractmethod
     def sample_counts(self, circuit: Any, shots: int) -> dict[str, int]:
         """Sample computational-basis counts without mutating ``circuit``."""
+        raise NotImplementedError
 
     @abstractmethod
     def statevector(self, circuit: Any) -> np.ndarray:
         """Return the circuit's final statevector."""
+        raise NotImplementedError

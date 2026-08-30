@@ -59,6 +59,25 @@ def test_encode():
         model.encode(0.55, 2)
 
 
+def test_encode_vector():
+    """A complete sample vector is encoded in one call."""
+    vector_model = AngularModel(n=3, tau=2)
+    scalar_model = AngularModel(n=3, tau=2)
+
+    angles = vector_model.encode_vector([0.2, 0.5, 0.8])
+    expected_angles = [scalar_model.encode(value, dim) for dim, value in enumerate([0.2, 0.5, 0.8])]
+
+    assert np.allclose(angles, expected_angles)
+    assert np.allclose(vector_model.get_statevector(), scalar_model.get_statevector())
+
+    with pytest.raises(ValueError, match="3-dimensional"):
+        vector_model.encode_vector([0.1, 0.2])
+    with pytest.raises(TypeError, match="scalar number"):
+        vector_model.encode_vector([0.1, "invalid", 0.3])
+    with pytest.raises(ValueError, match="between 0 and 1"):
+        vector_model.encode_vector([0.1, 1.1, 0.3])
+
+
 def test_measure():
     """Tests measuring for unambiguous inputs"""
 

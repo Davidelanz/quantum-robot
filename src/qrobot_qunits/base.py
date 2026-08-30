@@ -117,10 +117,12 @@ class BaseUnit(ABC):
     @abstractmethod
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
+        raise NotImplementedError
 
     @abstractmethod
     def _unit_task(self) -> None:
         """Task executed by the unit every sampling period."""
+        raise NotImplementedError
 
     def _loop(self) -> None:
         if self.logging_config is not None:
