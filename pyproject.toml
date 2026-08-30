@@ -68,7 +68,7 @@ lint = ["black>=25.0", "build>=1.2", "jupytext>=1.17", "ruff>=0.14", "twine>=6.1
 
 [project.urls]
 Homepage = "http://quantum-robot.org/"
-Documentation = "http://quantum-robot.org/docs"
+Documentation = "http://docs.quantum-robot.org/"
 Repository = "https://github.com/Davidelanz/quantum-robot"
 
 [tool.poetry]

@@ -7,7 +7,7 @@
 [![Snyk Advisor](https://img.shields.io/badge/Snyk_Security-blue)](https://snyk.io/advisor/python/quantum-robot)
 [![Maintainability](https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability)](https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability)
 [![License](https://img.shields.io/badge/license-GNU_GPL_v3-blue)](LICENSE)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3926776-blue)](https://doi.org/10.5281/zenodo.3926776)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22068511-blue)](https://doi.org/10.5281/zenodo.22068511)
 
 `quantum-robot` provides quantum-like perception models for robotics. It
 targets Python 3.14 and exposes a small backend interface; Qiskit is the
