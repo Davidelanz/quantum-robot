@@ -50,7 +50,9 @@ jobs:
       # test
       - name: Run tests with coverage
         run: |
-          poetry run pytest --cov --cov-report=xml:coverage.xml --junitxml=junit.xml -o junit_family=legacy
+          poetry run pytest --cov \
+            --cov-report=term-missing --cov-report=xml:coverage.xml \
+            --junitxml=junit.xml -o junit_family=legacy
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v5
         with:

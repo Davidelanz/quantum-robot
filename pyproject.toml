@@ -132,7 +132,8 @@ module = ["networkx"]
 ignore_missing_imports = true
 
 [tool.coverage.run]
-omit = ["src/qrobot_dashboard/*"]
+relative_files = true
+source = ["src"]
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover"]

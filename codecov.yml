@@ -1,0 +1,28 @@
+coverage:
+  status:
+    project:
+      default: false
+
+component_management:
+  individual_components:
+    - component_id: supported
+      name: Supported packages
+      paths:
+        - src/qrobot/**
+        - src/qrobot_qunits/**
+      statuses:
+        - type: project
+          target: auto
+    - component_id: experimental
+      name: Experimental plugins
+      paths:
+        - src/qrobot_visualization/**
+        - src/qrobot_simulator/**
+        - src/qrobot_dashboard/**
+      statuses:
+        - type: project
+          target: auto
+          informational: true
+
+comment:
+  layout: "header, diff, components"
