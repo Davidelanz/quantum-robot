@@ -2,6 +2,30 @@
 
 All notable changes are documented here. Semantic Versioning starts with 1.0.0.
 
+## [1.1.0] - 2026-08-30
+
+### Added
+
+- Added `Model.encode_vector` for encoding a complete multidimensional input
+  vector in one call, with validation against the model dimensionality.
+- Added full qBrain architecture graph construction and interactive drawing,
+  including layered layouts, node and edge styling, runtime status overlays,
+  and output-based coloring.
+- Added a public `qrobot_qunits.redis` package with typed Redis attributes,
+  key construction/parsing, connection helpers, and status retrieval.
+- Added graceful qUnit worker shutdown: workers finish their current task,
+  wait for a configurable timeout, and are force-terminated only as a fallback.
+
+### Changed
+
+- Promoted qBrain visualization from "Experimental" to "Supported" status.
+- Reorganized visualization internals into the public `draw` and `graph`
+  packages while retaining `build_network` and `draw` as the top-level API.
+- Updated qUnit, simulator, dashboard, examples, and documentation code to use
+  the centralized Redis key protocol.
+- Improved abstract model, backend, and qUnit method contracts by explicitly
+  raising `NotImplementedError` in abstract implementations.
+
 ## [1.0.0] - 2026-08-30
 
 This release deliberately defines a new API. Compatibility with the published
@@ -122,4 +146,5 @@ from 2023-06-13 described in the next section.
 - NumPy, Qiskit, pandas, Matplotlib, and seaborn as mandatory dependencies.
 
 [1.0.0]: https://github.com/Davidelanz/quantum-robot/compare/d797c1a8e943a3201ea523bd031131549718b06c...1.0.0
+[1.1.0]: https://github.com/Davidelanz/quantum-robot/compare/1.0.0...1.1.0
 [0.1]: https://github.com/Davidelanz/quantum-robot/releases/tag/0.1
