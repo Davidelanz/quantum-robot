@@ -79,6 +79,7 @@ Run the standard quality checks through that environment:
 ```console
 poetry check
 poetry run ruff check src tests scripts
+poetry run python scripts/check_docstrings.py src
 poetry run black --check src tests scripts
 poetry run python scripts/format_notebooks.py --check
 poetry run mypy src
