@@ -1,7 +1,7 @@
 """Core quantum-like perception models and burst strategies.
 
-Optional integrations live in separately installable distributions:
-``qrobot-qunits``, ``qrobot-visualization``, and ``qrobot-dashboard``.
+Optional integrations live in separate import packages in the same distribution.
+Install their dependencies with the corresponding ``quantum-robot`` extras.
 """
 
 from . import bursts, logger, models

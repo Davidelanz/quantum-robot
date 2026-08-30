@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "quantum-robot"
-version = "0.1.0"
+version = "1.0.0"
 description = "A set of Python modules for quantum-like perception modelling."
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
@@ -64,7 +64,7 @@ docs = [
     "networkx>=3.4",
     "plotly>=6.0",
 ]
-lint = ["black>=25.0", "build>=1.2", "jupytext>=1.17", "ruff>=0.14"]
+lint = ["black>=25.0", "build>=1.2", "jupytext>=1.17", "ruff>=0.14", "twine>=6.1"]
 
 [project.urls]
 Homepage = "http://quantum-robot.org/"

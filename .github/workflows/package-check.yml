@@ -61,7 +61,9 @@ jobs:
 
       # build
       - name: Build distribution
-        run: poetry build
+        run: |
+          poetry build
+          poetry run twine check --strict dist/*
 
       # docs
       - name: Build Sphinx documentation
