@@ -227,9 +227,7 @@ class QUnit(BaseUnit):
         # Get input
         input_vector = self.input_vector
         self._logger.debug(f"input_vector={input_vector}")
-        # Loop through the dimensions to encode data
-        for dim in range(self.model.n):
-            self.model.encode(input_vector[dim], dim)
+        self.model.encode_vector(input_vector)
         # Wait for the next input in the time window
         self._t_idx.value += 1
         # If at the end of the time window

@@ -15,6 +15,10 @@ class AngularModel(Model):
     def encode(self, scalar_input: Scalar, dim: int) -> float:
         """Encode one scalar input as a fractional y-axis rotation.
 
+        Use this method for one value in one dimension. Use
+        :meth:`~qrobot.models.model.Model.encode_vector` to encode a complete
+        multidimensional sample at once.
+
         Parameters
         ----------
         scalar_input : float
@@ -26,6 +30,17 @@ class AngularModel(Model):
         -------
         float
             The rotation angle applied to the qubit.
+
+        Examples
+        --------
+        Encode one value in dimension zero::
+
+            model = AngularModel(n=2, tau=1)
+            angle = model.encode(0.25, dim=0)
+
+        Encode both dimensions together::
+
+            angles = model.encode_vector([0.25, 0.75])
         """
         # Check the arguments
         dim = self._dim_index_check(dim)

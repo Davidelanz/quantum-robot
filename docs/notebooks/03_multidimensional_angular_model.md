@@ -85,15 +85,13 @@ We initialize the model by instantiating an object with $n$ and $\tau$
 model = AngularModel(n, tau)
 ```
 
-Encoding a general multidimensional sequence requires one loop over its temporal
-samples and another over its $n$ dimensions. This example has $\tau = 1$, so
-the single event requires only the dimension loop:
+Encoding a general multidimensional sequence requires one call per temporal
+sample. The model maps each vector element to its corresponding dimension. This
+example has $\tau = 1$, so the single event requires one encoding call:
 
 ```{code-cell} ipython3
 model.clear()  # Keep this cell repeatable by discarding any earlier encoding.
-
-for dim in range(model.n):
-    model.encode(input_data[dim], dim)
+model.encode_vector(input_data)
 ```
 
 The model is implemented by a Qiskit quantum circuit:
