@@ -10,13 +10,13 @@ component_management:
       paths:
         - src/qrobot/**
         - src/qrobot_qunits/**
+        - src/qrobot_visualization/**
       statuses:
         - type: project
           target: auto
     - component_id: experimental
       name: Experimental plugins
       paths:
-        - src/qrobot_visualization/**
         - src/qrobot_simulator/**
         - src/qrobot_dashboard/**
       statuses:
