@@ -2,7 +2,8 @@
 
 from qrobot.bursts import OneBurst, ZeroBurst
 from qrobot.models import AngularModel
-from qrobot_qunits import ActuatorUnit, QUnit, RedisConfig, SensorialUnit, redis_utils
+from qrobot_qunits import ActuatorUnit, QUnit, RedisConfig, SensorialUnit
+from qrobot_qunits.redis import get_redis
 
 from .base import Robot
 from .config import BUG_CONFIG, QBRAIN_CONFIG
@@ -111,7 +112,7 @@ class BugRobot(Robot):
             return
         for unit in reversed(units):
             unit.stop()
-        client = redis_utils.get_redis(self.redis_config)
+        client = get_redis(self.redis_config)
         keys = [key for unit in units for key in client.scan_iter(match=f"{unit.id} *")]
         if keys:
             client.delete(*keys)

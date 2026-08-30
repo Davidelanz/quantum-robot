@@ -28,9 +28,9 @@
    :members:
 ```
 
-## Redis utilities
+## Redis integration
 
 ```{eval-rst}
-.. automodule:: qrobot_qunits.redis_utils
+.. automodule:: qrobot_qunits.redis
    :members:
 ```

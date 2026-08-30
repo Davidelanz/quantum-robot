@@ -12,6 +12,25 @@ def test_status_node_id_removes_attribute_suffix() -> None:
     assert status_node_id("sensor in_qunits") == "sensor"
 
 
+def test_malformed_and_similarly_named_keys_are_ignored() -> None:
+    graph = nx.DiGraph()
+
+    apply_status(
+        graph,
+        {
+            "output sensor class": "SensorialUnit",
+            "sensor output metadata": "not-a-protocol-key",
+            "sensor query": "not-json",
+            "sensor in_qunits": "[]",
+        },
+    )
+
+    assert "output sensor" in graph
+    assert "sensor" in graph
+    assert "query" not in graph.nodes["sensor"]
+    assert list(graph.edges) == []
+
+
 def test_apply_status_adds_nodes_edges_and_live_outputs() -> None:
     graph = nx.DiGraph()
 

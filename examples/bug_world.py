@@ -19,7 +19,8 @@ from time import monotonic, sleep
 
 from redis.exceptions import ConnectionError
 
-from qrobot_qunits import RedisConfig, redis_utils
+from qrobot_qunits import RedisConfig
+from qrobot_qunits.redis import get_redis
 from qrobot_simulator.bug_world import BugRobot, BugWorld, BugWorldLiveView
 
 DEFAULT_DURATION = 0.0
@@ -43,7 +44,7 @@ def main() -> None:
         raise ValueError("use positive --fps/--duration; headless runs need a duration")
     config = RedisConfig()
     try:
-        redis_utils.get_redis(config).ping()
+        get_redis(config).ping()
     except ConnectionError as exc:
         raise RuntimeError("Redis must be running on localhost:6379") from exc
 

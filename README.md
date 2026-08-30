@@ -139,7 +139,7 @@ Open `docs/_build/html/index.html` directly in a browser.
 ```text
 src/
   qrobot/                 # core package and backend interface
-  qrobot_qunits/          # optional Redis-based extension
+  qrobot_qunits/          # optional qUnits Redis-based extension
   qrobot_visualization/   # optional graph/drawing extension
   qrobot_simulator/       # grasping_robot and bug_world 2-D simulators
   qrobot_dashboard/       # optional dashboard extension
