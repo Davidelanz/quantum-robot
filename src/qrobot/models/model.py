@@ -220,10 +220,12 @@ class Model(ABC):
     @abstractmethod
     def decode(self) -> str:
         """Measure and decode the model state as a basis-state label."""
+        raise NotImplementedError
 
     @abstractmethod
     def query(self, target_vector: TargetVector) -> None:
         r"""Change basis so ``target_vector`` maps to state \|00...0>."""
+        raise NotImplementedError
 
     def get_statevector(self) -> np.ndarray:
         """Return the simulated state vector of the model.
