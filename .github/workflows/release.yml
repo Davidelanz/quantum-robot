@@ -1,0 +1,172 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+*"
+
+jobs:
+  build:
+    name: Validate and build release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          cache: poetry
+          cache-dependency-path: poetry.lock
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Require tag and package versions to match
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import tomllib
+
+          package_version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]
+          release_tag = os.environ["RELEASE_TAG"]
+          if release_tag != package_version:
+              raise SystemExit(
+                  f"Release tag {release_tag!r} does not match package version {package_version!r}"
+              )
+          PY
+      - name: Install all development capabilities
+        run: poetry install --all-extras
+      - name: Validate metadata, formatting, linting, and types
+        run: |
+          poetry check --strict
+          poetry run ruff check src tests scripts
+          poetry run python scripts/check_docstrings.py src
+          poetry run black --check src tests scripts
+          poetry run python scripts/format_notebooks.py --check
+          poetry run mypy src
+      - name: Run tests
+        run: poetry run pytest
+      - name: Build documentation
+        run: poetry run python scripts/build_docs.py
+      - name: Build wheel and source distribution
+        run: |
+          poetry build
+          poetry run twine check --strict dist/*
+      - name: Upload release distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-distributions
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  artifact-smoke:
+    name: Install ${{ matrix.name }} artifact
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: core wheel
+            pattern: "*.whl"
+            extra: ""
+            import_package: qrobot
+          - name: core sdist
+            pattern: "*.tar.gz"
+            extra: ""
+            import_package: qrobot
+          - name: model visualization
+            pattern: "*.whl"
+            extra: model-visualization
+            import_package: qrobot
+          - name: qUnits
+            pattern: "*.whl"
+            extra: qunits
+            import_package: qrobot_qunits
+          - name: visualization
+            pattern: "*.whl"
+            extra: visualization
+            import_package: qrobot_visualization
+          - name: simulator
+            pattern: "*.whl"
+            extra: simulator
+            import_package: qrobot_simulator
+          - name: dashboard
+            pattern: "*.whl"
+            extra: dashboard
+            import_package: qrobot_dashboard
+    steps:
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-distributions
+          path: dist
+      - name: Install and import artifact
+        env:
+          ARTIFACT_PATTERN: ${{ matrix.pattern }}
+          EXTRA: ${{ matrix.extra }}
+          IMPORT_PACKAGE: ${{ matrix.import_package }}
+        run: |
+          artifact=$(find dist -maxdepth 1 -name "$ARTIFACT_PATTERN" -print -quit)
+          test -n "$artifact"
+          if test -n "$EXTRA"; then
+            python -m pip install "$artifact[$EXTRA]"
+          else
+            python -m pip install "$artifact"
+          fi
+          python -c "import $IMPORT_PACKAGE"
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: artifact-smoke
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/quantum-robot
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-distributions
+          path: dist
+      - name: Publish distributions with PyPI Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: Create GitHub Release
+    needs: publish-pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-distributions
+          path: dist
+      - name: Create release and attach distributions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "${{ github.ref_name }}" dist/*
+          --repo "${{ github.repository }}"
+          --verify-tag
+          --generate-notes
+          --title "quantum-robot ${{ github.ref_name }}"
