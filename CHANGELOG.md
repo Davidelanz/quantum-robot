@@ -2,7 +2,7 @@
 
 All notable changes are documented here. Semantic Versioning starts with 1.0.0.
 
-## [1.1.0] - 2026-08-30
+## [1.1.0] - 2026-08-31
 
 ### Added
 
@@ -100,7 +100,7 @@ from 2023-06-13 described in the next section.
 > [`d797c1a`](https://github.com/Davidelanz/quantum-robot/commit/d797c1a8e943a3201ea523bd031131549718b06c),
 > the tip of `master` on 2023-06-13. It was never tagged or published to PyPI
 > and is not a package version. It is recorded solely as an intermediate
-> baseline between the published 0.1 alpha and 1.0.0.
+> baseline between the published `0.1 alpha` and `1.0.0`.
 
 ### Added
 
