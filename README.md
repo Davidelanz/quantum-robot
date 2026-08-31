@@ -2,7 +2,7 @@
 
 [![Package Check](https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml/badge.svg)](https://github.com/Davidelanz/quantum-robot/actions/workflows/package-check.yml)
 [![CodeQL](https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Davidelanz/quantum-robot/actions/workflows/codeql-analysis.yml)
-[![Code coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU)](https://codecov.io/gh/Davidelanz/quantum-robot)
+[![Code coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=supported)](https://codecov.io/gh/Davidelanz/quantum-robot)
 [![Documentation Status](https://readthedocs.org/projects/quantum-robot/badge/?version=latest)](http://docs.quantum-robot.org/en/latest/)
 [![Snyk Advisor](https://img.shields.io/badge/Snyk_Security-blue)](https://snyk.io/advisor/python/quantum-robot)
 [![Maintainability](https://api.codeclimate.com/v1/badges/498a54bb981af54decec/maintainability)](https://codeclimate.com/github/Davidelanz/quantum-robot/maintainability)
@@ -23,13 +23,13 @@ maintained by Davide Lanza.
 The project is one Poetry distribution with a dependency-light `qrobot` core
 and optional extension import packages:
 
-| Capability | Install extra | Import package | Status |
-| --- | --- | --- | --- |
-| Core models and Qiskit backend | — | `qrobot` | Supported |
-| qUnits / Redis integration | `qunits` | `qrobot_qunits` | Supported |
-| Graph and drawing tools | `visualization` | `qrobot_visualization` | Supported |
-| Lightweight 2-D robot simulator | `simulator` | `qrobot_simulator` | Experimental |
-| Dashboard | `dashboard` | `qrobot_dashboard` | Experimental |
+| Capability | Install extra | Import package | Status | Coverage for status|
+| --- | --- | --- | --- | --- |
+| Core models and Qiskit backend | — | `qrobot` | Supported | ![](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=supported) |
+| qUnits / Redis integration | `qunits` | `qrobot_qunits` | Supported | ![](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=supported) |
+| Graph and drawing tools | `visualization` | `qrobot_visualization` | Supported | ![](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=supported) |
+| Lightweight 2-D robot simulator | `simulator` | `qrobot_simulator` | Experimental | ![](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=experimental) |
+| Dashboard | `dashboard` | `qrobot_dashboard` | Experimental | ![](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=experimental) |
 
 > [!WARNING]
 > `qrobot_simulator` and `qrobot_dashboard` are experimental extensions. Their
