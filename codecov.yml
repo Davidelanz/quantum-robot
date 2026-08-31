@@ -2,8 +2,16 @@ coverage:
   status:
     project:
       default: false
+    patch:
+      default: false
 
 component_management:
+  # Individual packages report coverage; only the "supported" aggregate influences CI outcome.
+  default_rules:
+    statuses:
+      - type: project
+        target: auto
+        informational: true
   individual_components:
     - component_id: supported
       name: Supported packages
@@ -14,15 +22,18 @@ component_management:
       statuses:
         - type: project
           target: auto
-    - component_id: experimental
-      name: Experimental plugins
-      paths:
-        - src/qrobot_simulator/**
-        - src/qrobot_dashboard/**
-      statuses:
-        - type: project
+        - type: patch
           target: auto
-          informational: true
+    - component_id: qrobot
+      paths: [src/qrobot/**]
+    - component_id: qrobot_qunits
+      paths: [src/qrobot_qunits/**]
+    - component_id: qrobot_visualization
+      paths: [src/qrobot_visualization/**]
+    - component_id: qrobot_simulator
+      paths: [src/qrobot_simulator/**]
+    - component_id: qrobot_dashboard
+      paths: [src/qrobot_dashboard/**]
 
 comment:
   layout: "header, diff, components"
