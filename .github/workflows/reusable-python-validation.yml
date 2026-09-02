@@ -1,0 +1,135 @@
+name: Reusable Python validation
+
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        description: Python version used for the checks
+        required: true
+        type: string
+      full_check:
+        description: Run lint, types, documentation, and distribution checks
+        default: false
+        type: boolean
+      upload_coverage:
+        description: Generate and upload coverage to Codecov
+        default: false
+        type: boolean
+      upload_docs:
+        description: Upload the rendered documentation
+        default: false
+        type: boolean
+      upload_distributions:
+        description: Upload wheel and source distributions for downstream jobs
+        default: false
+        type: boolean
+      release_tag:
+        description: Release tag that must match the package version
+        default: ""
+        type: string
+    secrets:
+      CODECOV_TOKEN:
+        required: false
+
+jobs:
+  check:
+    name: ${{ inputs.full_check && 'Full package check' || 'Tests' }} (Python ${{ inputs.python_version }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      # qUnits integration tests expect Redis on its conventional local port.
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      # Poetry is installed before setup-python so its cache location is
+      # available to the setup action.
+      - uses: actions/checkout@v6
+      - name: Install Poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.python_version }}
+          cache: poetry
+          cache-dependency-path: poetry.lock
+      - name: Require tag and package versions to match
+        if: inputs.release_tag != '' # Empty for ordinary CI runs; only for the release workflow.
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import tomllib
+
+          package_version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]
+          release_tag = os.environ["RELEASE_TAG"]
+          if release_tag != package_version:
+              raise SystemExit(
+                  f"Release tag {release_tag!r} does not match package version {package_version!r}"
+              )
+          PY
+      - name: Install dependencies
+        run: poetry install ${{ inputs.full_check && '--all-extras' || '--extras test' }}
+      - name: Check installed dependencies
+        run: poetry run python -m pip check
+
+      - name: Validate metadata, formatting, linting, and types
+        if: inputs.full_check
+        run: |
+          poetry check --strict
+          poetry run ruff check src tests scripts
+          poetry run python scripts/check_docstrings.py src
+          poetry run black --check src tests scripts
+          poetry run python scripts/format_notebooks.py --check
+          poetry run mypy src
+
+      - name: Run tests
+        if: ${{ ! inputs.upload_coverage }}
+        run: poetry run pytest
+      - name: Run tests with coverage
+        if: inputs.upload_coverage
+        run: |
+          poetry run pytest --cov \
+            --cov-report=term-missing --cov-report=xml:coverage.xml \
+            --junitxml=junit.xml -o junit_family=legacy
+      - name: Upload coverage report to Codecov
+        if: inputs.upload_coverage
+        uses: codecov/codecov-action@v5
+        with:
+          fail_ci_if_error: true
+          files: ./coverage.xml
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Build Sphinx documentation
+        if: inputs.full_check
+        run: poetry run python scripts/build_docs.py
+      - name: Upload HTML documentation
+        if: inputs.full_check && inputs.upload_docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: qrobot-documentation
+          path: docs/_build/html
+          if-no-files-found: error
+
+      - name: Build distribution
+        if: inputs.full_check
+        run: |
+          poetry build
+          poetry run twine check --strict dist/*
+      - name: Upload release distributions
+        if: inputs.full_check && inputs.upload_distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-distributions
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
