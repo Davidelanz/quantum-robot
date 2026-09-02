@@ -8,8 +8,8 @@
 <br>
 
 <div align="center" style="align:center; padding:20px; line-height:2;">
-   <a href="https://doi.org/10.5281/zenodo.3926776">
-      <img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3926776-blue" alt="DOI 10.5281/zenodo.3926776">
+   <a href="https://doi.org/10.5281/zenodo.22068511">
+      <img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22068511-blue" alt="DOI 10.5281/zenodo.22068511">
    </a>
    <a href="https://github.com/Davidelanz/quantum-robot/blob/master/LICENSE">
       <img src="https://img.shields.io/badge/license-GNU_GPL_v3-blue" alt="License"/>
