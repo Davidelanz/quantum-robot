@@ -10,6 +10,10 @@ https://stackoverflow.com/questions/23211695/modifying-content-width-of-the-sphi
 .wy-side-nav-search {
   border-right: 1px solid #e1e4e5;
 }
+.version-switch select,
+.switch-menus {
+  color: #505050;
+}
 .wy-menu-vertical li.toctree-l1.current {
   border-right: 1px solid #c9c9c9;
 }
