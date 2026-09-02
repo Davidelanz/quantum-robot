@@ -176,7 +176,7 @@ class QUnit(BaseUnit):
         """Return a normalized Redis input, falling back when invalid."""
         try:
             normalized = float(value)  # type: ignore[arg-type]
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             normalized = self.default_input[dim]
         if not 0.0 <= normalized <= 1.0:
             normalized = self.default_input[dim]

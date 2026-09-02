@@ -2,7 +2,7 @@
 
 ## Install quantum-robot
 
-`quantum-robot` requires Python 3.14. Creating a virtual environment keeps its
+`quantum-robot` supports Python 3.11 through 3.14. Creating a virtual environment keeps its
 dependencies separate from system Python:
 
 ```console

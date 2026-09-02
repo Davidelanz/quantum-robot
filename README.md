@@ -10,7 +10,7 @@
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22068511-blue)](https://doi.org/10.5281/zenodo.22068511)
 
 `quantum-robot` provides quantum-like perception models for robotics. It
-targets Python 3.14 and exposes a small backend interface; Qiskit is the
+supports Python 3.11 through 3.14 and exposes a small backend interface; Qiskit is the
 bundled backend implementation.
 
 The project was started in 2019 by
@@ -50,11 +50,11 @@ Install optional capabilities only when needed:
 python -m pip install --upgrade "quantum-robot[model-visualization,qunits,visualization,simulator,dashboard]"
 ```
 
-Python 3.14 is required. For an isolated installation, create and activate a
+Python 3.11 or newer (up to 3.14) is required. For an isolated installation, create and activate a
 virtual environment before running `pip`:
 
 ```sh
-python3.14 -m venv .venv
+python3.14 -m venv .venv # we suggest python 3.14
 source .venv/bin/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 ```
@@ -64,13 +64,13 @@ for individual extras, Redis setup, and installation checks.
 
 ## Development
 
-Use [Poetry](https://python-poetry.org/) with Python 3.14. The following
+Use [Poetry](https://python-poetry.org/) with any supported Python version. The following
 installs every development capability into Poetry’s project environment:
 
 ```sh
 git clone https://github.com/Davidelanz/quantum-robot.git
 cd quantum-robot
-poetry env use 3.14
+poetry env use 3.14 # we suggest python 3.14
 poetry install --all-extras
 ```
 
