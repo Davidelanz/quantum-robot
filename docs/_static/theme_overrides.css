@@ -12,7 +12,7 @@ https://stackoverflow.com/questions/23211695/modifying-content-width-of-the-sphi
 }
 .version-switch select,
 .switch-menus {
-  color: #505050;
+  color: #505050 !important;
 }
 .wy-menu-vertical li.toctree-l1.current {
   border-right: 1px solid #c9c9c9;
