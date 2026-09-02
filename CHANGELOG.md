@@ -2,6 +2,16 @@
 
 All notable changes are documented here. Semantic Versioning starts with 1.0.0.
 
+## [1.2.0] - 2026-09-02
+
+### Added
+
+- Extended support for Python to 3.11, 3.12, 3.13 (previously only 3.14).
+
+### Changed
+
+- Updated qUnit, visualization, and simulator code for compatibility across all supported Python versions.
+
 ## [1.1.0] - 2026-08-31
 
 ### Added
@@ -147,4 +157,5 @@ from 2023-06-13 described in the next section.
 
 [1.0.0]: https://github.com/Davidelanz/quantum-robot/compare/d797c1a8e943a3201ea523bd031131549718b06c...1.0.0
 [1.1.0]: https://github.com/Davidelanz/quantum-robot/compare/1.0.0...1.1.0
+[1.2.0]: https://github.com/Davidelanz/quantum-robot/compare/1.1.0...1.2.0
 [0.1]: https://github.com/Davidelanz/quantum-robot/releases/tag/0.1
