@@ -56,6 +56,8 @@ test = [
     "seaborn>=0.13",
     "redis>=4.3.4",
     "networkx>=3.4",
+    "plotly>=6.0",
+    "dash>=3.0",
 ]
 docs = [
     "ipykernel>=7.0",
