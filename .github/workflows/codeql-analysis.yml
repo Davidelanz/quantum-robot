@@ -13,13 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      # Required for CodeQL to publish findings to the repository's Security tab.
       security-events: write
     steps:
-      # prepare
+      # CodeQL builds its Python database automatically; no project install is required.
       - name: Checkout repository
         uses: actions/checkout@v6
-
-      # CodeQL scanning
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:

@@ -8,71 +8,25 @@ on:
     branches: [master]
 
 jobs:
+  # Lightweight compatibility check (the full one is for python 3.14 below)
+  test-python:
+    name: Python ${{ matrix.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    uses: ./.github/workflows/reusable-python-validation.yml
+    with:
+      python_version: ${{ matrix.python-version }}
+
   package-check:
-    name: Package full check (Python 3.14)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      # prepare
-      - uses: actions/checkout@v6
-      - name: Install Poetry
-        run: pipx install poetry
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.14"
-          cache: poetry
-          cache-dependency-path: poetry.lock
-      - name: Install all development capabilities
-        run: poetry install --all-extras
-
-      # check
-      - name: Validate project metadata
-        run: poetry check
-      - name: Check lint and formatting
-        run: |
-          poetry run ruff check src tests scripts
-          poetry run python scripts/check_docstrings.py src
-          poetry run black --check src tests scripts
-          poetry run python scripts/format_notebooks.py --check
-          poetry run mypy src
-
-      # test
-      - name: Run tests with coverage
-        run: |
-          poetry run pytest --cov \
-            --cov-report=term-missing --cov-report=xml:coverage.xml \
-            --junitxml=junit.xml -o junit_family=legacy
-      - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          fail_ci_if_error: true
-          files: ./coverage.xml
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-      # build
-      - name: Build distribution
-        run: |
-          poetry build
-          poetry run twine check --strict dist/*
-
-      # docs
-      - name: Build Sphinx documentation
-        run: poetry run python scripts/build_docs.py
-      - name: Upload HTML documentation
-        uses: actions/upload-artifact@v4
-        with:
-          name: qrobot-documentation
-          path: docs/_build/html
-          if-no-files-found: error
+    name: Python 3.14
+    # This is the canonical full check used for pull requests and master.
+    uses: ./.github/workflows/reusable-python-validation.yml
+    with:
+      python_version: "3.14"
+      full_check: true
+      upload_coverage: true
+      upload_docs: true
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

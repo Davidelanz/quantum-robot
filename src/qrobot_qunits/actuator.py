@@ -143,7 +143,7 @@ class ActuatorUnit(BaseUnit):
         """Return a normalized Redis burst, falling back when invalid."""
         try:
             normalized = float(value)  # type: ignore[arg-type]
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             normalized = self.default_input
         if not 0.0 <= normalized <= 1.0:
             normalized = self.default_input

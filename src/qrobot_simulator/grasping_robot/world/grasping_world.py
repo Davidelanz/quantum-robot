@@ -1,5 +1,7 @@
 """Physical encounter, sensors, interactions, and scoring for grasping."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from random import Random
 

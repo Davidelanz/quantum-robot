@@ -1,5 +1,7 @@
 """Shared geometry and motion primitives for the bug-world robots."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from math import atan2, cos, hypot, sin
 from typing import Literal, TypeAlias

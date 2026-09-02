@@ -1,5 +1,7 @@
 """State, sensing, interactions, and construction of the bug-world ecosystem."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from math import cos, degrees
 

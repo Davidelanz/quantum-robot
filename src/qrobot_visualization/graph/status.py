@@ -46,7 +46,7 @@ def apply_node_status(graph: nx.DiGraph, node_id: str, key: str, value: Any) -> 
     elif parsed.attribute is RedisAttribute.QUERY:
         try:
             graph.nodes[node_id]["query"] = json.loads(value)
-        except TypeError, json.JSONDecodeError:
+        except (TypeError, json.JSONDecodeError):
             pass
 
 
@@ -57,7 +57,7 @@ def apply_input_status(graph: nx.DiGraph, node_id: str, key: str, value: Any) ->
         return
     try:
         inputs = json.loads(value)
-    except TypeError, json.JSONDecodeError:
+    except (TypeError, json.JSONDecodeError):
         return
     if not isinstance(inputs, dict):
         return
