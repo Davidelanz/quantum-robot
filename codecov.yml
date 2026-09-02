@@ -1,5 +1,6 @@
 coverage:
   status:
+    # Component rules below define the meaningful gates for this multi-package project.
     project:
       default: false
     patch:
@@ -13,6 +14,7 @@ component_management:
         target: auto
         informational: true
   individual_components:
+    # Stable packages form the required aggregate reported on pull requests.
     - component_id: supported
       name: Supported packages
       paths:
@@ -24,6 +26,7 @@ component_management:
           target: auto
         - type: patch
           target: auto
+    # Per-package components make regressions visible without failing experimental code.
     - component_id: qrobot
       paths: [src/qrobot/**]
     - component_id: qrobot_qunits
@@ -36,4 +39,5 @@ component_management:
       paths: [src/qrobot_dashboard/**]
 
 comment:
+  # Keep the pull-request comment compact while still showing package-level movement.
   layout: "header, diff, components"

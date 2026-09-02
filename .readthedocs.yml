@@ -1,10 +1,12 @@
 version: 2
 
+# Read the Docs uses its own isolated build, independent from GitHub Actions.
 build:
   os: ubuntu-22.04
   tools:
     python: "3.14"
   apt_packages:
+    # Executed qUnits examples need a real Redis daemon during the docs build.
     - redis-server
   jobs:
     post_install:
@@ -23,4 +25,5 @@ build:
 
 sphinx:
   configuration: docs/conf.py
+  # Treat documentation warnings as regressions rather than silently publishing them.
   fail_on_warning: true
