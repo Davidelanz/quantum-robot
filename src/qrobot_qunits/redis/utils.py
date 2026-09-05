@@ -68,12 +68,11 @@ def redis_status(config: RedisConfig | None = None) -> dict[str, str]:
         while scanning are omitted.
     """
     client = get_redis(config)
-    status: dict[str, str] = {}
-    for key in client.scan_iter():
-        value = client.get(key)
-        if value is not None:
-            status[str(key)] = str(value)
-    return status
+    keys = list(client.scan_iter())
+    if not keys:
+        return {}
+    values = client.mget(keys)
+    return {str(key): str(value) for key, value in zip(keys, values) if value is not None}
 
 
 def flush_redis(config: RedisConfig | None = None) -> None:
