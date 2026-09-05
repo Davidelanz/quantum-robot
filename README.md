@@ -28,13 +28,13 @@ and optional extension import packages:
 | Core models and Qiskit backend | — | `qrobot` | Supported | ![qrobot coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=qrobot) |
 | qUnits / Redis integration | `qunits` | `qrobot_qunits` | Supported | ![qrobot_qunits coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=qrobot_qunits) |
 | Graph and drawing tools | `visualization` | `qrobot_visualization` | Supported | ![qrobot_visualization coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=qrobot_visualization) |
+| Dashboard | `dashboard` | `qrobot_dashboard` | Supported | ![qrobot_dashboard coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=qrobot_dashboard) |
 | Lightweight 2-D robot simulator | `simulator` | `qrobot_simulator` | Experimental | ![qrobot_simulator coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=qrobot_simulator) |
-| Dashboard | `dashboard` | `qrobot_dashboard` | Experimental | ![qrobot_dashboard coverage](https://codecov.io/gh/Davidelanz/quantum-robot/branch/master/graph/badge.svg?token=69IQEINMQU&component=qrobot_dashboard) |
 
 > [!WARNING]
-> `qrobot_simulator` and `qrobot_dashboard` are experimental extensions. Their
-> public interfaces, configuration, and output may change between minor
-> releases while their contracts are being defined.
+> `qrobot_simulator` is an experimental extension. Its public interfaces,
+> configuration, and output may change between minor releases while its
+> contracts are being defined.
 
 ## Install
 
@@ -108,7 +108,15 @@ poetry run pytest
 
 Stop it with `docker stop qrobot-redis`.
 
-Run either of the two embodied examples with Redis listening locally:
+## Run the examples
+
+In order to run the examples, furst start a local instance of redis:
+
+```sh
+docker run --rm --name qrobot-redis -p 6379:6379 -d redis:7-alpine
+```
+
+Then run of the examples:
 
 ```sh
 poetry run python examples/grasping_robot.py
@@ -120,6 +128,16 @@ and a qBrain-controlled gripper. `bug_world` opens a predator/prey chessboard
 where the qBrain drives five behavioral actuator interfaces. Both are small
 live 2-D simulations; the foundational model demonstrations remain executable
 inside the notebooks.
+
+To monitor the qBrain in the dashboard, start:
+
+```sh
+poetry run python -m qrobot_dashboard
+```
+
+The dashboard will be exposed at <http://127.0.0.1:8050>.
+It discovers qUnits from Redis automatically and refreshes every second.
+Stop the dashboard with Ctrl+C.
 
 ## Documentation
 

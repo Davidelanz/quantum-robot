@@ -21,6 +21,7 @@ component_management:
         - src/qrobot/**
         - src/qrobot_qunits/**
         - src/qrobot_visualization/**
+        - src/qrobot_dashboard/**
       statuses:
         - type: project
           target: auto
@@ -33,10 +34,10 @@ component_management:
       paths: [src/qrobot_qunits/**]
     - component_id: qrobot_visualization
       paths: [src/qrobot_visualization/**]
-    - component_id: qrobot_simulator
-      paths: [src/qrobot_simulator/**]
     - component_id: qrobot_dashboard
       paths: [src/qrobot_dashboard/**]
+    - component_id: qrobot_simulator
+      paths: [src/qrobot_simulator/**]
 
 comment:
   # Keep the pull-request comment compact while still showing package-level movement.

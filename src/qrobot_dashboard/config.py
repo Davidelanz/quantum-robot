@@ -1,20 +1,12 @@
-"""
-Configuration used by the create_app function.
-
-Note: keep it free of inner-project import statements to help prevent circular imports.
-"""
+"""Default configuration for the dashboard application."""
 
 from pathlib import Path
 
 
 class Config:
-    """Configuration object for the Dashboard."""
+    """Settings used by the Flask server and its mounted Dash application."""
 
-    # User configurations
     DASH_TITLE = "Quantum-robot Dashboard"
     DASH_DEBUG = False
     DASH_AUTORELOAD = False
-    DASH_ASSETS_DIR = Path(__file__).parent.joinpath("assets")
-
-    # Flask configurations (https://flask.palletsprojects.com/en/latest/config/)
-    # (...)
+    DASH_ASSETS_DIR = Path(__file__).parent / "assets"
