@@ -8,7 +8,7 @@ from qrobot.bursts import Burst
 from qrobot.logger import LoggingConfig
 from qrobot.models import Model
 from .redis import RedisAttribute, build_redis_key
-from .redis import get_redis, redis_status
+from .redis import get_redis, read_outputs, redis_status
 from .base import BaseUnit
 from .redis import RedisConfig, RedisWriteError
 
@@ -163,13 +163,13 @@ class QUnit(BaseUnit):
         # Inputs received from Redis must not alter the configured fallback
         # values used by later temporal windows.
         input_vector = self.default_input.copy()
-        for dim, qunit_id in self._in_qunits.items():
-            _r = get_redis(self.redis_config)
-            val = _r.get(build_redis_key(qunit_id, RedisAttribute.OUTPUT))
-            if val is not None:
-                input_vector[dim] = self._normalize_input(dim, val)
+        inputs = list(self._in_qunits.items())
+        values = read_outputs(get_redis(self.redis_config), (unit_id for _, unit_id in inputs))
+        for (dim, unit_id), value in zip(inputs, values):
+            if value is not None:
+                input_vector[dim] = self._normalize_input(dim, value)
             else:
-                self._logger.info(f"Unable to read {qunit_id} input")
+                self._logger.info(f"Unable to read {unit_id} input")
         return input_vector
 
     def _normalize_input(self, dim: int, value: object) -> float:

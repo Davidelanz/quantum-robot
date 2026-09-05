@@ -8,7 +8,7 @@ import redis
 from qrobot.logger import LoggingConfig
 from .redis import RedisAttribute, build_redis_key
 
-from .redis import get_redis
+from .redis import get_redis, read_outputs
 from .base import BaseUnit
 from .redis import RedisConfig, RedisWriteError
 
@@ -85,11 +85,11 @@ class ActuatorUnit(BaseUnit):
     def input_vector(self) -> list[float]:
         """Latest burst values, using the configured fallback when absent."""
         client = get_redis(self.redis_config)
-        values = []
-        for unit_id in self._in_qunits:
-            value = client.get(build_redis_key(unit_id, RedisAttribute.OUTPUT))
-            values.append(self.default_input if value is None else self._normalize_input(value))
-        return values
+        values = read_outputs(client, self._in_qunits)
+        return [
+            self.default_input if value is None else self._normalize_input(value)
+            for value in values
+        ]
 
     @property
     def normalized_sum(self) -> float:

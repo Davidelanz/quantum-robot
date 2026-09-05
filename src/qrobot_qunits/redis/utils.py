@@ -1,10 +1,12 @@
 """Redis configuration and operations used by the qUnits extension."""
 
 from dataclasses import dataclass
+from collections.abc import Iterable
 
 import redis
 
 from qrobot.logger import get_logger
+from .protocol import RedisAttribute, build_redis_key
 
 
 @dataclass(frozen=True)
@@ -92,3 +94,24 @@ def flush_redis(config: RedisConfig | None = None) -> None:
     logger.info("Flushing Redis database")
     client = get_redis(config)
     client.flushdb()
+
+
+def read_outputs(client: redis.Redis, unit_ids: Iterable[str]) -> list[str | None]:
+    """Read several unit outputs in one Redis request.
+
+    Parameters
+    ----------
+    client : redis.Redis
+        Connected Redis client configured to decode responses.
+    unit_ids : collections.abc.Iterable[str]
+        Unit identifiers in the order their outputs should be returned.
+
+    Returns
+    -------
+    list of str or None
+        Output values aligned with ``unit_ids``. Missing keys produce ``None``.
+    """
+    keys = [build_redis_key(unit_id, RedisAttribute.OUTPUT) for unit_id in unit_ids]
+    if not keys:
+        return []
+    return [None if value is None else str(value) for value in client.mget(keys)]
