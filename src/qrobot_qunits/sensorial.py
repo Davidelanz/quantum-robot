@@ -48,9 +48,8 @@ class SensorialUnit(BaseUnit):
         if default_input is not None:
             self.default_input = self._normalize_input(default_input)
 
-        # Initialize multiprocessing variables
-        # - _scalar_reading array variable
-        self._scalar_reading = self._multiproc_manager.Value("d", self.default_input)
+        # The simulation updates this value while the sensor worker publishes it.
+        self._scalar_reading = self._shared_value("d", self.default_input)
 
         # Log properties
         self._logger.debug(f"Properties: {self}")
@@ -64,7 +63,7 @@ class SensorialUnit(BaseUnit):
     @property
     def scalar_reading(self) -> float:
         """Current scalar reading."""
-        return self._scalar_reading.value
+        return float(self._scalar_reading.value)
 
     @scalar_reading.setter
     def scalar_reading(self, value: float | int) -> None:

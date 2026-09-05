@@ -3,6 +3,7 @@
 import multiprocessing
 from abc import ABC, abstractmethod
 from collections.abc import Generator
+from multiprocessing.managers import SyncManager
 from typing import Any
 from uuid import uuid4
 
@@ -61,13 +62,12 @@ class BaseUnit(ABC):
         self.redis_config = redis_config or RedisConfig()
         self.logging_config = logging_config
         self._worker_redis: redis.Redis | None = None
+        # Managed containers are created lazily because most unit types only
+        # need lightweight shared values.
+        self._multiproc_manager: SyncManager | None = None
 
-        # Subclasses store state shared with their worker process in this manager.
-        self._multiproc_manager = multiprocessing.Manager()
         # Used to gracefully stop the worker letting it finish its current task.
         self._stop_event = multiprocessing.Event()
-        # To define managed variables:
-        # -> self.name = self._multiproc_manager.list(value)
 
         # A process is deliberately created when ``start`` is called. On
         # platforms using the ``spawn`` start method, creating it while the
@@ -76,7 +76,7 @@ class BaseUnit(ABC):
         self._loop_thread: multiprocessing.Process | None = None
 
     def __getstate__(self) -> dict[str, Any]:
-        """Serialize manager proxies, but not their local manager process."""
+        """Serialize process-safe state without local runtime handles."""
         state = self.__dict__.copy()
         state["_multiproc_manager"] = None
         state["_loop_thread"] = None
@@ -168,6 +168,24 @@ class BaseUnit(ABC):
     def _redis(self) -> redis.Redis:
         """Return the worker's Redis client or a client for a parent-side call."""
         return getattr(self, "_worker_redis", None) or get_redis(self.redis_config)
+
+    def _shared_value(self, typecode: str, value: int | float) -> Any:
+        """Create a process-safe scalar without starting a manager process."""
+        return multiprocessing.Value(typecode, value)
+
+    def _shared_list(self, values: list[Any]) -> Any:
+        """Create a managed list shared with the unit's worker process."""
+        return self._manager().list(values)
+
+    def _shared_dict(self, values: dict[Any, Any]) -> Any:
+        """Create a managed dictionary shared with the unit's worker process."""
+        return self._manager().dict(values)
+
+    def _manager(self) -> SyncManager:
+        """Return this unit's manager, creating it only when first required."""
+        if self._multiproc_manager is None:
+            self._multiproc_manager = multiprocessing.Manager()
+        return self._multiproc_manager
 
     @staticmethod
     def _period_check(sampling_period: float | int) -> float:

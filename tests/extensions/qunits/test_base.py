@@ -89,6 +89,24 @@ def test_stop_rejects_negative_timeout() -> None:
         unit.stop(timeout=-0.1)
 
 
+def test_shared_state_starts_a_manager_only_for_managed_containers() -> None:
+    """BaseUnit centralizes shared state without charging scalars for a manager."""
+    unit = StubUnit("test-unit", 0.1)
+
+    shared_value = unit._shared_value("d", 0.25)
+
+    assert shared_value.value == 0.25
+    assert unit._multiproc_manager is None
+
+    shared_list = unit._shared_list([1.0])
+    try:
+        assert list(shared_list) == [1.0]
+        assert unit._multiproc_manager is not None
+    finally:
+        assert unit._multiproc_manager is not None
+        unit._multiproc_manager.shutdown()
+
+
 def test_loop_waits_on_stop_event_between_tasks(monkeypatch: pytest.MonkeyPatch) -> None:
     """The shared event replaces an uninterruptible sampling sleep."""
     unit = object.__new__(StubUnit)

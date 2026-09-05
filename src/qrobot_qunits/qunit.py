@@ -2,6 +2,7 @@
 
 import json
 from collections.abc import Generator
+
 import redis
 
 from qrobot.bursts import Burst
@@ -87,11 +88,11 @@ class QUnit(BaseUnit):
 
         # Initialize multiprocessing variables
         # - Query array variable
-        self._query = self._multiproc_manager.list(query)
+        self._query = self._shared_list(query)
         # - Output unit dictionary
-        self._in_qunits = self._multiproc_manager.dict(in_qunits or {})
+        self._in_qunits = self._shared_dict(in_qunits or {})
         # - Time window index
-        self._t_idx = self._multiproc_manager.Value("i", 0)
+        self._t_idx = self._shared_value("i", 0)
 
         # Log properties
         self._logger.debug(f"Properties: {self}")
