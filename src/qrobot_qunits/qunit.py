@@ -8,7 +8,7 @@ from qrobot.bursts import Burst
 from qrobot.logger import LoggingConfig
 from qrobot.models import Model
 from .redis import RedisAttribute, build_redis_key
-from .redis import get_redis, read_outputs, redis_status
+from .redis import get_redis, read_outputs
 from .base import BaseUnit
 from .redis import RedisConfig, RedisWriteError
 
@@ -209,9 +209,9 @@ class QUnit(BaseUnit):
         float or None
             The latest burst output written by the unit on the Redis database.
         """
-        global_status = redis_status(self.redis_config)
-        out = global_status.get(build_redis_key(self.id, RedisAttribute.OUTPUT))
-        return float(out) if out is not None else None
+        client = get_redis(self.redis_config)
+        output = client.get(build_redis_key(self.id, RedisAttribute.OUTPUT))
+        return float(output) if output is not None else None
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""

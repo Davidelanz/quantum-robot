@@ -1,5 +1,6 @@
 from time import monotonic, sleep
 from typing import Tuple
+from unittest.mock import Mock, call
 
 import pytest
 import pytest_check as check
@@ -9,8 +10,24 @@ from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
 from qrobot_qunits import QUnit, RedisConfig, SensorialUnit
 from qrobot_qunits.redis import flush_redis, get_redis, redis_status
+from qrobot_qunits import qunit as qunit_module
 
 TEST_REDIS_CONFIG = RedisConfig(database=15)
+
+
+def test_get_burst_output_reads_its_known_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Reading one burst does not scan unrelated Redis state."""
+    unit = object.__new__(QUnit)
+    unit.id = "processor"
+    unit.redis_config = TEST_REDIS_CONFIG
+    client = Mock()
+    client.get.side_effect = ["0.75", None]
+    monkeypatch.setattr(qunit_module, "get_redis", Mock(return_value=client))
+
+    assert unit.get_burst_output() == 0.75
+    assert unit.get_burst_output() is None
+    assert client.get.call_args_list == [call("processor output"), call("processor output")]
+
 
 # Soft assertions via pytest_check let the test reach its explicit
 # worker cleanup even when an earlier expectation fails.
