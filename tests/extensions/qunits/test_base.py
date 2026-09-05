@@ -89,17 +89,42 @@ def test_stop_rejects_negative_timeout() -> None:
         unit.stop(timeout=-0.1)
 
 
-def test_loop_waits_on_stop_event_between_tasks() -> None:
+def test_loop_waits_on_stop_event_between_tasks(monkeypatch: pytest.MonkeyPatch) -> None:
     """The shared event replaces an uninterruptible sampling sleep."""
     unit = object.__new__(StubUnit)
     unit.logging_config = None
+    unit.redis_config = Mock()
     unit.sampling_period = 0.2
     unit._unit_task_mock = Mock()
     stop_event = Mock()
     stop_event.is_set.side_effect = [False, True]
     unit._stop_event = stop_event
+    client = Mock()
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=client))
 
     unit._loop()
 
     unit._unit_task_mock.assert_called_once_with()
     stop_event.wait.assert_called_once_with(0.2)
+
+
+def test_loop_reuses_and_closes_worker_redis_client(monkeypatch: pytest.MonkeyPatch) -> None:
+    """One Redis client serves the worker until its loop exits."""
+    unit = object.__new__(StubUnit)
+    unit.logging_config = None
+    unit.redis_config = Mock()
+    unit.sampling_period = 0.2
+    unit._stop_event = Mock()
+    unit._stop_event.is_set.side_effect = [False, True]
+    clients_used = []
+    unit._unit_task_mock = Mock(side_effect=lambda: clients_used.append(unit._redis()))
+    client = Mock()
+    get_redis = Mock(return_value=client)
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", get_redis)
+
+    unit._loop()
+
+    assert clients_used == [client]
+    get_redis.assert_called_once_with(unit.redis_config)
+    client.close.assert_called_once_with()
+    assert unit._worker_redis is None

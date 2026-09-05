@@ -10,7 +10,6 @@ from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
 from qrobot_qunits import QUnit, RedisConfig, SensorialUnit
 from qrobot_qunits.redis import flush_redis, get_redis, redis_status
-from qrobot_qunits import qunit as qunit_module
 
 TEST_REDIS_CONFIG = RedisConfig(database=15)
 
@@ -22,7 +21,7 @@ def test_get_burst_output_reads_its_known_key(monkeypatch: pytest.MonkeyPatch) -
     unit.redis_config = TEST_REDIS_CONFIG
     client = Mock()
     client.get.side_effect = ["0.75", None]
-    monkeypatch.setattr(qunit_module, "get_redis", Mock(return_value=client))
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=client))
 
     assert unit.get_burst_output() == 0.75
     assert unit.get_burst_output() is None

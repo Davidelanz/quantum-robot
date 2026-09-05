@@ -8,7 +8,7 @@ from qrobot.bursts import Burst
 from qrobot.logger import LoggingConfig
 from qrobot.models import Model
 from .redis import RedisAttribute, build_redis_key
-from .redis import get_redis, read_outputs
+from .redis import read_outputs
 from .base import BaseUnit
 from .redis import RedisConfig, RedisWriteError
 
@@ -164,7 +164,7 @@ class QUnit(BaseUnit):
         # values used by later temporal windows.
         input_vector = self.default_input.copy()
         inputs = list(self._in_qunits.items())
-        values = read_outputs(get_redis(self.redis_config), (unit_id for _, unit_id in inputs))
+        values = read_outputs(self._redis(), (unit_id for _, unit_id in inputs))
         for (dim, unit_id), value in zip(inputs, values):
             if value is not None:
                 input_vector[dim] = self._normalize_input(dim, value)
@@ -209,13 +209,13 @@ class QUnit(BaseUnit):
         float or None
             The latest burst output written by the unit on the Redis database.
         """
-        client = get_redis(self.redis_config)
+        client = self._redis()
         output = client.get(build_redis_key(self.id, RedisAttribute.OUTPUT))
         return float(output) if output is not None else None
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
-        _r = get_redis(self.redis_config)
+        _r = self._redis()
         _r.delete(
             build_redis_key(self.id, RedisAttribute.OUTPUT),
             build_redis_key(self.id, RedisAttribute.STATE),
@@ -243,7 +243,7 @@ class QUnit(BaseUnit):
             self._logger.debug(f"Output state = {out_state}")
             # Write output on Redis database
             self._logger.debug("Opening a connection to redis...")
-            _r = get_redis(self.redis_config)
+            _r = self._redis()
             self._logger.debug(f"Redis connected: {_r}")
             try:
                 written = _r.mset(

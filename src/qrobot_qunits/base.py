@@ -6,6 +6,8 @@ from collections.abc import Generator
 from typing import Any
 from uuid import uuid4
 
+import redis
+
 from qrobot.logger import LoggingConfig, configure_logging, get_logger
 from .redis import RedisAttribute, build_redis_key
 from .redis import get_redis
@@ -58,6 +60,7 @@ class BaseUnit(ABC):
         self.sampling_period = self._period_check(sampling_period)
         self.redis_config = redis_config or RedisConfig()
         self.logging_config = logging_config
+        self._worker_redis: redis.Redis | None = None
 
         # Subclasses store state shared with their worker process in this manager.
         self._multiproc_manager = multiprocessing.Manager()
@@ -77,6 +80,7 @@ class BaseUnit(ABC):
         state = self.__dict__.copy()
         state["_multiproc_manager"] = None
         state["_loop_thread"] = None
+        state["_worker_redis"] = None
         return state
 
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
@@ -152,9 +156,18 @@ class BaseUnit(ABC):
     def _loop(self) -> None:
         if self.logging_config is not None:
             configure_logging(self.logging_config)
-        while not self._stop_event.is_set():
-            self._unit_task()
-            self._stop_event.wait(self.sampling_period)
+        self._worker_redis = get_redis(self.redis_config)
+        try:
+            while not self._stop_event.is_set():
+                self._unit_task()
+                self._stop_event.wait(self.sampling_period)
+        finally:
+            self._worker_redis.close()
+            self._worker_redis = None
+
+    def _redis(self) -> redis.Redis:
+        """Return the worker's Redis client or a client for a parent-side call."""
+        return getattr(self, "_worker_redis", None) or get_redis(self.redis_config)
 
     @staticmethod
     def _period_check(sampling_period: float | int) -> float:

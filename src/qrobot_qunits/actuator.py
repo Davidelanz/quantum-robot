@@ -8,7 +8,7 @@ import redis
 from qrobot.logger import LoggingConfig
 from .redis import RedisAttribute, build_redis_key
 
-from .redis import get_redis, read_outputs
+from .redis import read_outputs
 from .base import BaseUnit
 from .redis import RedisConfig, RedisWriteError
 
@@ -84,7 +84,7 @@ class ActuatorUnit(BaseUnit):
     @property
     def input_vector(self) -> list[float]:
         """Latest burst values, using the configured fallback when absent."""
-        client = get_redis(self.redis_config)
+        client = self._redis()
         values = read_outputs(client, self._in_qunits)
         return [
             self.default_input if value is None else self._normalize_input(value)
@@ -103,11 +103,11 @@ class ActuatorUnit(BaseUnit):
 
     def get_activation(self) -> float | None:
         """Return the latest activation published by this actuator."""
-        value = get_redis(self.redis_config).get(build_redis_key(self.id, RedisAttribute.OUTPUT))
+        value = self._redis().get(build_redis_key(self.id, RedisAttribute.OUTPUT))
         return None if value is None else float(value)
 
     def _clean_redis(self) -> None:
-        client = get_redis(self.redis_config)
+        client = self._redis()
         client.delete(
             build_redis_key(self.id, RedisAttribute.INPUT),
             build_redis_key(self.id, RedisAttribute.OUTPUT),
@@ -117,7 +117,7 @@ class ActuatorUnit(BaseUnit):
     def _unit_task(self) -> None:
         normalized_sum = self.normalized_sum
         activation = self.activation_for(normalized_sum)
-        client = get_redis(self.redis_config)
+        client = self._redis()
         try:
             written = client.mset(
                 {
