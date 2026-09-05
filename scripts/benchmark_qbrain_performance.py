@@ -13,7 +13,7 @@ import argparse
 import multiprocessing
 from collections.abc import Callable, Iterable
 from statistics import median, pstdev
-from time import perf_counter
+from time import perf_counter, sleep
 from typing import Any
 from uuid import uuid4
 
@@ -39,6 +39,7 @@ SECTIONS = (
     "worker",
     "construction",
     "simulation",
+    "scheduling",
 )
 
 
@@ -60,6 +61,22 @@ class RedisOutput:
     def _value(self) -> float | None:
         value = get_redis(self._config).get(build_redis_key(self.id, RedisAttribute.OUTPUT))
         return None if value is None else float(value)
+
+
+class SchedulingProbe(SensorialUnit):
+    """Record task starts while exercising the real BaseUnit worker loop."""
+
+    def __init__(self, period: float, task_time: float, iterations: int) -> None:
+        super().__init__("benchmark_scheduler", period)
+        self.task_time = task_time
+        self.iterations = iterations
+        self.starts: list[float] = []
+
+    def _unit_task(self) -> None:
+        self.starts.append(perf_counter())
+        sleep(self.task_time)
+        if len(self.starts) == self.iterations:
+            self._stop_event.set()
 
 
 def _shutdown_managers(units: Iterable[Any]) -> None:
@@ -274,6 +291,33 @@ def benchmark_simulation_outputs(client: Redis, runs: int) -> None:
         client.delete(*keys)
 
 
+def benchmark_scheduling(runs: int) -> None:
+    """Measure start-to-start interval and accumulated scheduler drift."""
+    period = 0.02
+    task_time = 0.008
+    iterations = 20
+    intervals: list[float] = []
+    drift: list[float] = []
+    for _ in range(runs):
+        probe = SchedulingProbe(period, task_time, iterations)
+        try:
+            probe._loop()
+            intervals.extend(
+                (current - previous) * 1_000
+                for previous, current in zip(probe.starts, probe.starts[1:])
+            )
+            actual_duration = probe.starts[-1] - probe.starts[0]
+            expected_duration = (iterations - 1) * period
+            drift.append((actual_duration - expected_duration) * 1_000)
+        finally:
+            _shutdown_managers([probe])
+
+    print("\nWorker scheduling")
+    print(f"period={period * 1_000:.0f} ms, task={task_time * 1_000:.0f} ms")
+    print_samples("start interval", intervals)
+    print_samples("accumulated drift", drift)
+
+
 def _positive_int(value: str) -> int:
     """Parse a strictly positive command-line integer."""
     parsed = int(value)
@@ -327,6 +371,8 @@ def main() -> None:
     sections = set(args.sections)
     if not args.skip_construction and "construction" in sections:
         benchmark_construction(args.brain_sizes, args.runs)
+    if "scheduling" in sections:
+        benchmark_scheduling(args.runs)
     if args.skip_redis:
         return
 

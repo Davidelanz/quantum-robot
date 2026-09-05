@@ -4,6 +4,7 @@ import multiprocessing
 from abc import ABC, abstractmethod
 from collections.abc import Generator
 from multiprocessing.managers import SyncManager
+from time import monotonic
 from typing import Any
 from uuid import uuid4
 
@@ -157,10 +158,16 @@ class BaseUnit(ABC):
         if self.logging_config is not None:
             configure_logging(self.logging_config)
         self._worker_redis = get_redis(self.redis_config)
+        deadline = monotonic()
         try:
             while not self._stop_event.is_set():
                 self._unit_task()
-                self._stop_event.wait(self.sampling_period)
+                deadline += self.sampling_period
+                now = monotonic()
+                if now >= deadline:
+                    missed_periods = int((now - deadline) // self.sampling_period) + 1
+                    deadline += missed_periods * self.sampling_period
+                self._stop_event.wait(deadline - now)
         finally:
             self._worker_redis.close()
             self._worker_redis = None

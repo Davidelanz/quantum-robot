@@ -107,8 +107,8 @@ def test_shared_state_starts_a_manager_only_for_managed_containers() -> None:
         unit._multiproc_manager.shutdown()
 
 
-def test_loop_waits_on_stop_event_between_tasks(monkeypatch: pytest.MonkeyPatch) -> None:
-    """The shared event replaces an uninterruptible sampling sleep."""
+def test_loop_waits_until_next_period_deadline(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Task duration is subtracted from the wait between scheduled starts."""
     unit = object.__new__(StubUnit)
     unit.logging_config = None
     unit.redis_config = Mock()
@@ -119,11 +119,29 @@ def test_loop_waits_on_stop_event_between_tasks(monkeypatch: pytest.MonkeyPatch)
     unit._stop_event = stop_event
     client = Mock()
     monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=client))
+    monkeypatch.setattr("qrobot_qunits.base.monotonic", Mock(side_effect=[10.0, 10.05]))
 
     unit._loop()
 
     unit._unit_task_mock.assert_called_once_with()
-    stop_event.wait.assert_called_once_with(0.2)
+    stop_event.wait.assert_called_once_with(pytest.approx(0.15))
+
+
+def test_loop_skips_deadlines_missed_by_slow_task(monkeypatch: pytest.MonkeyPatch) -> None:
+    """An overrun advances to the next future slot instead of busy-looping."""
+    unit = object.__new__(StubUnit)
+    unit.logging_config = None
+    unit.redis_config = Mock()
+    unit.sampling_period = 0.2
+    unit._unit_task_mock = Mock()
+    unit._stop_event = Mock()
+    unit._stop_event.is_set.side_effect = [False, True]
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=Mock()))
+    monkeypatch.setattr("qrobot_qunits.base.monotonic", Mock(side_effect=[10.0, 10.55]))
+
+    unit._loop()
+
+    unit._stop_event.wait.assert_called_once_with(pytest.approx(0.05))
 
 
 def test_loop_reuses_and_closes_worker_redis_client(monkeypatch: pytest.MonkeyPatch) -> None:
