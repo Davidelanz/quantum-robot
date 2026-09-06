@@ -1,8 +1,13 @@
-"""Benchmark qBrain process scaling and Redis communication.
+"""Benchmark qBrain behavior from construction to Redis-backed execution.
 
-Run the same command on each commit being compared. The benchmark reports
-construction cost separately from Redis connectivity and connected-output read
-scaling::
+The benchmark answers three questions using public package behavior:
+
+* Is Redis responsive from a fresh and an existing connection?
+* How does reading connected outputs scale with the number of connections?
+* How do construction, startup, observation, and shutdown scale for complete
+  sensor -> qUnit -> actuator networks?
+
+Run the same command from each revision being compared::
 
     poetry run python scripts/benchmark_qbrain_performance.py
 """
@@ -10,8 +15,9 @@ scaling::
 from __future__ import annotations
 
 import argparse
-import multiprocessing
+import gc
 from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 from statistics import median, pstdev
 from time import perf_counter, sleep
 from typing import Any
@@ -22,87 +28,135 @@ from redis import Redis
 from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
 from qrobot_qunits import ActuatorUnit, QUnit, RedisConfig, SensorialUnit
-from qrobot_qunits.redis import get_redis, redis_status
+from qrobot_qunits import redis as redis_api
+from qrobot_qunits.redis import get_redis
 from qrobot_qunits.redis.protocol import RedisAttribute, build_redis_key
-from qrobot_simulator.bug_world.robots.bug_robot import BugRobot
 
-try:
-    from qrobot_qunits.redis import read_outputs as _read_outputs
-except ImportError:
-    _read_outputs = None
-
-SECTIONS = (
-    "connectivity",
-    "status",
-    "inputs",
-    "output",
-    "worker",
-    "construction",
-    "simulation",
-    "scheduling",
-    "state",
+_read_outputs: Callable[[Redis, Iterable[str]], list[str | None]] | None = getattr(
+    redis_api, "read_outputs", None
 )
 
 
-class RedisOutput:
-    """Minimal unit interface for measuring simulation-side output collection."""
+@dataclass(frozen=True)
+class Measurement:
+    """Summarize repeated timings measured in milliseconds."""
 
-    def __init__(self, unit_id: str, config: RedisConfig) -> None:
-        self.id = unit_id
-        self._config = config
+    median_ms: float
+    minimum_ms: float
+    maximum_ms: float
+    deviation_ms: float
 
-    def get_burst_output(self) -> float | None:
-        """Read a qUnit-compatible output."""
-        return self._value()
-
-    def get_activation(self) -> float | None:
-        """Read an actuator-compatible output."""
-        return self._value()
-
-    def _value(self) -> float | None:
-        value = get_redis(self._config).get(build_redis_key(self.id, RedisAttribute.OUTPUT))
-        return None if value is None else float(value)
+    @classmethod
+    def from_samples(cls, samples: list[float]) -> Measurement:
+        """Build a measurement from a non-empty collection of samples."""
+        return cls(median(samples), min(samples), max(samples), pstdev(samples))
 
 
-class SchedulingProbe(SensorialUnit):
-    """Record task starts while exercising the real BaseUnit worker loop."""
+@dataclass(frozen=True)
+class Brain:
+    """Hold the units in a synthetic layered qBrain."""
 
-    def __init__(self, period: float, task_time: float, iterations: int) -> None:
-        super().__init__("benchmark_scheduler", period)
-        self.task_time = task_time
-        self.iterations = iterations
-        self.starts: list[float] = []
+    sensors: tuple[SensorialUnit, ...]
+    qunits: tuple[QUnit, ...]
+    actuators: tuple[ActuatorUnit, ...]
 
-    def _unit_task(self) -> None:
-        self.starts.append(perf_counter())
-        sleep(self.task_time)
-        if len(self.starts) == self.iterations:
-            self._stop_event.set()
+    @property
+    def units(self) -> tuple[SensorialUnit | QUnit | ActuatorUnit, ...]:
+        """Return every unit in signal-flow order."""
+        return (*self.sensors, *self.qunits, *self.actuators)
 
 
-class RecordingRedis:
-    """Delegate Redis operations while recording each MSET application payload."""
+def measure(operation: Callable[[], object], runs: int) -> Measurement:
+    """Measure repeated operation durations in milliseconds."""
+    samples = []
+    for _ in range(runs):
+        started_at = perf_counter()
+        operation()
+        samples.append((perf_counter() - started_at) * 1_000)
+    return Measurement.from_samples(samples)
 
-    def __init__(self, client: Redis) -> None:
-        self._client = client
-        self.mset_fields: list[int] = []
-        self.mset_bytes: list[int] = []
 
-    def mset(self, mapping: dict[str, object]) -> object:
-        """Record field count and encoded key/value bytes before writing."""
-        self.mset_fields.append(len(mapping))
-        self.mset_bytes.append(
-            sum(len(str(key).encode()) + len(str(value).encode()) for key, value in mapping.items())
+def print_measurement(label: str, result: Measurement) -> None:
+    """Print one consistently formatted benchmark result."""
+    print(
+        f"{label:<30} median {result.median_ms:9.3f} ms  "
+        f"range {result.minimum_ms:9.3f}-{result.maximum_ms:9.3f} ms  "
+        f"sd {result.deviation_ms:8.3f} ms"
+    )
+
+
+def client_config(client: Redis) -> RedisConfig:
+    """Recover benchmark connection settings from a Redis client."""
+    options = client.connection_pool.connection_kwargs
+    return RedisConfig(str(options["host"]), int(options["port"]), int(options["db"]))
+
+
+def read_outputs(client: Redis, unit_ids: Iterable[str]) -> list[str | None]:
+    """Read outputs with the package API available in the tested revision."""
+    ids = list(unit_ids)
+    if _read_outputs is not None:
+        return _read_outputs(client, ids)
+    values = [client.get(build_redis_key(unit_id, RedisAttribute.OUTPUT)) for unit_id in ids]
+    return [None if value is None else str(value) for value in values]
+
+
+def read_normalized_outputs(client: Redis, unit_ids: Iterable[str]) -> list[float]:
+    """Read outputs and verify that every unit published a normalized value."""
+    values = read_outputs(client, unit_ids)
+    normalized = []
+    for value in values:
+        if value is None:
+            raise RuntimeError("an expected qBrain output is missing")
+        normalized.append(float(value))
+    if any(not 0.0 <= value <= 1.0 for value in normalized):
+        raise RuntimeError("a qBrain output is outside the normalized range")
+    return normalized
+
+
+def output_keys(units: Iterable[Any]) -> list[str]:
+    """Return Redis output keys for units exposing an identifier."""
+    return [build_redis_key(unit.id, RedisAttribute.OUTPUT) for unit in units]
+
+
+def build_brain(unit_count: int, config: RedisConfig, period: float) -> Brain:
+    """Build independent three-layer chains totaling ``unit_count`` units."""
+    chain_count = unit_count // 3
+    prefix = f"benchmark-{uuid4().hex[:8]}"
+    sensors = tuple(
+        SensorialUnit(f"{prefix}-sensor-{index}", period, redis_config=config)
+        for index in range(chain_count)
+    )
+    qunits = tuple(
+        QUnit(
+            f"{prefix}-qunit-{index}",
+            AngularModel(n=1, tau=1),
+            ZeroBurst(),
+            period,
+            in_qunits={0: sensor.id},
+            redis_config=config,
         )
-        return self._client.mset(mapping)
+        for index, sensor in enumerate(sensors)
+    )
+    actuators = tuple(
+        ActuatorUnit(
+            f"{prefix}-actuator-{index}",
+            [qunit.id],
+            period,
+            redis_config=config,
+        )
+        for index, qunit in enumerate(qunits)
+    )
+    return Brain(sensors, qunits, actuators)
 
-    def __getattr__(self, name: str) -> Any:
-        """Delegate operations other than MSET to the real Redis client."""
-        return getattr(self._client, name)
+
+def stop_brain(brain: Brain) -> None:
+    """Stop a brain in reverse signal-flow order."""
+    for unit in reversed(brain.units):
+        unit.stop()
 
 
-def _shutdown_managers(units: Iterable[Any]) -> None:
-    """Stop every manager created for a synthetic brain."""
+def release_managers(units: Iterable[Any]) -> None:
+    """Release multiprocessing managers left by the tested revision."""
     managers = {
         id(manager): manager
         for unit in units
@@ -112,311 +166,98 @@ def _shutdown_managers(units: Iterable[Any]) -> None:
         manager.shutdown()
 
 
-def build_synthetic_brain(unit_count: int) -> list[Any]:
-    """Build an equally divided sensor, qUnit, and actuator network."""
-    layer_size = max(1, unit_count // 3)
-    sensors = [SensorialUnit(f"bench_sensor_{index}", 1.0) for index in range(layer_size)]
-    qunits = [
-        QUnit(
-            f"bench_qunit_{index}",
-            AngularModel(n=1, tau=1),
-            ZeroBurst(),
-            1.0,
-            in_qunits={0: sensors[index % len(sensors)].id},
-        )
-        for index in range(layer_size)
-    ]
-    actuators = [
-        ActuatorUnit(
-            f"bench_actuator_{index}",
-            [qunits[index % len(qunits)].id],
-            1.0,
-        )
-        for index in range(layer_size)
-    ]
-    return [*sensors, *qunits, *actuators]
+def wait_until_ready(client: Redis, brain: Brain, timeout: float) -> None:
+    """Wait until every layer has published an output or raise on timeout."""
+    keys = output_keys(brain.units)
+    deadline = perf_counter() + timeout
+    while perf_counter() < deadline:
+        if all(value is not None for value in client.mget(keys)):
+            return
+        sleep(min(brain.sensors[0].sampling_period / 4, 0.01))
+    missing = [key for key, value in zip(keys, client.mget(keys), strict=True) if value is None]
+    raise TimeoutError(f"qBrain did not publish {len(missing)} outputs within {timeout:g} seconds")
 
 
-def measure_brain_construction(unit_count: int) -> tuple[float, int, int]:
-    """Return construction time, actual unit count, and new child processes."""
-    children_before = {process.pid for process in multiprocessing.active_children()}
-    started_at = perf_counter()
-    units = build_synthetic_brain(unit_count)
-    elapsed = perf_counter() - started_at
-    children_after = {
-        process.pid
-        for process in multiprocessing.active_children()
-        if process.pid not in children_before
-    }
-    try:
-        return elapsed, len(units), len(children_after)
-    finally:
-        _shutdown_managers(units)
+def benchmark_redis(config: RedisConfig, client: Redis, runs: int) -> None:
+    """Measure fresh and reused Redis connections."""
 
-
-def measure_calls(operation: Callable[[], object], runs: int) -> list[float]:
-    """Measure individual operation durations in milliseconds."""
-    samples = []
-    for _ in range(runs):
-        started_at = perf_counter()
-        operation()
-        samples.append((perf_counter() - started_at) * 1_000)
-    return samples
-
-
-def read_connected_outputs(client: Redis, unit_ids: list[str]) -> list[object]:
-    """Use the package's batched reader, or its historical sequential behavior."""
-    if _read_outputs is not None:
-        return _read_outputs(client, unit_ids)
-    return [client.get(build_redis_key(unit_id, RedisAttribute.OUTPUT)) for unit_id in unit_ids]
-
-
-def print_samples(label: str, samples: list[float], unit: str = "ms") -> None:
-    """Print median, range, and population standard deviation."""
-    print(
-        f"{label}: median={median(samples):.3f} {unit}, "
-        f"range={min(samples):.3f}-{max(samples):.3f} {unit}, "
-        f"stddev={pstdev(samples):.3f} {unit}"
-    )
-
-
-def benchmark_construction(sizes: list[int], runs: int) -> None:
-    """Report how process count and construction time scale with brain size."""
-    print("\nBrain construction and process scaling")
-    for requested_size in sizes:
-        samples = [measure_brain_construction(requested_size) for _ in range(runs)]
-        elapsed = [sample[0] * 1_000 for sample in samples]
-        actual_sizes = {sample[1] for sample in samples}
-        child_counts = {sample[2] for sample in samples}
-        print_samples(f"requested={requested_size}, actual={actual_sizes.pop()}", elapsed)
-        print(f"  manager processes: {min(child_counts)}-{max(child_counts)}")
-
-
-def benchmark_connectivity(
-    config: RedisConfig,
-    client: Redis,
-    runs: int,
-) -> None:
-    """Report new-connection and existing-client Redis latency."""
-
-    def connect_and_ping() -> None:
+    def fresh_ping() -> None:
         fresh_client = get_redis(config)
         try:
             fresh_client.ping()
         finally:
             fresh_client.close()
 
-    print("\nRedis connectivity")
-    print_samples("connect + PING", measure_calls(connect_and_ping, runs))
-    client.ping()
-    print_samples("PING on existing client", measure_calls(client.ping, runs))
+    print("\nRedis round trips")
+    print_measurement("fresh connection + PING", measure(fresh_ping, runs))
+    print_measurement("existing connection PING", measure(client.ping, runs))
 
 
-def benchmark_status(client: Redis, sizes: list[int], runs: int) -> None:
-    """Report full-database status collection scaling."""
-    print("\nRedis status scaling")
-    prefix = f"qrobot-benchmark-status-{uuid4().hex}"
-    keys = [f"{prefix}-{index}" for index in range(max(sizes))]
+def benchmark_output_reads(client: Redis, fan_ins: list[int], runs: int) -> None:
+    """Measure reading complete output snapshots at increasing fan-in."""
+    prefix = f"benchmark-output-{uuid4().hex}"
+    unit_ids = [f"{prefix}-{index}" for index in range(max(fan_ins))]
+    keys = [build_redis_key(unit_id, RedisAttribute.OUTPUT) for unit_id in unit_ids]
     client.mset(dict.fromkeys(keys, "0.5"))
     try:
-        for size in sizes:
-            disabled = keys[size:]
-            if disabled:
-                client.delete(*disabled)
-            samples = measure_calls(lambda: redis_status(client_config(client)), runs)
-            print_samples(f"keys={size}", samples)
-            if disabled:
-                client.mset(dict.fromkeys(disabled, "0.5"))
+        print("\nConnected output snapshots")
+        for fan_in in fan_ins:
+            result = measure(lambda: read_normalized_outputs(client, unit_ids[:fan_in]), runs)
+            print_measurement(f"outputs {fan_in}", result)
     finally:
         client.delete(*keys)
 
 
-def client_config(client: Redis) -> RedisConfig:
-    """Recover benchmark connection settings from a Redis client."""
-    options = client.connection_pool.connection_kwargs
-    return RedisConfig(str(options["host"]), int(options["port"]), int(options["db"]))
+def benchmark_lifecycle(
+    config: RedisConfig,
+    client: Redis,
+    sizes: list[int],
+    runs: int,
+    period: float,
+    timeout: float,
+) -> None:
+    """Measure complete qBrain construction and Redis-backed lifecycle scaling."""
+    print("\nComplete qBrain lifecycle")
+    for size in sizes:
+        samples: dict[str, list[float]] = {
+            name: [] for name in ("construct", "ready", "observe", "shutdown")
+        }
+        for _ in range(runs):
+            started_at = perf_counter()
+            brain = build_brain(size, config, period)
+            samples["construct"].append((perf_counter() - started_at) * 1_000)
+            stopped = False
+            try:
+                started_at = perf_counter()
+                for unit in brain.units:
+                    unit.start()
+                wait_until_ready(client, brain, timeout)
+                samples["ready"].append((perf_counter() - started_at) * 1_000)
+
+                actuator_ids = [unit.id for unit in brain.actuators]
+                result = measure(
+                    lambda: read_normalized_outputs(client, actuator_ids),
+                    1,
+                )
+                samples["observe"].append(result.median_ms)
+
+                started_at = perf_counter()
+                stop_brain(brain)
+                stopped = True
+                samples["shutdown"].append((perf_counter() - started_at) * 1_000)
+            finally:
+                if not stopped:
+                    stop_brain(brain)
+                release_managers(brain.units)
+                del brain
+                gc.collect()
+
+        print(f"\n{size} units ({size // 3} independent chains)")
+        for name in ("construct", "ready", "observe", "shutdown"):
+            print_measurement(name, Measurement.from_samples(samples[name]))
 
 
-def benchmark_inputs(client: Redis, sizes: list[int], runs: int) -> None:
-    """Report connected-output read scaling through the available package API."""
-
-    prefix = f"qrobot-benchmark-input-{uuid4().hex}"
-    unit_ids = [f"{prefix}-{index}" for index in range(max(sizes))]
-    keys = [f"{unit_id} output" for unit_id in unit_ids]
-    client.mset(dict.fromkeys(keys, "0.5"))
-    try:
-        print("\nConnected-input read scaling")
-        for size in sizes:
-            samples = measure_calls(
-                lambda size=size: read_connected_outputs(client, unit_ids[:size]), runs
-            )
-            print_samples(f"fan-in={size}", samples)
-    finally:
-        client.delete(*keys)
-
-
-def benchmark_single_output(client: Redis, background_keys: int, runs: int) -> None:
-    """Measure one qUnit output lookup with unrelated Redis state present."""
-    unit = QUnit("benchmark_output", AngularModel(n=1, tau=1), ZeroBurst(), 1.0)
-    unit.redis_config = client_config(client)
-    output_key = build_redis_key(unit.id, RedisAttribute.OUTPUT)
-    prefix = f"qrobot-benchmark-background-{uuid4().hex}"
-    keys = [f"{prefix}-{index}" for index in range(background_keys)]
-    client.mset({**dict.fromkeys(keys, "0.5"), output_key: "0.5"})
-    try:
-        print("\nSingle-output lookup")
-        print_samples(
-            f"background-keys={background_keys}",
-            measure_calls(unit.get_burst_output, runs),
-        )
-    finally:
-        client.delete(*keys, output_key)
-        _shutdown_managers([unit])
-
-
-def benchmark_worker_cycle(client: Redis, runs: int) -> None:
-    """Measure repeated sensor publication using worker-equivalent client state."""
-    sensor = SensorialUnit("benchmark_worker", 1.0, redis_config=client_config(client))
-    if hasattr(sensor, "_worker_redis"):
-        sensor._worker_redis = client
-    try:
-        print("\nSensor worker cycle")
-        print_samples("read + publish", measure_calls(sensor._unit_task, runs))
-    finally:
-        client.delete(build_redis_key(sensor.id, RedisAttribute.OUTPUT))
-        _shutdown_managers([sensor])
-
-
-def benchmark_simulation_outputs(client: Redis, runs: int) -> None:
-    """Measure collection of the Bug brain outputs used by each simulation frame."""
-    config = client_config(client)
-    robot = BugRobot(redis_config=config, connect_brain=False)
-    prefix = f"qrobot-benchmark-simulation-{uuid4().hex}"
-    qunits = {f"qunit-{index}": RedisOutput(f"{prefix}-q-{index}", config) for index in range(7)}
-    actuators = {
-        f"actuator-{index}": RedisOutput(f"{prefix}-a-{index}", config) for index in range(5)
-    }
-    robot.qunits = qunits  # type: ignore[assignment]
-    robot.actuators = actuators  # type: ignore[assignment]
-    keys = [
-        build_redis_key(unit.id, RedisAttribute.OUTPUT)
-        for unit in (*qunits.values(), *actuators.values())
-    ]
-    client.mset(dict.fromkeys(keys, "0.5"))
-    try:
-        print("\nSimulation output collection")
-        print_samples(
-            "7 qUnits + 5 actuators",
-            measure_calls(lambda: (robot.qunint_values(), robot.actuator_values()), runs),
-        )
-    finally:
-        client.delete(*keys)
-
-
-def benchmark_scheduling(runs: int) -> None:
-    """Measure start-to-start interval and accumulated scheduler drift."""
-    period = 0.02
-    task_time = 0.008
-    iterations = 20
-    intervals: list[float] = []
-    drift: list[float] = []
-    for _ in range(runs):
-        probe = SchedulingProbe(period, task_time, iterations)
-        try:
-            probe._loop()
-            intervals.extend(
-                (current - previous) * 1_000
-                for previous, current in zip(probe.starts, probe.starts[1:])
-            )
-            actual_duration = probe.starts[-1] - probe.starts[0]
-            expected_duration = (iterations - 1) * period
-            drift.append((actual_duration - expected_duration) * 1_000)
-        finally:
-            _shutdown_managers([probe])
-
-    print("\nWorker scheduling")
-    print(f"period={period * 1_000:.0f} ms, task={task_time * 1_000:.0f} ms")
-    print_samples("start interval", intervals)
-    print_samples("accumulated drift", drift)
-
-
-def benchmark_state_publication(client: Redis, fan_in: int, runs: int) -> None:
-    """Measure qUnit and actuator cycles that publish changed Redis state."""
-    config = client_config(client)
-    source_id = f"qrobot-benchmark-state-source-{uuid4().hex}"
-    unit = QUnit(
-        "benchmark_state",
-        AngularModel(n=1, tau=1),
-        ZeroBurst(),
-        1.0,
-        in_qunits={0: source_id},
-        redis_config=config,
-    )
-    qunit_client = RecordingRedis(client)
-    unit._worker_redis = qunit_client  # type: ignore[assignment]
-    if hasattr(unit, "_initial_redis_state"):
-        unit._published_redis_state = unit._initial_redis_state()
-    source_key = build_redis_key(source_id, RedisAttribute.OUTPUT)
-    owned_keys = [
-        build_redis_key(unit.id, attribute)
-        for attribute in (
-            RedisAttribute.OUTPUT,
-            RedisAttribute.STATE,
-            RedisAttribute.QUERY,
-            RedisAttribute.IN_QUNITS,
-        )
-    ]
-    client.set(source_key, "0.5")
-    try:
-        print("\nqUnit state publication")
-        print_samples("dynamic cycle", measure_calls(unit._unit_task, runs))
-        print(f"  MSET calls: {len(qunit_client.mset_fields)}/{runs} cycles")
-        print(f"  fields per MSET: {median(qunit_client.mset_fields):.0f}")
-        print(
-            f"  amortized application payload: "
-            f"{sum(qunit_client.mset_bytes) / runs:.0f} bytes/cycle"
-        )
-    finally:
-        client.delete(source_key, *owned_keys)
-        _shutdown_managers([unit])
-
-    source_ids = [f"qrobot-benchmark-actuator-source-{uuid4().hex}" for _ in range(fan_in)]
-    actuator = ActuatorUnit(
-        "benchmark_state_actuator",
-        source_ids,
-        1.0,
-        redis_config=config,
-    )
-    actuator_client = RecordingRedis(client)
-    actuator._worker_redis = actuator_client  # type: ignore[assignment]
-    if hasattr(actuator, "_initial_redis_state"):
-        actuator._published_redis_state = actuator._initial_redis_state()
-    source_keys = [build_redis_key(source_id, RedisAttribute.OUTPUT) for source_id in source_ids]
-    actuator_keys = [
-        build_redis_key(actuator.id, attribute)
-        for attribute in (
-            RedisAttribute.INPUT,
-            RedisAttribute.OUTPUT,
-            RedisAttribute.IN_QUNITS,
-        )
-    ]
-    client.mset(dict.fromkeys(source_keys, "0.5"))
-    try:
-        print_samples(
-            f"actuator cycle, fan-in={fan_in}",
-            measure_calls(actuator._unit_task, runs),
-        )
-        print(f"  MSET calls: {len(actuator_client.mset_fields)}/{runs} cycles")
-        print(f"  fields per MSET: {median(actuator_client.mset_fields):.0f}")
-        print(
-            "  amortized application payload: "
-            f"{sum(actuator_client.mset_bytes) / runs:.0f} bytes/cycle"
-        )
-    finally:
-        client.delete(*source_keys, *actuator_keys)
-
-
-def _positive_int(value: str) -> int:
+def positive_int(value: str) -> int:
     """Parse a strictly positive command-line integer."""
     parsed = int(value)
     if parsed < 1:
@@ -424,73 +265,71 @@ def _positive_int(value: str) -> int:
     return parsed
 
 
+def positive_float(value: str) -> float:
+    """Parse a strictly positive command-line float."""
+    parsed = float(value)
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("value must be positive")
+    return parsed
+
+
+def brain_size(value: str) -> int:
+    """Parse a positive unit count made of complete three-unit chains."""
+    parsed = positive_int(value)
+    if parsed % 3:
+        raise argparse.ArgumentTypeError("brain size must be divisible by three")
+    return parsed
+
+
 def main() -> None:
-    """Parse options and run the process and Redis benchmarks."""
+    """Parse options, verify Redis, and run the benchmark suite."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="localhost", help="Redis host")
-    parser.add_argument("--port", type=_positive_int, default=6379, help="Redis port")
+    parser.add_argument("--port", type=positive_int, default=6379, help="Redis port")
     parser.add_argument("--database", type=int, default=14, help="Redis database")
-    parser.add_argument("--runs", type=_positive_int, default=7, help="Samples per measurement")
+    parser.add_argument("--runs", type=positive_int, default=5, help="Samples per result")
     parser.add_argument(
         "--brain-sizes",
-        type=_positive_int,
+        type=brain_size,
         nargs="+",
-        default=[6, 12, 24],
-        help="Approximate total unit counts",
+        default=[3, 12, 24],
+        help="Total units; each value must be divisible by three",
     )
     parser.add_argument(
         "--fan-ins",
-        type=_positive_int,
+        type=positive_int,
         nargs="+",
-        default=[1, 8, 32, 128, 512],
-        help="Connected outputs per batched Redis read",
+        default=[1, 8, 32, 128],
+        help="Output values per Redis snapshot",
     )
     parser.add_argument(
-        "--sections",
-        choices=SECTIONS,
-        nargs="+",
-        default=list(SECTIONS),
-        help="Benchmark sections to run",
+        "--period",
+        type=positive_float,
+        default=0.02,
+        help="Worker sampling period in seconds",
     )
     parser.add_argument(
-        "--skip-construction",
-        action="store_true",
-        help="Run only Redis connectivity and read scaling",
-    )
-    parser.add_argument(
-        "--skip-redis",
-        action="store_true",
-        help="Run only brain construction and process scaling",
+        "--timeout",
+        type=positive_float,
+        default=10.0,
+        help="Maximum seconds for a brain to publish all outputs",
     )
     args = parser.parse_args()
-    if args.skip_construction and args.skip_redis:
-        parser.error("the benchmark cannot skip both sections")
-
-    sections = set(args.sections)
-    if not args.skip_construction and "construction" in sections:
-        benchmark_construction(args.brain_sizes, args.runs)
-    if "scheduling" in sections:
-        benchmark_scheduling(args.runs)
-    if args.skip_redis:
-        return
 
     config = RedisConfig(args.host, args.port, args.database)
     client = get_redis(config)
     try:
-        if "connectivity" in sections:
-            benchmark_connectivity(config, client, args.runs)
-        if "status" in sections:
-            benchmark_status(client, args.fan_ins, args.runs)
-        if "inputs" in sections:
-            benchmark_inputs(client, args.fan_ins, args.runs)
-        if "output" in sections:
-            benchmark_single_output(client, max(args.fan_ins), args.runs)
-        if "worker" in sections:
-            benchmark_worker_cycle(client, args.runs)
-        if "simulation" in sections:
-            benchmark_simulation_outputs(client, args.runs)
-        if "state" in sections:
-            benchmark_state_publication(client, max(args.fan_ins), args.runs)
+        client.ping()
+        benchmark_redis(config, client, args.runs)
+        benchmark_output_reads(client, args.fan_ins, args.runs)
+        benchmark_lifecycle(
+            config,
+            client,
+            args.brain_sizes,
+            args.runs,
+            args.period,
+            args.timeout,
+        )
     finally:
         client.close()
 
