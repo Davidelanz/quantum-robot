@@ -18,7 +18,8 @@ from qrobot_dashboard.layout import (
 
 def component_ids(component: Component) -> set[str]:
     """Collect component IDs from a Dash component tree."""
-    ids = {component.id} if getattr(component, "id", None) else set()
+    component_id = getattr(component, "id", None)
+    ids = {component_id} if isinstance(component_id, str) else set()
     children = getattr(component, "children", None)
     descendants = children if isinstance(children, list) else [children]
     return ids | {
