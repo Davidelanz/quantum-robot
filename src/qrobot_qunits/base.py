@@ -63,6 +63,7 @@ class BaseUnit(ABC):
         self.redis_config = redis_config or RedisConfig()
         self.logging_config = logging_config
         self._worker_redis: redis.Redis | None = None
+        self._published_redis_state: dict[str, str | int | float] = {}
         # Managed containers are created lazily because most unit types only
         # need lightweight shared values.
         self._multiproc_manager: SyncManager | None = None
@@ -105,10 +106,11 @@ class BaseUnit(ABC):
         self._logger.info(f"Starting {self.__class__.__name__}")
         self._stop_event.clear()
         self._loop_thread = multiprocessing.Process(target=self._loop)
-        self._loop_thread.start()
-        # Add the unit with its class to redis
+        initial_state = self._initial_redis_state()
         _r = get_redis(self.redis_config)
-        _r.mset({build_redis_key(self.id, RedisAttribute.CLASS): self.__class__.__name__})
+        _r.mset(initial_state)
+        self._published_redis_state = initial_state.copy()
+        self._loop_thread.start()
 
     def stop(self, timeout: float = STOP_TIMEOUT) -> None:
         """Stop the worker and delete its Redis keys.
@@ -143,6 +145,7 @@ class BaseUnit(ABC):
         # Remove the unit with its class from redis
         _r = get_redis(self.redis_config)
         _r.delete(build_redis_key(self.id, RedisAttribute.CLASS))
+        self._published_redis_state = {}
 
     @abstractmethod
     def _clean_redis(self) -> None:
@@ -175,6 +178,24 @@ class BaseUnit(ABC):
     def _redis(self) -> redis.Redis:
         """Return the worker's Redis client or a client for a parent-side call."""
         return getattr(self, "_worker_redis", None) or get_redis(self.redis_config)
+
+    def _initial_redis_state(self) -> dict[str, str | int | float]:
+        """Return fields available before the first worker cycle."""
+        return {build_redis_key(self.id, RedisAttribute.CLASS): self.__class__.__name__}
+
+    def _write_changed_redis_state(self, state: dict[str, str | int | float]) -> bool:
+        """Write changed fields together and remember successful publications."""
+        changed = {
+            key: value
+            for key, value in state.items()
+            if self._published_redis_state.get(key) != value
+        }
+        if not changed:
+            return True
+        written = bool(self._redis().mset(changed))
+        if written:
+            self._published_redis_state.update(changed)
+        return written
 
     def _shared_value(self, typecode: str, value: int | float) -> Any:
         """Create a process-safe scalar without starting a manager process."""

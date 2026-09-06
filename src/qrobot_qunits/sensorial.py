@@ -95,9 +95,8 @@ class SensorialUnit(BaseUnit):
         self._logger.debug(f"scalar_reading={scalar_reading}")
         self._logger.debug("Writing input on redis")
         # Write it on redis
-        _r = self._redis()
         try:
-            written = _r.mset(
+            written = self._write_changed_redis_state(
                 {build_redis_key(self.id, RedisAttribute.OUTPUT): self.scalar_reading}
             )
         except redis.RedisError as exc:

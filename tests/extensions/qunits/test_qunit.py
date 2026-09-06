@@ -28,6 +28,25 @@ def test_get_burst_output_reads_its_known_key(monkeypatch: pytest.MonkeyPatch) -
     assert client.get.call_args_list == [call("processor output"), call("processor output")]
 
 
+def test_runtime_configuration_changes_are_in_current_redis_state() -> None:
+    """Query and topology changes remain visible to the general state writer."""
+    unit = object.__new__(QUnit)
+    unit.id = "processor"
+    unit.model = AngularModel(n=1, tau=1)
+    unit._query = [0.0]
+    unit._in_qunits = {0: "old-input"}
+    unit._logger = Mock()
+
+    unit.query = [0.25]
+    unit.set_input(0, "new-input")
+
+    assert unit._initial_redis_state() == {
+        "processor class": "QUnit",
+        "processor query": "[0.25]",
+        "processor in_qunits": '{"0": "new-input"}',
+    }
+
+
 # Soft assertions via pytest_check let the test reach its explicit
 # worker cleanup even when an earlier expectation fails.
 

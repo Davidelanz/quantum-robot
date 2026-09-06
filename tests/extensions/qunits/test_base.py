@@ -89,6 +89,45 @@ def test_stop_rejects_negative_timeout() -> None:
         unit.stop(timeout=-0.1)
 
 
+def test_start_publishes_initial_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Starting a unit publishes and remembers fields available immediately."""
+    unit = StubUnit("test-unit", 0.1)
+    unit._unit_task_mock = Mock()
+    unit._clean_redis_mock = Mock()
+    process = Mock()
+    client = Mock()
+    monkeypatch.setattr("qrobot_qunits.base.multiprocessing.Process", Mock(return_value=process))
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=client))
+
+    unit.start()
+
+    process.start.assert_called_once_with()
+    client.mset.assert_called_once_with({f"{unit.id} class": "StubUnit"})
+    assert unit._published_redis_state == {f"{unit.id} class": "StubUnit"}
+
+
+def test_redis_state_writer_sends_only_changed_fields() -> None:
+    """One MSET contains new values while unchanged fields remain in Redis."""
+    unit = object.__new__(StubUnit)
+    client = Mock()
+    unit._worker_redis = client
+    unit._published_redis_state = {"unit class": "StubUnit", "unit output": 0.5}
+
+    assert unit._write_changed_redis_state(
+        {"unit class": "StubUnit", "unit output": 0.75, "unit state": "active"}
+    )
+    assert unit._write_changed_redis_state(
+        {"unit class": "StubUnit", "unit output": 0.75, "unit state": "active"}
+    )
+
+    client.mset.assert_called_once_with({"unit output": 0.75, "unit state": "active"})
+    assert unit._published_redis_state == {
+        "unit class": "StubUnit",
+        "unit output": 0.75,
+        "unit state": "active",
+    }
+
+
 def test_shared_state_starts_a_manager_only_for_managed_containers() -> None:
     """BaseUnit centralizes shared state without charging scalars for a manager."""
     unit = StubUnit("test-unit", 0.1)

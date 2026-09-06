@@ -40,6 +40,7 @@ SECTIONS = (
     "construction",
     "simulation",
     "scheduling",
+    "state",
 )
 
 
@@ -77,6 +78,27 @@ class SchedulingProbe(SensorialUnit):
         sleep(self.task_time)
         if len(self.starts) == self.iterations:
             self._stop_event.set()
+
+
+class RecordingRedis:
+    """Delegate Redis operations while recording each MSET application payload."""
+
+    def __init__(self, client: Redis) -> None:
+        self._client = client
+        self.mset_fields: list[int] = []
+        self.mset_bytes: list[int] = []
+
+    def mset(self, mapping: dict[str, object]) -> object:
+        """Record field count and encoded key/value bytes before writing."""
+        self.mset_fields.append(len(mapping))
+        self.mset_bytes.append(
+            sum(len(str(key).encode()) + len(str(value).encode()) for key, value in mapping.items())
+        )
+        return self._client.mset(mapping)
+
+    def __getattr__(self, name: str) -> Any:
+        """Delegate operations other than MSET to the real Redis client."""
+        return getattr(self._client, name)
 
 
 def _shutdown_managers(units: Iterable[Any]) -> None:
@@ -318,6 +340,82 @@ def benchmark_scheduling(runs: int) -> None:
     print_samples("accumulated drift", drift)
 
 
+def benchmark_state_publication(client: Redis, fan_in: int, runs: int) -> None:
+    """Measure qUnit and actuator cycles that publish changed Redis state."""
+    config = client_config(client)
+    source_id = f"qrobot-benchmark-state-source-{uuid4().hex}"
+    unit = QUnit(
+        "benchmark_state",
+        AngularModel(n=1, tau=1),
+        ZeroBurst(),
+        1.0,
+        in_qunits={0: source_id},
+        redis_config=config,
+    )
+    qunit_client = RecordingRedis(client)
+    unit._worker_redis = qunit_client  # type: ignore[assignment]
+    if hasattr(unit, "_initial_redis_state"):
+        unit._published_redis_state = unit._initial_redis_state()
+    source_key = build_redis_key(source_id, RedisAttribute.OUTPUT)
+    owned_keys = [
+        build_redis_key(unit.id, attribute)
+        for attribute in (
+            RedisAttribute.OUTPUT,
+            RedisAttribute.STATE,
+            RedisAttribute.QUERY,
+            RedisAttribute.IN_QUNITS,
+        )
+    ]
+    client.set(source_key, "0.5")
+    try:
+        print("\nqUnit state publication")
+        print_samples("dynamic cycle", measure_calls(unit._unit_task, runs))
+        print(f"  MSET calls: {len(qunit_client.mset_fields)}/{runs} cycles")
+        print(f"  fields per MSET: {median(qunit_client.mset_fields):.0f}")
+        print(
+            f"  amortized application payload: "
+            f"{sum(qunit_client.mset_bytes) / runs:.0f} bytes/cycle"
+        )
+    finally:
+        client.delete(source_key, *owned_keys)
+        _shutdown_managers([unit])
+
+    source_ids = [f"qrobot-benchmark-actuator-source-{uuid4().hex}" for _ in range(fan_in)]
+    actuator = ActuatorUnit(
+        "benchmark_state_actuator",
+        source_ids,
+        1.0,
+        redis_config=config,
+    )
+    actuator_client = RecordingRedis(client)
+    actuator._worker_redis = actuator_client  # type: ignore[assignment]
+    if hasattr(actuator, "_initial_redis_state"):
+        actuator._published_redis_state = actuator._initial_redis_state()
+    source_keys = [build_redis_key(source_id, RedisAttribute.OUTPUT) for source_id in source_ids]
+    actuator_keys = [
+        build_redis_key(actuator.id, attribute)
+        for attribute in (
+            RedisAttribute.INPUT,
+            RedisAttribute.OUTPUT,
+            RedisAttribute.IN_QUNITS,
+        )
+    ]
+    client.mset(dict.fromkeys(source_keys, "0.5"))
+    try:
+        print_samples(
+            f"actuator cycle, fan-in={fan_in}",
+            measure_calls(actuator._unit_task, runs),
+        )
+        print(f"  MSET calls: {len(actuator_client.mset_fields)}/{runs} cycles")
+        print(f"  fields per MSET: {median(actuator_client.mset_fields):.0f}")
+        print(
+            "  amortized application payload: "
+            f"{sum(actuator_client.mset_bytes) / runs:.0f} bytes/cycle"
+        )
+    finally:
+        client.delete(*source_keys, *actuator_keys)
+
+
 def _positive_int(value: str) -> int:
     """Parse a strictly positive command-line integer."""
     parsed = int(value)
@@ -391,6 +489,8 @@ def main() -> None:
             benchmark_worker_cycle(client, args.runs)
         if "simulation" in sections:
             benchmark_simulation_outputs(client, args.runs)
+        if "state" in sections:
+            benchmark_state_publication(client, max(args.fan_ins), args.runs)
     finally:
         client.close()
 

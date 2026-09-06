@@ -114,12 +114,18 @@ class ActuatorUnit(BaseUnit):
             build_redis_key(self.id, RedisAttribute.IN_QUNITS),
         )
 
+    def _initial_redis_state(self) -> dict[str, str | int | float]:
+        """Return actuator type and input topology available at startup."""
+        return {
+            **super()._initial_redis_state(),
+            build_redis_key(self.id, RedisAttribute.IN_QUNITS): json.dumps(self.in_qunits),
+        }
+
     def _unit_task(self) -> None:
         normalized_sum = self.normalized_sum
         activation = self.activation_for(normalized_sum)
-        client = self._redis()
         try:
-            written = client.mset(
+            written = self._write_changed_redis_state(
                 {
                     build_redis_key(self.id, RedisAttribute.INPUT): normalized_sum,
                     build_redis_key(self.id, RedisAttribute.OUTPUT): activation,

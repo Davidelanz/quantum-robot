@@ -202,6 +202,14 @@ class QUnit(BaseUnit):
         self._in_qunits[dim] = input_id
         self._logger.debug(f"_in_qunits={self._in_qunits}")
 
+    def _initial_redis_state(self) -> dict[str, str | int | float]:
+        """Return qUnit type, query, and input topology available at startup."""
+        return {
+            **super()._initial_redis_state(),
+            build_redis_key(self.id, RedisAttribute.QUERY): json.dumps(self.query),
+            build_redis_key(self.id, RedisAttribute.IN_QUNITS): json.dumps(self.in_qunits),
+        }
+
     def get_burst_output(self) -> float | None:
         """Return the latest burst output published by the qUnit.
 
@@ -247,7 +255,7 @@ class QUnit(BaseUnit):
             _r = self._redis()
             self._logger.debug(f"Redis connected: {_r}")
             try:
-                written = _r.mset(
+                written = self._write_changed_redis_state(
                     {
                         build_redis_key(self.id, RedisAttribute.OUTPUT): self.burst(out_state),
                         build_redis_key(self.id, RedisAttribute.STATE): str(out_state),
