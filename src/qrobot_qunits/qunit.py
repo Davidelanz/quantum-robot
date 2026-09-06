@@ -1,6 +1,7 @@
 """Redis-connected quantum-like processing unit."""
 
 import json
+import logging
 from collections.abc import Generator
 
 import redis
@@ -95,7 +96,7 @@ class QUnit(BaseUnit):
         self._t_idx = self._shared_value("i", 0)
 
         # Log properties
-        self._logger.debug(f"Properties: {self}")
+        self._logger.debug("Properties: %s", self)
 
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
         """Yield the qUnit configuration as key-value pairs."""
@@ -129,10 +130,12 @@ class QUnit(BaseUnit):
         # Check arguments
         query = self.model._target_vector_check(query)
         # Update accumulator
-        self._logger.debug(f"Changing query from {self._query} to {query}")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug("Changing query from %s to %s", self._query, query)
         for idx, value in enumerate(query):
             self._query[idx] = value
-        self._logger.debug(f"_query={self._query}")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug("_query=%s", self._query)
 
     @property
     def in_qunits(self) -> dict[int, str | None]:
@@ -170,7 +173,7 @@ class QUnit(BaseUnit):
             if value is not None:
                 input_vector[dim] = self._normalize_input(dim, value)
             else:
-                self._logger.info(f"Unable to read {unit_id} input")
+                self._logger.info("Unable to read %s input", unit_id)
         return input_vector
 
     def _normalize_input(self, dim: int, value: object) -> float:
@@ -196,11 +199,16 @@ class QUnit(BaseUnit):
         # Check arguments
         dim = self.model._dim_index_check(dim)
         # Update accumulator
-        self._logger.debug(
-            f"Changing dim {dim} input from " + f"{self.in_qunits[dim]} to {input_id}"
-        )
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug(
+                "Changing dim %s input from %s to %s",
+                dim,
+                self.in_qunits[dim],
+                input_id,
+            )
         self._in_qunits[dim] = input_id
-        self._logger.debug(f"_in_qunits={self._in_qunits}")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug("_in_qunits=%s", self._in_qunits)
 
     def _initial_redis_state(self) -> dict[str, str | int | float]:
         """Return qUnit type, query, and input topology available at startup."""
@@ -235,25 +243,35 @@ class QUnit(BaseUnit):
     def _unit_task(self) -> None:
         """Single iteration of the processing loop."""
         # "_t_idx" is the event index of the temporal window
-        self._logger.debug(f"Temporal window event {self._t_idx.value + 1}/{self.model.tau}")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug(
+                "Temporal window event %s/%s",
+                self._t_idx.value + 1,
+                self.model.tau,
+            )
         # Get input
         input_vector = self.input_vector
-        self._logger.debug(f"input_vector={input_vector}")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug("input_vector=%s", input_vector)
         self.model.encode_vector(input_vector)
         # Wait for the next input in the time window
         self._t_idx.value += 1
         # If at the end of the time window
         if self._t_idx.value == self.model.tau:
             # Apply the query
-            self._logger.debug(f"Querying for state {self._query}")
+            if self._logger.isEnabledFor(logging.DEBUG):
+                self._logger.debug("Querying for state %s", self._query)
             self.model.query(self.query)
             # Decode
             out_state = self.model.decode()
-            self._logger.debug(f"Output state = {out_state}")
+            if self._logger.isEnabledFor(logging.DEBUG):
+                self._logger.debug("Output state = %s", out_state)
             # Write output on Redis database
-            self._logger.debug("Opening a connection to redis...")
+            if self._logger.isEnabledFor(logging.DEBUG):
+                self._logger.debug("Opening a connection to redis...")
             _r = self._redis()
-            self._logger.debug(f"Redis connected: {_r}")
+            if self._logger.isEnabledFor(logging.DEBUG):
+                self._logger.debug("Redis connected: %s", _r)
             try:
                 written = self._write_changed_redis_state(
                     {
@@ -270,6 +288,7 @@ class QUnit(BaseUnit):
             if not written:
                 raise RedisWriteError(f"Redis did not write qUnit {self.id} state")
             # Initialize new temporal window
-            self._logger.debug("Initializing a new temporal window")
+            if self._logger.isEnabledFor(logging.DEBUG):
+                self._logger.debug("Initializing a new temporal window")
             self.model.clear()
             self._t_idx.value = 0

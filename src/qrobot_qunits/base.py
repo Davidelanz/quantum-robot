@@ -55,7 +55,7 @@ class BaseUnit(ABC):
         # The random suffix lets units with the same display name coexist.
         self.id = name + "-" + str(uuid4())[:6]
         self._logger = get_logger(self.id)
-        self._logger.debug(f"Initializing {self.__class__.__name__} {self.id}")
+        self._logger.debug("Initializing %s %s", self.__class__.__name__, self.id)
 
         # Store the unit name and properties
         self.name = name
@@ -101,9 +101,9 @@ class BaseUnit(ABC):
     def start(self) -> None:
         """Start the unit's background process and publish its type."""
         if self._loop_thread is not None and self._loop_thread.is_alive():
-            self._logger.warning(f"{self.__class__.__name__} is already started")
+            self._logger.warning("%s is already started", self.__class__.__name__)
             return
-        self._logger.info(f"Starting {self.__class__.__name__}")
+        self._logger.info("Starting %s", self.__class__.__name__)
         self._stop_event.clear()
         self._loop_thread = multiprocessing.Process(target=self._loop)
         initial_state = self._initial_redis_state()
@@ -128,9 +128,9 @@ class BaseUnit(ABC):
         if timeout < 0:
             raise ValueError("timeout must not be negative")
         if self._loop_thread is None:
-            self._logger.warning(f"{self.__class__.__name__} is not running")
+            self._logger.warning("%s is not running", self.__class__.__name__)
             return
-        self._logger.info(f"Stopping {self.__class__.__name__}")
+        self._logger.info("Stopping %s", self.__class__.__name__)
         self._stop_event.set()
         self._loop_thread.join(timeout)
         if self._loop_thread.is_alive():

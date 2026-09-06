@@ -1,5 +1,7 @@
 """Redis-connected normalized sensor interface."""
 
+import logging
+
 from .base import BaseUnit
 from .redis import RedisConfig, RedisWriteError
 from qrobot.logger import LoggingConfig
@@ -52,7 +54,7 @@ class SensorialUnit(BaseUnit):
         self._scalar_reading = self._shared_value("d", self.default_input)
 
         # Log properties
-        self._logger.debug(f"Properties: {self}")
+        self._logger.debug("Properties: %s", self)
 
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
         """Yield the sensorial-unit configuration as key-value pairs."""
@@ -69,9 +71,15 @@ class SensorialUnit(BaseUnit):
     def scalar_reading(self, value: float | int) -> None:
         """Set the reading published by subsequent unit tasks."""
         value = self._normalize_input(value)
-        self._logger.debug(f"Changing scalar reading from {self._scalar_reading.value} to {value}")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug(
+                "Changing scalar reading from %s to %s",
+                self._scalar_reading.value,
+                value,
+            )
         self._scalar_reading.value = value
-        self._logger.debug(f"_scalar_reading={self._scalar_reading.value}")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug("_scalar_reading=%s", self._scalar_reading.value)
 
     def _normalize_input(self, value: object) -> float:
         """Return a normalized reading, falling back when invalid."""
@@ -92,8 +100,9 @@ class SensorialUnit(BaseUnit):
         """Single iteration of the processing loop."""
         # Get reading
         scalar_reading = self.scalar_reading
-        self._logger.debug(f"scalar_reading={scalar_reading}")
-        self._logger.debug("Writing input on redis")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug("scalar_reading=%s", scalar_reading)
+            self._logger.debug("Writing input on redis")
         # Write it on redis
         try:
             written = self._write_changed_redis_state(
