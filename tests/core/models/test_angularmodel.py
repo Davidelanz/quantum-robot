@@ -133,13 +133,13 @@ def test_query():
     # 3-dimensional model, 2-events time window
     model = AngularModel(n=5, tau=2)
     # Define an input data value
-    input_data = [0.1, 0.4, 0.5, 0.2, 0.1]
+    input_vector = [0.1, 0.4, 0.5, 0.2, 0.1]
     # Encode input_data two times (tau = 2)
     for _ in range(1, model.tau):
         for dim in range(1, model.n):
-            model.encode(input_data[dim], dim)
+            model.encode(input_vector[dim], dim)
     # Apply a query on the input_data (to obtain an unambiguous result)
-    model.query(input_data)
+    model.query(input_vector)
     # See if the actual output is the |00...0> state or a close one
     # (at most one zero)
     assert model.decode() in {"00000", "10000", "01000", "00100", "00010", "00001"}
