@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "quantum-robot"
-version = "1.2.0"
+version = "1.3.0"
 description = "A set of Python modules for quantum-like perception modelling."
 readme = "README.md"
 requires-python = ">=3.11,<3.15"

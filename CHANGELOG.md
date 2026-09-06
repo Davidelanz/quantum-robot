@@ -2,6 +2,38 @@
 
 All notable changes are documented here. Semantic Versioning starts with 1.0.0.
 
+## [1.3.0] - 2026-09-06
+
+### Added
+
+- Finalized qBrain dashboard and released as part of the supported extentions,
+  with a direct `python -m qrobot_dashboard` entry point, configurable server
+  settings, automatic Redis discovery, and an adjustable refresh interval.
+- Added a repeatable qBrain performance benchmark covering Redis operations,
+  unit construction, connected inputs, worker cycles, and complete lifecycles.
+- Added dedicated Redis and multiprocessing lifecycle tests for sensorial units,
+  qUnits, and actuators, alongside concise isolated unit tests.
+
+### Changed
+
+- Reduced Redis round trips by batching status, qUnit input, simulator output,
+  and grasping-display reads and by reading known qUnit output keys directly.
+- Reused one Redis client per worker process, created shared-state managers only
+  when needed, and skipped disabled debug-log work.
+- Scheduled worker cycles against monotonic deadlines so task duration does not
+  add drift to every sampling period.
+- Published only changed unit state in a single Redis write while keeping query
+  and input-connection changes visible.
+- Reorganized qUnit tests in source order and separated isolated behavior from
+  real Redis process startup, operation, restart, and shutdown scenarios.
+
+### Fixed
+
+- Fixed dashboard application construction, responsive graph presentation,
+  empty-state handling, refresh controls, and deployed documentation styling.
+- Fixed static-analysis warnings in model validation and dashboard layout tests.
+
+
 ## [1.2.0] - 2026-09-02
 
 ### Added
@@ -10,7 +42,8 @@ All notable changes are documented here. Semantic Versioning starts with 1.0.0.
 
 ### Changed
 
-- Updated qUnit, visualization, and simulator code for compatibility across all supported Python versions.
+- Updated qUnit, visualization, and simulator code for compatibility across all
+  supported Python versions.
 
 ## [1.1.0] - 2026-08-31
 
@@ -35,6 +68,7 @@ All notable changes are documented here. Semantic Versioning starts with 1.0.0.
   the centralized Redis key protocol.
 - Improved abstract model, backend, and qUnit method contracts by explicitly
   raising `NotImplementedError` in abstract implementations.
+
 
 ## [1.0.0] - 2026-08-30
 
@@ -104,6 +138,7 @@ from 2023-06-13 described in the next section.
   drawing functions now return their figure objects.
 - Configure desired logging explicitly with `qrobot.logger.configure_logging`.
 
+
 ## Master snapshot (unreleased) - 2023-06-13
 
 > **Historical note:** this is commit
@@ -147,6 +182,7 @@ from 2023-06-13 described in the next section.
 - Removed setuptools/`requirements.txt` packaging and the original top-level
   source layout.
 
+
 ## [0.1] - 2020-07-01
 
 ### Added
@@ -158,4 +194,5 @@ from 2023-06-13 described in the next section.
 [1.0.0]: https://github.com/Davidelanz/quantum-robot/compare/d797c1a8e943a3201ea523bd031131549718b06c...1.0.0
 [1.1.0]: https://github.com/Davidelanz/quantum-robot/compare/1.0.0...1.1.0
 [1.2.0]: https://github.com/Davidelanz/quantum-robot/compare/1.1.0...1.2.0
+[1.3.0]: https://github.com/Davidelanz/quantum-robot/compare/1.2.0...1.3.0
 [0.1]: https://github.com/Davidelanz/quantum-robot/releases/tag/0.1
