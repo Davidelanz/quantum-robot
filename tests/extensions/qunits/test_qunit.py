@@ -1,5 +1,6 @@
 from time import monotonic, sleep
 from typing import Tuple
+from unittest.mock import Mock, call
 
 import pytest
 import pytest_check as check
@@ -11,6 +12,40 @@ from qrobot_qunits import QUnit, RedisConfig, SensorialUnit
 from qrobot_qunits.redis import flush_redis, get_redis, redis_status
 
 TEST_REDIS_CONFIG = RedisConfig(database=15)
+
+
+def test_get_burst_output_reads_its_known_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Reading one burst does not scan unrelated Redis state."""
+    unit = object.__new__(QUnit)
+    unit.id = "processor"
+    unit.redis_config = TEST_REDIS_CONFIG
+    client = Mock()
+    client.get.side_effect = ["0.75", None]
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=client))
+
+    assert unit.get_burst_output() == 0.75
+    assert unit.get_burst_output() is None
+    assert client.get.call_args_list == [call("processor output"), call("processor output")]
+
+
+def test_runtime_configuration_changes_are_in_current_redis_state() -> None:
+    """Query and topology changes remain visible to the general state writer."""
+    unit = object.__new__(QUnit)
+    unit.id = "processor"
+    unit.model = AngularModel(n=1, tau=1)
+    unit._query = [0.0]
+    unit._in_qunits = {0: "old-input"}
+    unit._logger = Mock()
+
+    unit.query = [0.25]
+    unit.set_input(0, "new-input")
+
+    assert unit._initial_redis_state() == {
+        "processor class": "QUnit",
+        "processor query": "[0.25]",
+        "processor in_qunits": '{"0": "new-input"}',
+    }
+
 
 # Soft assertions via pytest_check let the test reach its explicit
 # worker cleanup even when an earlier expectation fails.

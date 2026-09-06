@@ -23,7 +23,6 @@ def sensor() -> Generator[SensorialUnit, None, None]:
     yield unit
     if unit._loop_thread is not None and unit._loop_thread.is_alive():
         unit.stop()
-    unit._multiproc_manager.shutdown()
 
 
 def test_sensorial_initialization_and_input(sensor: SensorialUnit) -> None:
@@ -50,15 +49,20 @@ def test_sensorial_publishes_and_cleans_up(sensor: SensorialUnit) -> None:
         pytest.skip("Redis is not available on localhost:6379")
     client.flushdb()
 
-    sensor.scalar_reading = 0.75
     try:
         sensor.start()
         deadline = monotonic() + 2
         while client.get(f"{sensor.id} output") is None and monotonic() < deadline:
             sleep(0.02)
 
-        # The worker publishes the current scalar reading on its Redis output key.
+        # Parent-side changes remain visible to the running worker.
+        sensor.scalar_reading = 0.75
+        deadline = monotonic() + 2
         output = client.get(f"{sensor.id} output")
+        while (output is None or float(output) != 0.75) and monotonic() < deadline:
+            sleep(0.02)
+            output = client.get(f"{sensor.id} output")
+
         assert output is not None
         assert float(output) == 0.75
     finally:

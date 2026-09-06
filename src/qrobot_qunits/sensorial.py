@@ -1,6 +1,7 @@
 """Redis-connected normalized sensor interface."""
 
-from .redis import get_redis
+import logging
+
 from .base import BaseUnit
 from .redis import RedisConfig, RedisWriteError
 from qrobot.logger import LoggingConfig
@@ -49,12 +50,11 @@ class SensorialUnit(BaseUnit):
         if default_input is not None:
             self.default_input = self._normalize_input(default_input)
 
-        # Initialize multiprocessing variables
-        # - _scalar_reading array variable
-        self._scalar_reading = self._multiproc_manager.Value("d", self.default_input)
+        # The simulation updates this value while the sensor worker publishes it.
+        self._scalar_reading = self._shared_value("d", self.default_input)
 
         # Log properties
-        self._logger.debug(f"Properties: {self}")
+        self._logger.debug("Properties: %s", self)
 
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
         """Yield the sensorial-unit configuration as key-value pairs."""
@@ -65,15 +65,21 @@ class SensorialUnit(BaseUnit):
     @property
     def scalar_reading(self) -> float:
         """Current scalar reading."""
-        return self._scalar_reading.value
+        return float(self._scalar_reading.value)
 
     @scalar_reading.setter
     def scalar_reading(self, value: float | int) -> None:
         """Set the reading published by subsequent unit tasks."""
         value = self._normalize_input(value)
-        self._logger.debug(f"Changing scalar reading from {self._scalar_reading.value} to {value}")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug(
+                "Changing scalar reading from %s to %s",
+                self._scalar_reading.value,
+                value,
+            )
         self._scalar_reading.value = value
-        self._logger.debug(f"_scalar_reading={self._scalar_reading.value}")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug("_scalar_reading=%s", self._scalar_reading.value)
 
     def _normalize_input(self, value: object) -> float:
         """Return a normalized reading, falling back when invalid."""
@@ -87,19 +93,19 @@ class SensorialUnit(BaseUnit):
 
     def _clean_redis(self) -> None:
         """Clean all the redis entries created by the unit when the loop stops."""
-        _r = get_redis(self.redis_config)
+        _r = self._redis()
         _r.delete(build_redis_key(self.id, RedisAttribute.OUTPUT))
 
     def _unit_task(self) -> None:
         """Single iteration of the processing loop."""
         # Get reading
         scalar_reading = self.scalar_reading
-        self._logger.debug(f"scalar_reading={scalar_reading}")
-        self._logger.debug("Writing input on redis")
+        if self._logger.isEnabledFor(logging.DEBUG):
+            self._logger.debug("scalar_reading=%s", scalar_reading)
+            self._logger.debug("Writing input on redis")
         # Write it on redis
-        _r = get_redis(self.redis_config)
         try:
-            written = _r.mset(
+            written = self._write_changed_redis_state(
                 {build_redis_key(self.id, RedisAttribute.OUTPUT): self.scalar_reading}
             )
         except redis.RedisError as exc:

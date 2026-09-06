@@ -89,17 +89,117 @@ def test_stop_rejects_negative_timeout() -> None:
         unit.stop(timeout=-0.1)
 
 
-def test_loop_waits_on_stop_event_between_tasks() -> None:
-    """The shared event replaces an uninterruptible sampling sleep."""
+def test_start_publishes_initial_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Starting a unit publishes and remembers fields available immediately."""
+    unit = StubUnit("test-unit", 0.1)
+    unit._unit_task_mock = Mock()
+    unit._clean_redis_mock = Mock()
+    process = Mock()
+    client = Mock()
+    monkeypatch.setattr("qrobot_qunits.base.multiprocessing.Process", Mock(return_value=process))
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=client))
+
+    unit.start()
+
+    process.start.assert_called_once_with()
+    client.mset.assert_called_once_with({f"{unit.id} class": "StubUnit"})
+    assert unit._published_redis_state == {f"{unit.id} class": "StubUnit"}
+
+
+def test_redis_state_writer_sends_only_changed_fields() -> None:
+    """One MSET contains new values while unchanged fields remain in Redis."""
+    unit = object.__new__(StubUnit)
+    client = Mock()
+    unit._worker_redis = client
+    unit._published_redis_state = {"unit class": "StubUnit", "unit output": 0.5}
+
+    assert unit._write_changed_redis_state(
+        {"unit class": "StubUnit", "unit output": 0.75, "unit state": "active"}
+    )
+    assert unit._write_changed_redis_state(
+        {"unit class": "StubUnit", "unit output": 0.75, "unit state": "active"}
+    )
+
+    client.mset.assert_called_once_with({"unit output": 0.75, "unit state": "active"})
+    assert unit._published_redis_state == {
+        "unit class": "StubUnit",
+        "unit output": 0.75,
+        "unit state": "active",
+    }
+
+
+def test_shared_state_starts_a_manager_only_for_managed_containers() -> None:
+    """BaseUnit centralizes shared state without charging scalars for a manager."""
+    unit = StubUnit("test-unit", 0.1)
+
+    shared_value = unit._shared_value("d", 0.25)
+
+    assert shared_value.value == 0.25
+    assert unit._multiproc_manager is None
+
+    shared_list = unit._shared_list([1.0])
+    try:
+        assert list(shared_list) == [1.0]
+        assert unit._multiproc_manager is not None
+    finally:
+        assert unit._multiproc_manager is not None
+        unit._multiproc_manager.shutdown()
+
+
+def test_loop_waits_until_next_period_deadline(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Task duration is subtracted from the wait between scheduled starts."""
     unit = object.__new__(StubUnit)
     unit.logging_config = None
+    unit.redis_config = Mock()
     unit.sampling_period = 0.2
     unit._unit_task_mock = Mock()
     stop_event = Mock()
     stop_event.is_set.side_effect = [False, True]
     unit._stop_event = stop_event
+    client = Mock()
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=client))
+    monkeypatch.setattr("qrobot_qunits.base.monotonic", Mock(side_effect=[10.0, 10.05]))
 
     unit._loop()
 
     unit._unit_task_mock.assert_called_once_with()
-    stop_event.wait.assert_called_once_with(0.2)
+    stop_event.wait.assert_called_once_with(pytest.approx(0.15))
+
+
+def test_loop_skips_deadlines_missed_by_slow_task(monkeypatch: pytest.MonkeyPatch) -> None:
+    """An overrun advances to the next future slot instead of busy-looping."""
+    unit = object.__new__(StubUnit)
+    unit.logging_config = None
+    unit.redis_config = Mock()
+    unit.sampling_period = 0.2
+    unit._unit_task_mock = Mock()
+    unit._stop_event = Mock()
+    unit._stop_event.is_set.side_effect = [False, True]
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", Mock(return_value=Mock()))
+    monkeypatch.setattr("qrobot_qunits.base.monotonic", Mock(side_effect=[10.0, 10.55]))
+
+    unit._loop()
+
+    unit._stop_event.wait.assert_called_once_with(pytest.approx(0.05))
+
+
+def test_loop_reuses_and_closes_worker_redis_client(monkeypatch: pytest.MonkeyPatch) -> None:
+    """One Redis client serves the worker until its loop exits."""
+    unit = object.__new__(StubUnit)
+    unit.logging_config = None
+    unit.redis_config = Mock()
+    unit.sampling_period = 0.2
+    unit._stop_event = Mock()
+    unit._stop_event.is_set.side_effect = [False, True]
+    clients_used = []
+    unit._unit_task_mock = Mock(side_effect=lambda: clients_used.append(unit._redis()))
+    client = Mock()
+    get_redis = Mock(return_value=client)
+    monkeypatch.setattr("qrobot_qunits.base.get_redis", get_redis)
+
+    unit._loop()
+
+    assert clients_used == [client]
+    get_redis.assert_called_once_with(unit.redis_config)
+    client.close.assert_called_once_with()
+    assert unit._worker_redis is None

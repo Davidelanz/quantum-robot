@@ -8,7 +8,7 @@ import redis
 from qrobot.logger import LoggingConfig
 from .redis import RedisAttribute, build_redis_key
 
-from .redis import get_redis
+from .redis import read_outputs
 from .base import BaseUnit
 from .redis import RedisConfig, RedisWriteError
 
@@ -84,12 +84,12 @@ class ActuatorUnit(BaseUnit):
     @property
     def input_vector(self) -> list[float]:
         """Latest burst values, using the configured fallback when absent."""
-        client = get_redis(self.redis_config)
-        values = []
-        for unit_id in self._in_qunits:
-            value = client.get(build_redis_key(unit_id, RedisAttribute.OUTPUT))
-            values.append(self.default_input if value is None else self._normalize_input(value))
-        return values
+        client = self._redis()
+        values = read_outputs(client, self._in_qunits)
+        return [
+            self.default_input if value is None else self._normalize_input(value)
+            for value in values
+        ]
 
     @property
     def normalized_sum(self) -> float:
@@ -103,23 +103,29 @@ class ActuatorUnit(BaseUnit):
 
     def get_activation(self) -> float | None:
         """Return the latest activation published by this actuator."""
-        value = get_redis(self.redis_config).get(build_redis_key(self.id, RedisAttribute.OUTPUT))
+        value = self._redis().get(build_redis_key(self.id, RedisAttribute.OUTPUT))
         return None if value is None else float(value)
 
     def _clean_redis(self) -> None:
-        client = get_redis(self.redis_config)
+        client = self._redis()
         client.delete(
             build_redis_key(self.id, RedisAttribute.INPUT),
             build_redis_key(self.id, RedisAttribute.OUTPUT),
             build_redis_key(self.id, RedisAttribute.IN_QUNITS),
         )
 
+    def _initial_redis_state(self) -> dict[str, str | int | float]:
+        """Return actuator type and input topology available at startup."""
+        return {
+            **super()._initial_redis_state(),
+            build_redis_key(self.id, RedisAttribute.IN_QUNITS): json.dumps(self.in_qunits),
+        }
+
     def _unit_task(self) -> None:
         normalized_sum = self.normalized_sum
         activation = self.activation_for(normalized_sum)
-        client = get_redis(self.redis_config)
         try:
-            written = client.mset(
+            written = self._write_changed_redis_state(
                 {
                     build_redis_key(self.id, RedisAttribute.INPUT): normalized_sum,
                     build_redis_key(self.id, RedisAttribute.OUTPUT): activation,

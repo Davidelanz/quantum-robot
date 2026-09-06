@@ -1,9 +1,11 @@
 """Bug body, qBrain construction, and Redis lifecycle management."""
 
+from collections.abc import Mapping
+
 from qrobot.bursts import OneBurst, ZeroBurst
 from qrobot.models import AngularModel
 from qrobot_qunits import ActuatorUnit, QUnit, RedisConfig, SensorialUnit
-from qrobot_qunits.redis import get_redis
+from qrobot_qunits.redis import get_redis, read_outputs
 
 from .base import Robot
 from .config import BUG_CONFIG, QBRAIN_CONFIG
@@ -83,14 +85,14 @@ class BugRobot(Robot):
 
         :returns: Bursts keyed by qunit name; unavailable values become zero.
         """
-        return {name: qunit.get_burst_output() or 0.0 for name, qunit in self.qunits.items()}
+        return self._output_values(self.qunits)
 
     def actuator_values(self) -> dict[str, float]:
         """Read the current activation of every actuator.
 
         :returns: Activations keyed by actuator name; unavailable values become zero.
         """
-        return {name: actuator.get_activation() or 0.0 for name, actuator in self.actuators.items()}
+        return self._output_values(self.actuators)
 
     @property
     def brain_units(self) -> tuple[SensorialUnit | QUnit | ActuatorUnit, ...]:
@@ -118,6 +120,21 @@ class BugRobot(Robot):
             client.delete(*keys)
 
     # Internal actuator interpretation
+
+    def _output_values(
+        self,
+        units: Mapping[str, QUnit | ActuatorUnit],
+    ) -> dict[str, float]:
+        """Read a named collection of unit outputs in one Redis request."""
+        names = list(units)
+        values = read_outputs(
+            get_redis(self.redis_config),
+            [units[name].id for name in names],
+        )
+        return {
+            name: 0.0 if value is None else float(value)
+            for name, value in zip(names, values, strict=True)
+        }
 
     def _target_commands(self, activations: dict[str, float]) -> tuple[float, float]:
         """Combine opposing actuators into signed speed and turn targets."""

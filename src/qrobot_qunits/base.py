@@ -3,8 +3,12 @@
 import multiprocessing
 from abc import ABC, abstractmethod
 from collections.abc import Generator
+from multiprocessing.managers import SyncManager
+from time import monotonic
 from typing import Any
 from uuid import uuid4
+
+import redis
 
 from qrobot.logger import LoggingConfig, configure_logging, get_logger
 from .redis import RedisAttribute, build_redis_key
@@ -51,20 +55,21 @@ class BaseUnit(ABC):
         # The random suffix lets units with the same display name coexist.
         self.id = name + "-" + str(uuid4())[:6]
         self._logger = get_logger(self.id)
-        self._logger.debug(f"Initializing {self.__class__.__name__} {self.id}")
+        self._logger.debug("Initializing %s %s", self.__class__.__name__, self.id)
 
         # Store the unit name and properties
         self.name = name
         self.sampling_period = self._period_check(sampling_period)
         self.redis_config = redis_config or RedisConfig()
         self.logging_config = logging_config
+        self._worker_redis: redis.Redis | None = None
+        self._published_redis_state: dict[str, str | int | float] = {}
+        # Managed containers are created lazily because most unit types only
+        # need lightweight shared values.
+        self._multiproc_manager: SyncManager | None = None
 
-        # Subclasses store state shared with their worker process in this manager.
-        self._multiproc_manager = multiprocessing.Manager()
         # Used to gracefully stop the worker letting it finish its current task.
         self._stop_event = multiprocessing.Event()
-        # To define managed variables:
-        # -> self.name = self._multiproc_manager.list(value)
 
         # A process is deliberately created when ``start`` is called. On
         # platforms using the ``spawn`` start method, creating it while the
@@ -73,10 +78,11 @@ class BaseUnit(ABC):
         self._loop_thread: multiprocessing.Process | None = None
 
     def __getstate__(self) -> dict[str, Any]:
-        """Serialize manager proxies, but not their local manager process."""
+        """Serialize process-safe state without local runtime handles."""
         state = self.__dict__.copy()
         state["_multiproc_manager"] = None
         state["_loop_thread"] = None
+        state["_worker_redis"] = None
         return state
 
     def __iter__(self) -> Generator[tuple[str, object], None, None]:
@@ -95,15 +101,16 @@ class BaseUnit(ABC):
     def start(self) -> None:
         """Start the unit's background process and publish its type."""
         if self._loop_thread is not None and self._loop_thread.is_alive():
-            self._logger.warning(f"{self.__class__.__name__} is already started")
+            self._logger.warning("%s is already started", self.__class__.__name__)
             return
-        self._logger.info(f"Starting {self.__class__.__name__}")
+        self._logger.info("Starting %s", self.__class__.__name__)
         self._stop_event.clear()
         self._loop_thread = multiprocessing.Process(target=self._loop)
-        self._loop_thread.start()
-        # Add the unit with its class to redis
+        initial_state = self._initial_redis_state()
         _r = get_redis(self.redis_config)
-        _r.mset({build_redis_key(self.id, RedisAttribute.CLASS): self.__class__.__name__})
+        _r.mset(initial_state)
+        self._published_redis_state = initial_state.copy()
+        self._loop_thread.start()
 
     def stop(self, timeout: float = STOP_TIMEOUT) -> None:
         """Stop the worker and delete its Redis keys.
@@ -121,9 +128,9 @@ class BaseUnit(ABC):
         if timeout < 0:
             raise ValueError("timeout must not be negative")
         if self._loop_thread is None:
-            self._logger.warning(f"{self.__class__.__name__} is not running")
+            self._logger.warning("%s is not running", self.__class__.__name__)
             return
-        self._logger.info(f"Stopping {self.__class__.__name__}")
+        self._logger.info("Stopping %s", self.__class__.__name__)
         self._stop_event.set()
         self._loop_thread.join(timeout)
         if self._loop_thread.is_alive():
@@ -138,6 +145,7 @@ class BaseUnit(ABC):
         # Remove the unit with its class from redis
         _r = get_redis(self.redis_config)
         _r.delete(build_redis_key(self.id, RedisAttribute.CLASS))
+        self._published_redis_state = {}
 
     @abstractmethod
     def _clean_redis(self) -> None:
@@ -152,9 +160,60 @@ class BaseUnit(ABC):
     def _loop(self) -> None:
         if self.logging_config is not None:
             configure_logging(self.logging_config)
-        while not self._stop_event.is_set():
-            self._unit_task()
-            self._stop_event.wait(self.sampling_period)
+        self._worker_redis = get_redis(self.redis_config)
+        deadline = monotonic()
+        try:
+            while not self._stop_event.is_set():
+                self._unit_task()
+                deadline += self.sampling_period
+                now = monotonic()
+                if now >= deadline:
+                    missed_periods = int((now - deadline) // self.sampling_period) + 1
+                    deadline += missed_periods * self.sampling_period
+                self._stop_event.wait(deadline - now)
+        finally:
+            self._worker_redis.close()
+            self._worker_redis = None
+
+    def _redis(self) -> redis.Redis:
+        """Return the worker's Redis client or a client for a parent-side call."""
+        return getattr(self, "_worker_redis", None) or get_redis(self.redis_config)
+
+    def _initial_redis_state(self) -> dict[str, str | int | float]:
+        """Return fields available before the first worker cycle."""
+        return {build_redis_key(self.id, RedisAttribute.CLASS): self.__class__.__name__}
+
+    def _write_changed_redis_state(self, state: dict[str, str | int | float]) -> bool:
+        """Write changed fields together and remember successful publications."""
+        changed = {
+            key: value
+            for key, value in state.items()
+            if self._published_redis_state.get(key) != value
+        }
+        if not changed:
+            return True
+        written = bool(self._redis().mset(changed))
+        if written:
+            self._published_redis_state.update(changed)
+        return written
+
+    def _shared_value(self, typecode: str, value: int | float) -> Any:
+        """Create a process-safe scalar without starting a manager process."""
+        return multiprocessing.Value(typecode, value)
+
+    def _shared_list(self, values: list[Any]) -> Any:
+        """Create a managed list shared with the unit's worker process."""
+        return self._manager().list(values)
+
+    def _shared_dict(self, values: dict[Any, Any]) -> Any:
+        """Create a managed dictionary shared with the unit's worker process."""
+        return self._manager().dict(values)
+
+    def _manager(self) -> SyncManager:
+        """Return this unit's manager, creating it only when first required."""
+        if self._multiproc_manager is None:
+            self._multiproc_manager = multiprocessing.Manager()
+        return self._multiproc_manager
 
     @staticmethod
     def _period_check(sampling_period: float | int) -> float:

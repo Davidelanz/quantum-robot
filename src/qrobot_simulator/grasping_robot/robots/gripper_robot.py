@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from qrobot.bursts import ZeroBurst
 from qrobot.models import AngularModel
 from qrobot_qunits import ActuatorUnit, QUnit, RedisConfig, SensorialUnit
-from qrobot_qunits.redis import get_redis
+from qrobot_qunits.redis import get_redis, read_outputs
 
 from .config import GRIPPER_ROBOT_CONFIG
 
@@ -84,11 +84,18 @@ class GraspingRobot:
         """
         if self.actuator is None:
             return GraspingSignals(None, None, None)
-        return GraspingSignals(
-            self.qunits["proximity"].get_burst_output(),
-            self.qunits["empty_gripper"].get_burst_output(),
-            self.actuator.get_activation(),
+        values = read_outputs(
+            get_redis(self.redis_config),
+            (
+                self.qunits["proximity"].id,
+                self.qunits["empty_gripper"].id,
+                self.actuator.id,
+            ),
         )
+        proximity, empty_gripper, activation = (
+            None if value is None else float(value) for value in values
+        )
+        return GraspingSignals(proximity, empty_gripper, activation)
 
     def actuator_value(self) -> float:
         """Return the latest actuator output.
