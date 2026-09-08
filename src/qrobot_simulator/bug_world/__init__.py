@@ -1,13 +1,8 @@
-"""Self-contained predator/prey world demonstrating an embodied qBrain."""
+"""Public participants and view of the predator-prey example."""
 
-from .rendering import BugWorldLiveView
-from .robots import BluePrey, BugRobot, RedPredator
+from .rendering.liveview import BugWorldLiveView
+from .robots.classical_bug import ClassicalBug
+from .robots.quantum_bug import QuantumBug
 from .world.bug_world import BugWorld
 
-__all__ = [
-    "BluePrey",
-    "BugRobot",
-    "BugWorld",
-    "BugWorldLiveView",
-    "RedPredator",
-]
+__all__ = ["BugWorld", "BugWorldLiveView", "ClassicalBug", "QuantumBug"]

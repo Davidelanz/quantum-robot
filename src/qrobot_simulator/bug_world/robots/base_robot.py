@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import atan2, cos, hypot, sin
+from math import atan2, hypot
 from typing import Literal, TypeAlias
 
-from ..utils.geometry import wrap_angle, wrap_coordinate
+from ..utils.geometry import wrap_angle
+from ..utils.motion import integrate_motion
 from .config import ROBOT_CONFIG
 
 MotionMode: TypeAlias = Literal["deterministic", "random"]
@@ -64,7 +65,7 @@ class Robot:
         turn: float,
         dt: float,
         bounds: tuple[float, float],
-    ) -> None:
+    ) -> bool:
         """Advance the body and wrap it across arena boundaries.
 
         ``speed`` and ``turn`` are normalized commands scaled by
@@ -77,12 +78,16 @@ class Robot:
         :param dt: Simulation interval in seconds.
         :param bounds: Arena ``(width, height)`` in world units.
         """
-        self.heading = wrap_angle(self.heading + self.max_turn * turn * dt)
-        self.x += self.max_speed * speed * cos(self.heading) * dt
-        self.y += self.max_speed * speed * sin(self.heading) * dt
-        width, height = bounds
-        self.x = wrap_coordinate(self.x, self.radius, width)
-        self.y = wrap_coordinate(self.y, self.radius, height)
+        self.x, self.y, self.heading, crossed_boundary = integrate_motion(
+            (self.x, self.y),
+            self.heading,
+            self.radius,
+            (self.max_speed, self.max_turn),
+            (speed, turn),
+            dt,
+            bounds,
+        )
+        return crossed_boundary
 
     def turn_towards(self, x: float, y: float) -> float:
         """Compute a normalized shortest-turn command toward a point.

@@ -4,7 +4,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from ..world import BugWorld, Chessboard
+from ..world.arena import Chessboard
+from ..world.bug_world import BugWorld
 from .config import RENDERING_CONFIG
 from .utils import (
     RobotGraphics,
@@ -32,6 +33,10 @@ class BugWorldLiveView:
         self._interactive = interactive
         if interactive:
             plt.ion()
+        else:
+            # Hidden rendering must use a backend that does not create a native
+            # window, including when the caller only wants to save one frame.
+            plt.switch_backend("Agg")
         self.figure, self.axis = plt.subplots(
             num=RENDERING_CONFIG.figure_name,
             figsize=RENDERING_CONFIG.figure_size,
