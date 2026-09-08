@@ -4,8 +4,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from ..robots import GraspingSignals
-from ..world import GraspingArena, GraspingWorld
+from ..world.arena import GraspingArena
+from ..world.grasping_world import GraspingWorld
 from .config import RENDERING_CONFIG
 from .utils import (
     create_robot_graphics,
@@ -51,7 +51,7 @@ class GraspingWorldLiveView:
     def update(
         self,
         world: GraspingWorld,
-        signals: GraspingSignals | None = None,
+        signals: dict[str, float | None] | None = None,
         phase: str = "RUNNING",
     ) -> None:
         """Refresh physical geometry and observable qBrain values.

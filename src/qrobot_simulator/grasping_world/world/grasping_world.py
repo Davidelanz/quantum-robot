@@ -2,66 +2,17 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from random import Random
+from ..robots.ball_prey import BallPrey
+from ..robots.base_gripper import BaseGripper
+from ..robots.config import BALL_PREY_CONFIG, BallPreyConfig
+from ..utils.sensors import proximity_reading, touch_reading
+from .arena import GraspingArena
+from .config import WORLD_CONFIG, GraspingWorldConfig
 
-from ..robots import BallPrey, GraspingRobot
-from ..robots.config import BALL_PREY_CONFIG
-from .config import WORLD_CONFIG
-
-# Sensor interfaces
-
-
-def proximity_interface(
-    distance: float,
-    near: float = WORLD_CONFIG.near_distance,
-    far: float = WORLD_CONFIG.far_distance,
-) -> float:
-    """Map continuous distance to a normalized nearby-object signal.
-
-    :param distance: Object distance in centimetres.
-    :param near: Distance producing a full response.
-    :param far: Distance producing a zero response.
-    :returns: Normalized proximity in the interval ``[0, 1]``.
-    :raises ValueError: If ``far`` is not greater than ``near``.
-    """
-    if far <= near:
-        raise ValueError("far must be greater than near")
-    return min(1.0, max(0.0, (far - distance) / (far - near)))
-
-
-def touch_interface(pressed: bool) -> float:
-    """Map the internal touch switch to the empty-gripper signal.
-
-    :param pressed: Whether caught prey presses the switch.
-    :returns: Zero when pressed and one while the gripper is empty.
-    """
-    return 0.0 if pressed else 1.0
-
-
-# Arena geometry
-
-
-@dataclass(frozen=True)
-class GraspingArena:
-    """Define the rectangular checkerboard arena.
-
-    :param width: Arena width in display units.
-    :param height: Arena height in display units.
-    :param cell_size: Width and height of one checkerboard cell.
-    """
-
-    width: float = WORLD_CONFIG.arena_width
-    height: float = WORLD_CONFIG.arena_height
-    cell_size: float = WORLD_CONFIG.arena_cell_size
-
-    @property
-    def bounds(self) -> tuple[float, float]:
-        """Return the arena dimensions.
-
-        :returns: Arena ``(width, height)`` in display units.
-        """
-        return self.width, self.height
+Controller = Callable[[dict[str, float]], float]
 
 
 # Encounter state and dynamics
@@ -72,7 +23,7 @@ class GraspingWorld:
     """Represent one stationary gripper and one wandering ball prey.
 
     :param arena: Visible checkerboard dimensions.
-    :param robot: Physical gripper body controlled by an actuator.
+    :param gripper: Classical or quantum gripper controlled by an actuator.
     :param ball: Ball prey moving in front of the gripper.
     :param elapsed: Simulated time in seconds.
     :param touch_pressed: Whether caught prey presses the touch sensor.
@@ -83,17 +34,21 @@ class GraspingWorld:
     """
 
     arena: GraspingArena
-    robot: GraspingRobot
+    gripper: BaseGripper
     ball: BallPrey
+    config: GraspingWorldConfig = WORLD_CONFIG
+    prey_config: BallPreyConfig = BALL_PREY_CONFIG
     elapsed: float = 0.0
     touch_pressed: bool = False
     readings: dict[str, float] = field(default_factory=dict)
     correct_grips: int = 0
     missed_grips: int = 0
     empty_grips: int = 0
+    grip_response_times: list[float] = field(default_factory=list)
     _inside_visit: bool = False
     _visit_gripped: bool = False
     _caught_at: float | None = None
+    _visit_started_at: float | None = None
     _rng: Random = field(default_factory=Random, repr=False)
 
     # Construction and simulation API
@@ -101,25 +56,30 @@ class GraspingWorld:
     @classmethod
     def demo(
         cls,
-        robot: GraspingRobot | None = None,
+        gripper: BaseGripper,
         seed: int | None = None,
+        config: GraspingWorldConfig = WORLD_CONFIG,
+        prey_config: BallPreyConfig = BALL_PREY_CONFIG,
+        prey: BallPrey | None = None,
     ) -> GraspingWorld:
         """Create the configured arena, robot, and randomly placed ball prey.
 
-        :param robot: Existing robot to place in the world. A brainless robot is
-            created when omitted.
+        :param gripper: Configured gripper to place in the world.
         :param seed: Optional seed for reproducible prey movement.
+        :param prey: Optional configured prey instance; otherwise one is sampled.
         :returns: Initialized world with its first sensor snapshot.
         """
         rng = Random(seed)
-        robot = robot or GraspingRobot(connect_brain=False)
-        ball = BallPrey(
+        ball = prey or BallPrey(
             0.0,
-            robot.y,
-            rng.uniform(*BALL_PREY_CONFIG.initial_distance_range),
-            rng.uniform(*BALL_PREY_CONFIG.initial_velocity_range),
+            gripper.y,
+            rng.uniform(*prey_config.initial_distance_range),
+            rng.uniform(*prey_config.initial_velocity_range),
+            config=prey_config,
         )
-        world = cls(GraspingArena(), robot, ball, _rng=rng)
+        selected_prey_config = ball.config
+        arena = GraspingArena(config.arena_width, config.arena_height, config.arena_cell_size)
+        world = cls(arena, gripper, ball, config, selected_prey_config, _rng=rng)
         ball.schedule_motion_change(world.elapsed, rng)
         world._update_ball_position()
         world.readings = world.sensor_readings()
@@ -134,9 +94,9 @@ class GraspingWorld:
         """
         if dt <= 0:
             raise ValueError("dt must be positive")
-        was_closed = self.robot.gripper_closed
+        was_closed = self.gripper.gripper_closed
         ball_was_inside = self._ball_is_grippable()
-        self.robot.apply_activation(gripper_activation)
+        self.gripper.apply_activation(gripper_activation)
         self.elapsed += dt
         self._handle_gripper_transition(was_closed, ball_was_inside)
         self._advance_ball(dt)
@@ -145,21 +105,68 @@ class GraspingWorld:
         self._update_ball_position()
         self.readings = self.sensor_readings()
 
+    def run_headless(
+        self,
+        controller: Controller | None,
+        duration: float,
+        dt: float = 0.01,
+    ) -> GraspingWorld:
+        """Advance a controller without constructing or refreshing a live view.
+
+        Parameters
+        ----------
+        controller : callable
+            Function mapping the latest normalized readings to gripper activation.
+        duration : float
+            Positive simulated duration in seconds.
+        dt : float
+            Positive fixed physics integration step in seconds.
+
+        Returns
+        -------
+        GraspingWorld
+            This world after the requested simulated duration.
+        """
+        if duration <= 0 or dt <= 0:
+            raise ValueError("duration and dt must be positive")
+        target = self.elapsed + duration
+        while self.elapsed < target:
+            step_dt = min(dt, target - self.elapsed)
+            readings = self.readings.copy()
+            if controller is None:
+                activation = self.gripper.command(readings, step_dt)
+            else:
+                activation = controller(readings)
+            self.step(activation, step_dt)
+        return self
+
+    def run_robot_headless(self, duration: float, dt: float = 0.01) -> GraspingWorld:
+        """Run either gripper through the same headless world interface."""
+        if duration <= 0 or dt <= 0:
+            raise ValueError("duration and dt must be positive")
+        self.gripper.prepare_headless(self.readings)
+        try:
+            return self.run_headless(None, duration, dt)
+        finally:
+            self.gripper.stop()
+
     def sensor_readings(self) -> dict[str, float]:
         """Calculate the two normalized robot sensor values.
 
         :returns: Proximity and touch readings keyed by sensor name.
         """
         return {
-            "proximity": proximity_interface(self.ball.distance),
-            "touch": touch_interface(self.touch_pressed),
+            "proximity": proximity_reading(
+                self.ball.distance, self.config.near_distance, self.config.far_distance
+            ),
+            "touch": touch_reading(self.touch_pressed),
         }
 
     # Grip, digestion, and scoring internals
 
     def _handle_gripper_transition(self, was_closed: bool, ball_was_inside: bool) -> None:
         """Score and apply a newly issued closing command."""
-        if self.robot.gripper_closed and not was_closed:
+        if self.gripper.gripper_closed and not was_closed:
             if ball_was_inside:
                 self._catch_ball()
             else:
@@ -172,39 +179,43 @@ class GraspingWorld:
         self._caught_at = self.elapsed
         self._inside_visit = True
         self._visit_gripped = True
+        if self._visit_started_at is not None:
+            self.grip_response_times.append(self.elapsed - self._visit_started_at)
 
     def _advance_ball(self, dt: float) -> None:
         """Hold caught prey or advance a free ball."""
         if self.ball.caught:
             self._hold_or_digest_ball()
             return
-        closed_barrier = WORLD_CONFIG.grippable_distance if self.robot.gripper_closed else None
+        closed_barrier = self.config.grippable_distance if self.gripper.gripper_closed else None
         self.ball.step(
             self.elapsed,
             dt,
-            WORLD_CONFIG.minimum_distance,
+            self.config.minimum_distance,
             closed_barrier,
             self._rng,
+            near_limit=self.config.grippable_distance,
         )
 
     def _hold_or_digest_ball(self) -> None:
         """Hold caught prey still and respawn it after digestion."""
         if self._caught_at is None:
             raise RuntimeError("caught ball has no capture time")
-        if self.elapsed - self._caught_at >= WORLD_CONFIG.digestion_time:
+        if self.elapsed - self._caught_at >= self.config.digestion_time:
             self._respawn_ball()
         else:
-            self.robot.gripper_closed = True
+            self.gripper.gripper_closed = True
             self.ball.velocity = 0.0
 
     def _respawn_ball(self) -> None:
         """Replace eaten prey at a random far position."""
         self.ball.caught = False
         self._caught_at = None
-        self.ball.distance = self._rng.uniform(*BALL_PREY_CONFIG.respawn_distance_range)
-        self.ball.velocity = self._rng.uniform(*BALL_PREY_CONFIG.initial_velocity_range)
+        self.ball.distance = self._rng.uniform(*self.prey_config.respawn_distance_range)
+        self.ball.velocity = self._rng.uniform(*self.prey_config.initial_velocity_range)
         self._inside_visit = False
         self._visit_gripped = False
+        self._visit_started_at = None
         self.ball.schedule_motion_change(self.elapsed, self._rng)
 
     def _update_visit_counter(self) -> None:
@@ -213,20 +224,20 @@ class GraspingWorld:
         if is_inside and not self._inside_visit:
             self._inside_visit = True
             self._visit_gripped = False
+            self._visit_started_at = self.elapsed
         elif not is_inside and self._inside_visit:
             if not self._visit_gripped:
                 self.missed_grips += 1
             self._inside_visit = False
             self._visit_gripped = False
+            self._visit_started_at = None
 
     def _ball_is_grippable(self) -> bool:
         """Return whether prey lies inside the configured jaw interval."""
-        return (
-            WORLD_CONFIG.minimum_distance <= self.ball.distance <= WORLD_CONFIG.grippable_distance
-        )
+        return self.config.minimum_distance <= self.ball.distance <= self.config.grippable_distance
 
     def _update_ball_position(self) -> None:
         """Convert sensor distance to the ball's horizontal display position."""
-        sensor_origin_x = self.robot.x + WORLD_CONFIG.sensor_offset_x
-        self.ball.x = sensor_origin_x + self.ball.distance * WORLD_CONFIG.ball_distance_scale
-        self.ball.y = self.robot.y
+        sensor_origin_x = self.gripper.x + self.config.sensor_offset_x
+        self.ball.x = sensor_origin_x + self.ball.distance * self.config.ball_distance_scale
+        self.ball.y = self.gripper.y

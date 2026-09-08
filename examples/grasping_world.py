@@ -1,4 +1,4 @@
-"""Run the object-grasping qBrain in a live two-dimensional world.
+"""Run a classical or quantum gripper in the two-dimensional grasping world.
 
 Warning: ``qrobot_simulator`` is experimental. This example implements the
 object-grasping research scenario with simplified two-dimensional kinematics,
@@ -6,9 +6,8 @@ sensing, and contact rules; its simulator interfaces may change between minor
 releases.
 
 A blue ball wanders between near and far destinations in front of a stationary
-brown robot whose distance and touch interfaces feed independently timed qUnits
-and a Redis-connected gripper actuator. The example implements its arena,
-movement, sensing, grasping, and rendering directly in Python.
+brown gripper. The classical version applies a deterministic timed policy; the
+quantum version feeds independently timed qUnits and a Redis-connected actuator.
 
 Reference: D. Lanza, "Quantum-like Modeling of Cognitive Architectures for Robotics",
 Zenodo, 2020, https://doi.org/10.5281/zenodo.22068511.
@@ -22,16 +21,18 @@ from redis.exceptions import ConnectionError
 
 from qrobot_qunits import RedisConfig
 from qrobot_qunits.redis import get_redis
-from qrobot_simulator.grasping_robot import (
-    GraspingRobot,
+from qrobot_simulator.grasping_world import (
+    ClassicalGripper,
     GraspingWorld,
     GraspingWorldLiveView,
+    QuantumGripper,
 )
-from qrobot_simulator.grasping_robot.robots.config import GRIPPER_ROBOT_CONFIG
+from qrobot_simulator.grasping_world.robots.base_gripper import BaseGripper
 
 DEFAULT_DURATION = 0.0
 DEFAULT_SPEED = 2.0
 DEFAULT_FPS = 15.0
+MAX_SIMULATION_SPEED = 10.0
 MIN_WARMUP_SECONDS = 5.0
 WARMUP_ALLOWANCE = 12.0
 MAX_WARMUP_SLEEP = 0.05
@@ -47,6 +48,12 @@ def parse_args() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--gripper",
+        choices=("classical", "quantum"),
+        default="quantum",
+        help="Controller used by the stationary gripper.",
+    )
+    parser.add_argument(
         "--duration",
         type=float,
         default=DEFAULT_DURATION,
@@ -56,7 +63,7 @@ def parse_args() -> argparse.Namespace:
         "--speed",
         type=float,
         default=DEFAULT_SPEED,
-        help=(f"Simulation/real-time ratio in (0, {GRIPPER_ROBOT_CONFIG.max_simulation_speed:g}]."),
+        help=f"Simulation/real-time ratio in (0, {MAX_SIMULATION_SPEED:g}].",
     )
     parser.add_argument("--fps", type=float, default=DEFAULT_FPS)
     parser.add_argument("--seed", type=int, help="Seed for reproducible random ball movement.")
@@ -74,7 +81,7 @@ def validate_args(args: argparse.Namespace) -> None:
     """
     if (
         args.duration < 0
-        or not 0 < args.speed <= GRIPPER_ROBOT_CONFIG.max_simulation_speed
+        or not 0 < args.speed <= MAX_SIMULATION_SPEED
         or args.fps <= 0
         or (args.no_show and args.duration == 0)
     ):
@@ -85,15 +92,15 @@ def validate_args(args: argparse.Namespace) -> None:
 
 
 def wait_for_brain(
-    robot: GraspingRobot,
+    gripper: BaseGripper,
     world: GraspingWorld,
-    view: GraspingWorldLiveView,
+    view: GraspingWorldLiveView | None,
     speed: float,
     frame_period: float,
 ) -> None:
     """Wait until both perceptual qUnits complete their first window.
 
-    :param robot: Robot providing the perceptual qUnit signals.
+    :param gripper: Quantum gripper providing the perceptual qUnit signals.
     :param world: Current simulation state displayed during warm-up.
     :param view: Live view refreshed while the qUnits collect samples.
     :param speed: Simulation-time to wall-clock-time ratio.
@@ -103,23 +110,18 @@ def wait_for_brain(
     # The slower touch qUnit needs five simulated seconds of samples. Extra
     # wall-clock allowance covers process startup on slower computers.
     warmup_deadline = monotonic() + max(MIN_WARMUP_SECONDS, WARMUP_ALLOWANCE / speed)
-    while any(
-        signal is None
-        for signal in (
-            robot.signals().proximity_burst,
-            robot.signals().empty_gripper_burst,
-        )
-    ):
+    while not gripper.brain.ready:
         if monotonic() >= warmup_deadline:
             raise RuntimeError("qUnits did not publish during warm-up")
-        view.update(world, robot.signals(), phase="WARMING UP")
+        if view is not None:
+            view.update(world, gripper.diagnostics(), phase="WARMING UP")
         sleep(min(frame_period, MAX_WARMUP_SLEEP))
 
 
 def run_simulation(
-    robot: GraspingRobot,
+    gripper: BaseGripper,
     world: GraspingWorld,
-    view: GraspingWorldLiveView,
+    view: GraspingWorldLiveView | None,
     duration: float,
     speed: float,
     frame_period: float,
@@ -127,7 +129,7 @@ def run_simulation(
 ) -> None:
     """Run the sensor-brain-actuator loop until time or the window ends.
 
-    :param robot: Robot that receives readings and supplies actuator commands.
+    :param gripper: Gripper that receives readings and supplies actuator commands.
     :param world: Physical simulation advanced by each actuator command.
     :param view: Live view refreshed after each world step.
     :param duration: Simulated run duration, or zero for an unlimited run.
@@ -138,17 +140,22 @@ def run_simulation(
     started = monotonic()
     next_frame = started
     while (duration == 0 or (monotonic() - started) * speed < duration) and (
-        headless or view.is_open
+        headless or (view is not None and view.is_open)
     ):
         now = monotonic()
         if now < next_frame:
             sleep(next_frame - now)
 
-        # Each frame publishes the previous physical reading, applies the
-        # newest brain command, then draws the resulting world state.
-        robot.perceive(world.readings)
-        world.step(robot.actuator_value(), frame_period * speed)
-        view.update(world, robot.signals())
+        # Each brain translates the same readings and simulated time into the
+        # normalized action consumed by the physical world.
+        simulated_dt = frame_period * speed
+        activation = gripper.command(world.readings, simulated_dt)
+
+        # Physics and rendering consume the selected controller through the
+        # same normalized actuator interface.
+        world.step(activation, simulated_dt)
+        if view is not None:
+            view.update(world, gripper.diagnostics())
         next_frame = max(next_frame + frame_period, monotonic())
 
 
@@ -162,22 +169,31 @@ def main() -> None:
     """
     args = parse_args()
     validate_args(args)
-    redis_config = RedisConfig()
-    try:
-        get_redis(redis_config).ping()
-    except ConnectionError as exc:
-        raise RuntimeError("Redis must be running on localhost:6379") from exc
+    # Only the quantum implementation depends on Redis-backed worker processes.
+    if args.gripper == "quantum":
+        redis_config = RedisConfig()
+        try:
+            get_redis(redis_config).ping()
+        except ConnectionError as exc:
+            raise RuntimeError("Redis must be running on localhost:6379") from exc
+        gripper: BaseGripper = QuantumGripper(redis_config, args.speed)
+    else:
+        gripper = ClassicalGripper()
 
-    robot = GraspingRobot(redis_config, args.speed)
-    world = GraspingWorld.demo(robot, seed=args.seed)
-    view = GraspingWorldLiveView(world.arena, interactive=not args.no_show)
-    robot.perceive(world.readings)
+    world = GraspingWorld.demo(gripper, seed=args.seed)
+    # A headless run constructs no Matplotlib objects unless a final rendered
+    # frame was explicitly requested.
+    view = (
+        GraspingWorldLiveView(world.arena, interactive=not args.no_show)
+        if not args.no_show or args.save_world
+        else None
+    )
     frame_period = 1 / args.fps
     try:
-        robot.start_brain()
-        wait_for_brain(robot, world, view, args.speed, frame_period)
+        gripper.brain.start(world.readings)
+        wait_for_brain(gripper, world, view, args.speed, frame_period)
         run_simulation(
-            robot,
+            gripper,
             world,
             view,
             args.duration,
@@ -188,10 +204,11 @@ def main() -> None:
     except KeyboardInterrupt:
         pass
     finally:
-        if args.save_world:
+        if args.save_world and view is not None:
             print("saved", view.save(args.save_world))
-        robot.stop_brain()
-        view.close()
+        gripper.stop()
+        if view is not None:
+            view.close()
 
 
 if __name__ == "__main__":

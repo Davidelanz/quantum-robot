@@ -7,9 +7,9 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.text import Text
 
-from ..robots import GraspingSignals
-from ..robots.config import BALL_PREY_CONFIG, GRIPPER_ROBOT_CONFIG
-from ..world import WORLD_CONFIG, GraspingWorld
+from ..robots.config import BALL_PREY_CONFIG, BASE_GRIPPER_CONFIG
+from ..world.config import WORLD_CONFIG
+from ..world.grasping_world import GraspingWorld
 from .config import RENDERING_CONFIG
 
 
@@ -99,9 +99,9 @@ def create_robot_graphics(axis: Axes) -> RobotGraphics:
     """
     body = Rectangle(
         (0, 0),
-        2 * GRIPPER_ROBOT_CONFIG.half_width,
-        2 * GRIPPER_ROBOT_CONFIG.half_height,
-        facecolor=GRIPPER_ROBOT_CONFIG.color,
+        2 * BASE_GRIPPER_CONFIG.half_width,
+        2 * BASE_GRIPPER_CONFIG.half_height,
+        facecolor=BASE_GRIPPER_CONFIG.color,
         edgecolor=RENDERING_CONFIG.robot_edge_color,
         linewidth=RENDERING_CONFIG.robot_edge_width,
         zorder=RENDERING_CONFIG.robot_zorder,
@@ -144,11 +144,11 @@ def update_robot_graphics(graphics: RobotGraphics, world: GraspingWorld) -> None
     :param graphics: Graphics handles created for the robots.
     :param world: Current physical simulation state.
     """
-    robot = world.robot
+    robot = world.gripper
     graphics.body.set_xy(
         (
-            robot.x - GRIPPER_ROBOT_CONFIG.half_width,
-            robot.y - GRIPPER_ROBOT_CONFIG.half_height,
+            robot.x - robot.config.half_width,
+            robot.y - robot.config.half_height,
         )
     )
     graphics.ball_prey.center = (world.ball.x, world.ball.y)
@@ -199,8 +199,8 @@ def create_sensor_graphics(axis: Axes) -> SensorGraphics:
     :param axis: Matplotlib axes receiving the graphics.
     :returns: Dynamic sensor graphics handles.
     """
-    robot_x = GRIPPER_ROBOT_CONFIG.x
-    robot_y = GRIPPER_ROBOT_CONFIG.y
+    robot_x = BASE_GRIPPER_CONFIG.x
+    robot_y = BASE_GRIPPER_CONFIG.y
     origin_x = robot_x + WORLD_CONFIG.sensor_offset_x
     proximity_region = Rectangle(
         (origin_x, robot_y - RENDERING_CONFIG.sensor_half_height),
@@ -262,11 +262,11 @@ def update_sensor_graphics(graphics: SensorGraphics, world: GraspingWorld) -> No
     :param graphics: Dynamic sensor graphics handles.
     :param world: Current physical simulation state.
     """
-    origin_x = world.robot.x + WORLD_CONFIG.sensor_offset_x
+    origin_x = world.gripper.x + WORLD_CONFIG.sensor_offset_x
     graphics.proximity_region.set_xy(
-        (origin_x, world.robot.y - RENDERING_CONFIG.sensor_half_height)
+        (origin_x, world.gripper.y - RENDERING_CONFIG.sensor_half_height)
     )
-    graphics.distance_line.set_data([origin_x, world.ball.x], [world.robot.y, world.ball.y])
+    graphics.distance_line.set_data([origin_x, world.ball.x], [world.gripper.y, world.ball.y])
     graphics.proximity_region.set_alpha(
         RENDERING_CONFIG.sensor_idle_alpha
         + RENDERING_CONFIG.sensor_signal_alpha * world.readings["proximity"]
@@ -326,7 +326,7 @@ def create_text_overlays(axis: Axes) -> TextOverlays:
 def update_text_overlays(
     graphics: TextOverlays,
     world: GraspingWorld,
-    signals: GraspingSignals | None,
+    signals: dict[str, float | None] | None,
     phase: str,
 ) -> None:
     """Update state, scores, and qBrain signal labels.
@@ -336,8 +336,7 @@ def update_text_overlays(
     :param signals: Latest observable qBrain outputs, when available.
     :param phase: Short label describing the simulation phase.
     """
-    signals = signals or GraspingSignals(None, None, None)
-    gripper = "CLOSED" if world.robot.gripper_closed else "OPEN"
+    gripper = "CLOSED" if world.gripper.gripper_closed else "OPEN"
     touch = "PRESSED" if world.touch_pressed else "EMPTY"
     graphics.status.set_text(
         f"{phase}   t={world.elapsed:4.1f}s   distance={world.ball.distance:4.1f} cm"
@@ -349,14 +348,24 @@ def update_text_overlays(
         f"missed   {world.missed_grips}\n"
         f"empty    {world.empty_grips}"
     )
-    graphics.brain_state.set_text(
-        "qBRAIN SIGNALS\n"
-        f"proximity input  {world.readings['proximity']:.2f}\n"
-        f"empty input      {world.readings['touch']:.2f}\n"
-        f"proximity burst  {_signal_text(signals.proximity_burst)}\n"
-        f"empty burst      {_signal_text(signals.empty_gripper_burst)}\n"
-        f"actuator         {_signal_text(signals.gripper_activation)}"
-    )
+    if not signals:
+        # The classical view reports only the two sensor values available to
+        # its deterministic state machine; it has no qUnit signals to display.
+        controller_text = (
+            "CLASSICAL CONTROLLER\n"
+            f"proximity input  {world.readings['proximity']:.2f}\n"
+            f"empty input      {world.readings['touch']:.2f}"
+        )
+    else:
+        controller_text = (
+            "qBRAIN SIGNALS\n"
+            f"proximity input  {world.readings['proximity']:.2f}\n"
+            f"empty input      {world.readings['touch']:.2f}\n"
+            f"proximity burst  {_signal_text(signals.get('proximity_burst'))}\n"
+            f"empty burst      {_signal_text(signals.get('empty_gripper_burst'))}\n"
+            f"actuator         {_signal_text(signals.get('gripper_activation'))}"
+        )
+    graphics.brain_state.set_text(controller_text)
 
 
 def _signal_text(value: float | None) -> str:

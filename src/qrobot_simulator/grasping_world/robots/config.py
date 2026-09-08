@@ -4,26 +4,39 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class GripperRobotConfig:
-    """Configure the gripper robot's body and qBrain."""
+class BaseGripperConfig:
+    """Configure geometry and actuation shared by both grippers."""
 
-    # Physical body
     x: float = 2.0
     y: float = 3.0
     color: str = "#704214"
     half_width: float = 0.55
     half_height: float = 0.65
+    gripper_threshold: float = 0.5
+
+
+@dataclass(frozen=True)
+class QuantumGripperConfig(BaseGripperConfig):
+    """Configure only the quantum gripper's qBrain."""
+
     # qBrain timing and wiring
     sensor_keys: tuple[str, ...] = ("proximity", "touch")
     sampling_period: float = 0.1
     proximity_tau: int = 10
     empty_gripper_tau: int = 50
-    gripper_threshold: float = 0.5
-    max_simulation_speed: float = 10.0
     proximity_query: tuple[float, ...] = (1.0,)
     empty_gripper_query: tuple[float, ...] = (1.0,)
     touch_default_input: float = 1.0
     qunit_dimensions: int = 1
+
+
+@dataclass(frozen=True)
+class ClassicalGripperConfig(BaseGripperConfig):
+    """Configure only the deterministic controller algorithm."""
+
+    proximity_threshold: float = 0.5
+    confirmation_time: float = 0.3
+    grasp_time: float = 2.5
 
 
 @dataclass(frozen=True)
@@ -41,7 +54,11 @@ class BallPreyConfig:
     velocity_kick_range: tuple[float, float] = (-4.0, 4.0)
     max_speed: float = 7.0
     motion_change_interval: tuple[float, float] = (0.35, 1.1)
+    max_near_duration: float = 1.0
+    escape_speed: float = 5.0
 
 
-GRIPPER_ROBOT_CONFIG = GripperRobotConfig()
+BASE_GRIPPER_CONFIG = BaseGripperConfig()
+QUANTUM_GRIPPER_CONFIG = QuantumGripperConfig()
+CLASSICAL_GRIPPER_CONFIG = ClassicalGripperConfig()
 BALL_PREY_CONFIG = BallPreyConfig()
