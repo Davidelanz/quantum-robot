@@ -308,9 +308,225 @@ is encoded continuously rather than rounded to `0` or `1`. Some curves overlap
 when different states receive the same probability; their distinct markers
 make those coincident outcomes visible.
 
+## From an RGB path to the whole input cube
+
+The path above visits only a thin slice of the input domain. Does the same
+behavior hold away from that path? We now reproduce the two whole-RGB-space
+visualizations from the [study cited above](https://doi.org/10.1007/978-3-030-71151-1_44): the three probability cubes
+and the overlapping probability clouds plotted against distance from black.
+We still use $n=3$, $\tau=1$, and the canonical basis, with no query applied.
+
+For one channel, encoding $x_i$ prepares
+$\cos(\pi x_i/2)|0\rangle+\sin(\pi x_i/2)|1\rangle$. Since these three
+qubits are independent, the probability of a complete bit string is a product:
+
+$$
+P(s\mid\mathbf{x})=\prod_{i=0}^{2}
+\begin{cases}
+\cos^2(\pi x_i/2), & s_i=0,\\
+\sin^2(\pi x_i/2), & s_i=1.
+\end{cases}
+$$
+
+Here $x_0,x_1,x_2$ are red, green, and blue. Qiskit displays the bits as
+$s_2s_1s_0$, so the red corner is $|001\rangle$. We evaluate this expression
+in a batch instead of simulating a million shots for every input. This gives
+the exact probabilities underlying the paper's sampled estimates.
+
+```{code-cell} ipython3
+rgb_levels = np.arange(0, 256, 5)
+rgb_grid = np.stack(
+    np.meshgrid(rgb_levels, rgb_levels, rgb_levels, indexing="ij"), axis=-1
+).reshape(-1, 3)
+normalized_rgb_grid = rgb_grid / 255.0
+
+
+def rgb_basis_probabilities(colors):
+    """Exact tau=1 probabilities, in Qiskit's |blue green red> order."""
+    colors = np.asarray(colors)
+    probability_zero = np.cos(np.pi * colors / 2) ** 2
+    probability_one = np.sin(np.pi * colors / 2) ** 2
+    bits = (np.arange(8)[:, None] >> np.arange(3)) & 1
+    return np.prod(
+        np.where(bits[None, :, :], probability_one[:, None, :], probability_zero[:, None, :]),
+        axis=-1,
+    )
+
+
+rgb_probabilities = rgb_basis_probabilities(normalized_rgb_grid)
+print(f"{len(rgb_levels)} levels per channel; {len(rgb_grid):,} RGB inputs")
+
+# Check the formula against actual circuits, including every RGB corner.
+check_colors = np.vstack(
+    (
+        [[float(bit) for bit in reversed(state)] for state in state_labels],
+        [input_data, [0.5, 0.5, 0.5], [0.23, 0.61, 0.87]],
+    )
+)
+for color, expected in zip(check_colors, rgb_basis_probabilities(check_colors), strict=True):
+    check_model = AngularModel(n=3, tau=1)
+    check_model.encode_vector(color)
+    np.testing.assert_allclose(expected, np.abs(check_model.get_statevector()) ** 2, atol=1e-14)
+np.testing.assert_allclose(rgb_probabilities.sum(axis=1), 1, atol=1e-14)
+```
+
+We include both 0 and 255: a step of 5 gives 52 levels and **140,608 inputs**.
+The paper reports 132,651 alongside a step-of-5 description; that count does
+not match the inclusive grid used here. The axes retain the original 0–255
+RGB units, while the model receives normalized values.
+
+### Probability landscapes at three canonical corners
+
+Each point's position is an RGB input, but its heat color is the probability
+of the outcome named above that cube. The common scale runs from black (zero)
+to white (one); it does **not** depict the input's own RGB color. Blue rings
+mark the corresponding canonical corners, as in the original figure.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+
+def plot_rgb_probability_cubes(points, probabilities):
+    """Recreate the ISER probability cubes on the complete step-5 grid."""
+    fig = plt.figure(figsize=(16, 5.4), layout="constrained")
+    axes = []
+    for panel, state_index in enumerate([0, 1, 7], start=1):
+        axis = fig.add_subplot(1, 3, panel, projection="3d")
+        axes.append(axis)
+        cloud = axis.scatter(
+            *points.T,
+            c=probabilities[:, state_index],
+            cmap="hot",
+            vmin=0,
+            vmax=1,
+            s=9,
+            linewidths=0,
+            depthshade=False,
+            rasterized=True,
+        )
+        corner = 255 * ((state_index >> np.arange(3)) & 1)
+        axis.scatter(
+            *corner,
+            s=240,
+            facecolors="none",
+            edgecolors="blue",
+            linewidths=3,
+            depthshade=False,
+            zorder=10,
+        )
+        axis.set(
+            title=f"|{state_index:03b}⟩ probability",
+            xlabel="Red",
+            ylabel="Green",
+            zlabel="",
+            xlim=(0, 255),
+            ylim=(0, 255),
+            zlim=(0, 255),
+            xticks=[0, 128, 255],
+            yticks=[0, 128, 255],
+            zticks=[0, 128, 255],
+        )
+        axis.text2D(0.92, 0.60, "Blue", transform=axis.transAxes)
+        axis.set_box_aspect((1, 1, 1))
+        axis.view_init(elev=25, azim=-60)
+    fig.colorbar(cloud, ax=axes, shrink=0.7, pad=0.04, label="Exact probability")
+    plt.show()
+```
+
+```{code-cell} ipython3
+plot_rgb_probability_cubes(rgb_grid, rgb_probabilities)
+```
+
+Probability concentrates near black for $|000\rangle$, red for
+$|001\rangle$, and white for $|111\rangle$. At each marked corner the
+corresponding outcome is certain. Moving away changes the three channel
+factors continuously. These are dense point clouds: the visible outer faces
+occlude interior points. The next plot exposes the entire grid in a different
+projection.
+
+### The probability clouds against distance from black
+
+We now collapse the input coordinates to
+$d=\|\mathrm{RGB}-(0,0,0)\|_2$, from 0 to $255\sqrt{3}\approx441.7$.
+For each input, we retain four probabilities: all three zeros, exactly two
+zeros, exactly one zero, and no zeros. A group's probability is the **sum**
+of its member-state probabilities, not their average:
+
+$$
+P_{2\,\mathrm{zeros}}=P_{001}+P_{010}+P_{100},\qquad
+P_{1\,\mathrm{zero}}=P_{011}+P_{101}+P_{110}.
+$$
+
+```{code-cell} ipython3
+rgb_distances = np.linalg.norm(rgb_grid, axis=1)
+zero_counts = np.asarray([state.count("0") for state in state_labels])
+probabilities_by_zeros = {
+    count: rgb_probabilities[:, zero_counts == count].sum(axis=1) for count in range(4)
+}
+np.testing.assert_allclose(sum(probabilities_by_zeros.values()), 1, atol=1e-14)
+```
+
+```{code-cell} ipython3
+:tags: [hide-input]
+
+def plot_rgb_distance_clouds(distances, grouped_probabilities):
+    """Recreate the four overlapping ISER clouds without distance binning."""
+    fig, axis = plt.subplots(figsize=(13, 7), layout="constrained")
+    for count, color, label in [
+        (0, "red", "|111⟩ (0 zeros)"),
+        (1, "green", "1 zero: P011 + P101 + P110"),
+        (2, "#b5b500", "2 zeros: P001 + P010 + P100"),
+        (3, "blue", "|000⟩ (3 zeros)"),
+    ]:
+        axis.scatter(
+            distances,
+            grouped_probabilities[count],
+            color=color,
+            s=36,
+            alpha=0.025,
+            edgecolors="none",
+            rasterized=True,
+        )
+        # Opaque legend samples stay readable despite the faint cloud points.
+        axis.plot([], [], "o", color=color, label=label)
+    axis.set(
+        xlabel="Euclidean distance from black (RGB units)",
+        ylabel="Exact probability of the outcome group",
+        title="Whole RGB space: canonical outcomes grouped by zero count",
+        xlim=(-5, 255 * np.sqrt(3) + 5),
+        ylim=(-0.02, 1.02),
+    )
+    axis.grid(alpha=0.15)
+    axis.legend(loc="center right", fontsize="small")
+    plt.show()
+```
+
+```{code-cell} ipython3
+plot_rgb_distance_clouds(rgb_distances, probabilities_by_zeros)
+```
+
+The overlapping fans are the result of projecting a three-dimensional grid
+onto one distance axis. Every input contributes one point to each group;
+no curve fitting, averaging, or distance binning is applied. Their fine bands
+come from the regular RGB sampling, and opacity makes overlapping points
+appear darker.
+
+Distance alone does not determine the probabilities. For example, normalized
+inputs $(1,0,0)$ and $(1/\sqrt{3},1/\sqrt{3},1/\sqrt{3})$ are both 255 RGB
+units from black. The first has $P_{000}=0$, while the second has
+$P_{000}=\cos^6(\pi/(2\sqrt{3}))\approx0.055$. The model responds to the
+individual channel differences, not just their Euclidean norm. This explains
+why these are clouds rather than single-valued confidence curves.
+
+Black produces three zeros with certainty; a primary-color corner produces
+two, a secondary-color corner one, and white none. Intermediate inputs spread
+probability across groups. Later, `ZeroBurst` assigns these groups intensities
+$1$, $2/3$, $1/3$, and $0$, respectively. First, we need to move the reference
+from black to an arbitrary query color.
+
 ## Querying for similarity to a color
 
-Now keep a warm-red input fixed and compare it with a blue query:
+The whole-cube plots used the canonical zero state (black) as the reference.
+To compare against another color, keep a warm-red input fixed and use a blue query:
 
 ```{code-cell} ipython3
 fixed_input = [0.9, 0.2, 0.1]
