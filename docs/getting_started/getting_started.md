@@ -109,6 +109,6 @@ With Redis running, try one of the packaged simulations from a repository
 checkout:
 
 ```console
-poetry run python examples/grasping_robot.py
+poetry run python examples/grasping_world.py
 poetry run python examples/bug_world.py
 ```

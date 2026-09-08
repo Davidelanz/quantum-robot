@@ -1,68 +1,92 @@
-# Embodied simulators
+# Simulator API
 
 ```{warning}
-`qrobot_simulator` is experimental. Its public interfaces and configuration may
-change between minor releases while common simulator contracts are defined.
+`qrobot_simulator` is experimental and its interfaces may change between minor releases.
 ```
 
-The simulator extension contains two examples: the stationary
-`grasping_robot` and the mobile `bug_world`.
-Both separate physical world state, a self-contained Redis-connected robot,
-and persistent Matplotlib presentation.
+`qrobot_simulator` provides two small closed-loop worlds for studying how sensor
+histories become robot actions. Each world separates four concerns:
 
-The examples require the `simulator` extra and a Redis server on
-`localhost:6379`. Run them from a repository checkout with Poetry:
+1. the world advances physical state and computes normalized sensor readings;
+2. a robot passes those readings to its brain;
+3. the brain returns normalized actuator values;
+4. an optional live view renders state without participating in the simulation.
+
+This common boundary allows each world to run either a classical robot or a quantum
+robot. Headless methods use the same world dynamics without constructing Matplotlib
+figures. Quantum robots additionally require a running Redis server for communication
+among independently scheduled qUnits.
+
+Install the simulator dependencies and start either interactive example with:
 
 ```console
-poetry run python examples/bug_world.py
-poetry run python examples/grasping_robot.py
+poetry install -E simulator
+poetry run python examples/grasping_world.py --gripper quantum
+poetry run python examples/bug_world.py --controller quantum
 ```
 
-## Grasping robot
+The [grasping-world notebook](../notebooks/07_object_grasping_world.md) explains
+the sensors, robot brains, and fixed comparison. The
+[bug-world notebook](../notebooks/08_bug_like_robot.md) explains the predator/prey
+interaction and the perceptual and cognitive layers.
 
-The grasping simulation follows a ball approaching a stationary robot. Its
-distance and touch readings pass through independently timed qUnits, and the
-resulting actuator signal closes the gripper. The public example is composed
-from the world, the complete Redis-connected robot, and the live view below.
+## Grasping world
 
-```{image} ../notebooks/07_imgs/grasping_live_world.png
-:alt: Live grasping simulation with an approaching blue ball and stationary robot
-:align: center
-:width: 720px
+The grasping world contains a stationary gripper and a blue ball moving along its
+sensor axis. `ClassicalGripper` applies a deterministic temporal policy.
+`QuantumGripper` integrates proximity and touch histories through a qBrain. Both
+can be passed to `GraspingWorld.demo()` and executed through the same method:
+
+```python
+from qrobot_simulator.grasping_world import ClassicalGripper, GraspingWorld
+
+world = GraspingWorld.demo(ClassicalGripper(), seed=7)
+world.run_robot_headless(duration=20.0, dt=0.05)
+
+print(world.correct_grips, world.missed_grips, world.empty_grips)
 ```
+
+`GraspingWorldLiveView` can display the same world or save a frame; it is unnecessary for headless runs.
 
 ```{eval-rst}
-.. autoclass:: qrobot_simulator.grasping_robot.GraspingWorld
-   :members:
+.. autoclass:: qrobot_simulator.grasping_world.GraspingWorld
+   :members: demo, step, run_headless, run_robot_headless, sensor_readings
 
-.. autoclass:: qrobot_simulator.grasping_robot.GraspingRobot
-   :members:
+.. autoclass:: qrobot_simulator.grasping_world.ClassicalGripper
 
-.. autoclass:: qrobot_simulator.grasping_robot.GraspingWorldLiveView
-   :members:
+.. autoclass:: qrobot_simulator.grasping_world.QuantumGripper
+
+.. autoclass:: qrobot_simulator.grasping_world.GraspingWorldLiveView
+   :members: update, save, close
 ```
 
 ## Bug world
 
-The bug simulation places the qBrain-controlled robot in a mobile ecosystem
-with blue prey and a red predator. Sensor readings and five behavioral
-actuators form a closed loop between the chessboard world and the complete
-bug robot; the internal prey and predator bodies remain implementation
-details of the world.
+The bug world contains one controlled brown bug, blue prey, and a red predator.
+`ClassicalBug` maps stereo RGB and proximity readings directly to five actions.
+`QuantumBug` can include intermediate prey and threat qUnits before producing the
+same actions. `BugWorld` records contacts, boundary crossings, and complete
+time-series data:
 
-```{image} ../notebooks/08_imgs/bug_live_world.png
-:alt: Live bug-world simulation with the qBrain robot, blue prey, and red predator
-:align: center
-:width: 720px
+```python
+from qrobot_simulator.bug_world import BugWorld, ClassicalBug
+
+world = BugWorld.demo(ClassicalBug(), seed=7)
+record = world.run_recorded_headless(duration=20.0, dt=0.05)
+
+print(world.bitten_prey, world.predator_bites)
 ```
+
+`BugWorldLiveView` displays the world state and current brain diagnostics without changing the simulation.
 
 ```{eval-rst}
 .. autoclass:: qrobot_simulator.bug_world.BugWorld
-   :members:
+   :members: demo, step, run_headless, run_robot_headless, run_recorded_headless, snapshot, sensor_readings
 
-.. autoclass:: qrobot_simulator.bug_world.BugRobot
-   :members:
+.. autoclass:: qrobot_simulator.bug_world.ClassicalBug
+
+.. autoclass:: qrobot_simulator.bug_world.QuantumBug
 
 .. autoclass:: qrobot_simulator.bug_world.BugWorldLiveView
-   :members:
+   :members: update, save, close
 ```

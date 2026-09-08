@@ -119,12 +119,12 @@ docker run --rm --name qrobot-redis -p 6379:6379 -d redis:7-alpine
 Then run of the examples:
 
 ```sh
-poetry run python examples/grasping_robot.py
+poetry run python examples/grasping_world.py
 poetry run python examples/bug_world.py
 ```
 
-`grasping_robot` presents an approaching ball, distance and touch interfaces,
-and a qBrain-controlled gripper. `bug_world` opens a predator/prey chessboard
+`grasping_world` presents an approaching ball, distance and touch interfaces,
+and a selectable classical or quantum gripper. `bug_world` opens a predator/prey chessboard
 where the qBrain drives five behavioral actuator interfaces. Both are small
 live 2-D simulations; the foundational model demonstrations remain executable
 inside the notebooks.
@@ -159,7 +159,7 @@ src/
   qrobot/                 # core package and backend interface
   qrobot_qunits/          # optional qUnits Redis-based extension
   qrobot_visualization/   # optional graph/drawing extension
-  qrobot_simulator/       # grasping_robot and bug_world 2-D simulators
+  qrobot_simulator/       # grasping_world and bug_world 2-D simulators
   qrobot_dashboard/       # optional dashboard extension
 examples/                 # exactly two embodied example runners
 tests/
