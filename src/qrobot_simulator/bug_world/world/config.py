@@ -3,12 +3,28 @@
 from dataclasses import dataclass
 from math import pi
 
-from ..robots.base import MotionMode
+from ..robots.base_robot import MotionMode
 
 
 @dataclass(frozen=True)
 class WorldConfig:
-    """Arena, population, sensing, and interaction settings of the bug world."""
+    """Configure the arena, population, sensors, and interactions.
+
+    :param board_columns: Horizontal checkerboard cells.
+    :param board_rows: Vertical checkerboard cells.
+    :param board_cell_size: Side length of one cell.
+    :param prey_spawns: Name, pose, and motion mode of each prey.
+    :param predator_spawn: Name and initial predator pose.
+    :param proximity_distance: Maximum frontal proximity range.
+    :param proximity_half_angle_degrees: Half-width of the proximity field.
+    :param eye_angle: Offset of each eye ray from the bug heading.
+    :param eye_distance_scale: Distance-response numerator of each eye.
+    :param eye_angular_exponent: Concentration of the angular eye response.
+    :param min_eye_distance: Lower distance bound in the eye response.
+    :param bug_bite_reach: Bug reach beyond the two body radii.
+    :param predator_bite_reach: Predator reach beyond the two body radii.
+    :param bite_cue_duration: Seconds for which a bite highlight remains visible.
+    """
 
     board_columns: int = 18
     board_rows: int = 12

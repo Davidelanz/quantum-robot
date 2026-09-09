@@ -8,8 +8,10 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Circle, Rectangle, Wedge
 from matplotlib.text import Text
 
-from ..robots.base import Robot
-from ..world import WORLD_CONFIG, BugWorld, eye_response_strength
+from ..robots.base_robot import Robot
+from ..utils.sensing import eye_response_strength
+from ..world.bug_world import BugWorld
+from ..world.config import WORLD_CONFIG
 from .config import RENDERING_CONFIG
 
 

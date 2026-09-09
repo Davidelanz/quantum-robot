@@ -5,7 +5,18 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class RenderingConfig:
-    """Colors, dimensions, labels, and layer order of the Matplotlib view."""
+    """Configure colors, dimensions, labels, and drawing order.
+
+    ``left_eye_color``, ``right_eye_color``, ``normal_outline_color``,
+    ``bite_outline_color``, ``proximity_color``, ``legend_color``, and the two
+    board shades define colors. The outline, eye-guide, heading, label, legend,
+    cone, proximity, figure, and canvas fields control their corresponding
+    sizes, alpha values, resolution, and refresh interval. ``figure_name``,
+    ``axis_title``, ``axis_x_label``, ``axis_y_label``, and ``legend_text``
+    supply visible text. The four ``*_zorder`` fields define drawing order,
+    while ``status_position``, ``score_position``, and ``legend_position``
+    locate text in normalized axes coordinates.
+    """
 
     left_eye_color: str = "#2878d0"
     right_eye_color: str = "#e68a35"
