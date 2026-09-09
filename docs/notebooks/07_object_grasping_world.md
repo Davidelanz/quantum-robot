@@ -43,9 +43,9 @@ green portion is the space enclosed by the jaws. The touch pads lie inside the
 jaws, so they report contact only after a closure reaches the ball.
 
 The sensor limits below define the distance normalization, while the grippable
-distance marks how far the jaws can reach. The captured-ball holding time is how
-long a successful catch remains between the closed jaws before the ball is removed
-and a new approach begins. Ball speed determines how quickly this geometry changes.
+distance marks how far the jaws can reach. The prey consumption time is how long
+a successful catch must remain between the closed jaws before the prey disappears.
+Ball speed determines how quickly this geometry changes.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -60,7 +60,7 @@ from qrobot_simulator.grasping_world.world.config import WORLD_CONFIG
 setup = {
     "sensor near / far (cm)": f"{WORLD_CONFIG.near_distance:g} / {WORLD_CONFIG.far_distance:g}",
     "grippable distance (cm)": WORLD_CONFIG.grippable_distance,
-    "captured-ball holding time (s)": WORLD_CONFIG.digestion_time,
+    "prey consumption time (s)": WORLD_CONFIG.consumption_time,
     "ball maximum speed (cm/s)": BALL_PREY_CONFIG.max_speed,
 }
 pd.DataFrame.from_dict(setup, orient="index", columns=["value"])
@@ -179,10 +179,11 @@ remaining indefinitely under the gripper. Arena boundaries and closed jaws const
 its motion.
 
 When the jaws close around the ball, the ball is held and the touch input changes.
-The **captured-ball holding time** is the simulated interval for which a caught ball
-remains between the closed jaws. At its end, the ball is removed and respawned farther
-away, representing completion of one capture and resetting the world for another
-approach. Closing without
+The **prey consumption time** is the simulated chewing interval for which a caught
+ball remains between the closed jaws. At its end the consumed ball disappears, making
+the touch sensor report an empty gripper. The brain must then open the jaws; only that
+opening makes a new ball appear farther away. Opening before consumption releases the
+same ball and lets it escape. Closing without
 the ball counts as an **empty grip**. A visit ending inside the jaws counts as a
 **correct grip**, while an uncaught visit counts as a **missed grip**. Response time
 is measured from entry into the grippable region until capture. The renderer shows

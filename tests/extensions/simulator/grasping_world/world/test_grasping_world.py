@@ -50,6 +50,70 @@ def test_classical_gripper_closure_is_scored_as_a_catch() -> None:
     assert world.touch_pressed
 
 
+def test_consumed_prey_respawns_only_after_the_robot_opens() -> None:
+    """An absent prey waits for a later opening transition before replacement."""
+    config = replace(WORLD_CONFIG, consumption_time=0.1)
+    world = GraspingWorld.demo(ClassicalGripper(), seed=5, config=config)
+    world.ball.distance = 10.0
+    world.ball.velocity = 0.0
+
+    world.step(1.0, 0.1)
+    world.step(1.0, 0.1)
+    assert not world.ball.present
+
+    # Continuing to command closed cannot create new prey behind the jaws.
+    world.step(1.0, 0.1)
+    assert not world.ball.present
+
+    world.step(0.0, 0.1)
+    assert world.ball.present
+    assert not world.ball.caught
+    assert world.ball.distance >= world.prey_config.respawn_distance_range[0]
+
+
+def test_opening_before_consumption_releases_the_same_prey() -> None:
+    """A premature opening records failure and lets the captured prey escape."""
+    config = replace(WORLD_CONFIG, consumption_time=1.0)
+    world = GraspingWorld.demo(ClassicalGripper(), seed=6, config=config)
+    world.ball.distance = 10.0
+    world.ball.velocity = 0.0
+
+    world.step(1.0, 0.1)
+    captured_prey = world.ball
+    world.step(0.0, 0.1)
+
+    assert world.ball is captured_prey
+    assert world.ball.present
+    assert not world.ball.caught
+    assert world.ball.velocity >= world.prey_config.escape_speed
+    assert world.premature_releases == 1
+    assert world.consumed_prey == 0
+
+
+def test_opening_at_consumption_completion_counts_as_successful() -> None:
+    """A release at the completed chewing boundary is not premature."""
+    robot_config = replace(
+        CLASSICAL_GRIPPER_CONFIG,
+        confirmation_time=0.1,
+        grasp_time=0.3,
+    )
+    world_config = replace(WORLD_CONFIG, consumption_time=0.3)
+    world = GraspingWorld.demo(ClassicalGripper(robot_config), seed=7, config=world_config)
+    world.ball.distance = 10.0
+    world.ball.velocity = 0.0
+    world.readings = world.sensor_readings()
+
+    # The classical brain opens after exactly the same interval required for
+    # consumption. The world completes consumption before processing that
+    # opening transition, then spawns the next prey behind open jaws.
+    world.run_robot_headless(duration=0.4, dt=0.1)
+
+    assert world.consumed_prey == 1
+    assert world.premature_releases == 0
+    assert not world.gripper.gripper_closed
+    assert world.ball.present
+
+
 def test_sensor_readings_use_the_world_configuration() -> None:
     """Per-trial sensing bounds replace defaults in the physical interface."""
     config = replace(WORLD_CONFIG, near_distance=10.0, far_distance=30.0)

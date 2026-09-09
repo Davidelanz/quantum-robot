@@ -9,7 +9,11 @@ from ..robots.config import BASE_GRIPPER_CONFIG
 
 @dataclass(frozen=True)
 class GraspingWorldConfig:
-    """Configure arena geometry, sensing, grasping, and digestion."""
+    """Configure arena geometry, sensing, grasping, and prey consumption.
+
+    :param consumption_time: Simulated seconds that captured prey must remain
+        between closed jaws before it is consumed and disappears.
+    """
 
     # Sensor mapping
     near_distance: float = 5.0
@@ -17,7 +21,7 @@ class GraspingWorldConfig:
     # Physical interaction
     minimum_distance: float = 5.0
     grippable_distance: float = 15.0
-    digestion_time: float = 2.5
+    consumption_time: float = 2.5
     ball_distance_scale: float = 0.16
     sensor_offset_x: float = BASE_GRIPPER_CONFIG.half_width
     # Arena geometry

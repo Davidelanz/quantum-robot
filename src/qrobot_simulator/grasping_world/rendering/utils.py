@@ -152,6 +152,7 @@ def update_robot_graphics(graphics: RobotGraphics, world: GraspingWorld) -> None
         )
     )
     graphics.ball_prey.center = (world.ball.x, world.ball.y)
+    graphics.ball_prey.set_visible(world.ball.present)
     gap = RENDERING_CONFIG.closed_jaw_gap if robot.gripper_closed else RENDERING_CONFIG.open_jaw_gap
     sensor_x = robot.x + WORLD_CONFIG.sensor_offset_x
     base_x = sensor_x + WORLD_CONFIG.minimum_distance * WORLD_CONFIG.ball_distance_scale
@@ -267,6 +268,7 @@ def update_sensor_graphics(graphics: SensorGraphics, world: GraspingWorld) -> No
         (origin_x, world.gripper.y - RENDERING_CONFIG.sensor_half_height)
     )
     graphics.distance_line.set_data([origin_x, world.ball.x], [world.gripper.y, world.ball.y])
+    graphics.distance_line.set_visible(world.ball.present)
     graphics.proximity_region.set_alpha(
         RENDERING_CONFIG.sensor_idle_alpha
         + RENDERING_CONFIG.sensor_signal_alpha * world.readings["proximity"]
@@ -338,15 +340,16 @@ def update_text_overlays(
     """
     gripper = "CLOSED" if world.gripper.gripper_closed else "OPEN"
     touch = "PRESSED" if world.touch_pressed else "EMPTY"
-    graphics.status.set_text(
-        f"{phase}   t={world.elapsed:4.1f}s   distance={world.ball.distance:4.1f} cm"
-    )
+    distance = f"{world.ball.distance:4.1f} cm" if world.ball.present else "consumed"
+    graphics.status.set_text(f"{phase}   t={world.elapsed:4.1f}s   distance={distance}")
     graphics.physical_state.set_text(f"GRIPPER {gripper}\nTOUCH {touch}")
     graphics.score.set_text(
         "GRIP RESULTS\n"
         f"correct  {world.correct_grips}\n"
         f"missed   {world.missed_grips}\n"
-        f"empty    {world.empty_grips}"
+        f"empty    {world.empty_grips}\n"
+        f"consumed {world.consumed_prey}\n"
+        f"early release {world.premature_releases}"
     )
     if not signals:
         # The classical view reports only the two sensor values available to
