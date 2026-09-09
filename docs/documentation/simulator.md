@@ -46,11 +46,55 @@ world.run_robot_headless(duration=20.0, dt=0.05)
 print(world.correct_grips, world.missed_grips, world.empty_grips)
 ```
 
+The grasping world has two separate ways to start:
+
+- `GraspingWorld.demo(...)` creates the visual demonstration. Its ball continues
+  to wander randomly, changing speed and direction as the simulation runs.
+- `GraspingWorld.controlled(...)` creates one predefined visit of the ball. This
+  mode is intended for comparing the classical and quantum grippers fairly.
+
+That predefined visit is called a `GraspingEncounter`. It says where the ball
+starts, how long it moves at each velocity, and when it is close enough for a
+grasp to count as a valid response. Negative velocity moves the ball toward the
+jaws and positive velocity moves it away. The opportunity interval is only a
+label for later scoring: the robots cannot see it, and it does not change the
+physics. The encounter can also add sensor noise, dropouts, or false detections:
+
+```python
+from qrobot_simulator.grasping_world import (
+    GraspingEncounter,
+    MotionSegment,
+    ProximityDisturbance,
+    TimeInterval,
+)
+
+encounter = GraspingEncounter(
+    initial_distance=24.0,
+    motion=(
+        MotionSegment(duration=2.0, velocity=-5.0),
+        MotionSegment(duration=2.5, velocity=0.0),
+        MotionSegment(duration=2.0, velocity=5.0),
+    ),
+    opportunity=TimeInterval(start=1.8, duration=2.7),
+    disturbance=ProximityDisturbance(noise_standard_deviation=0.05),
+)
+
+world = GraspingWorld.controlled(ClassicalGripper(), encounter, seed=7)
+world.run_robot_headless(duration=encounter.duration, dt=0.05)
+```
+
+An experiment creates two fresh worlds from the same encounter and seed: one with
+`ClassicalGripper` and one with `QuantumGripper`. Each robot therefore sees the
+same ball visit and the same sensor disturbance. Differences in their responses
+can then be attributed to their brains rather than to one receiving an easier
+random trajectory. Noise is derived from the seed and simulated time, so rendering
+or reading a sensor for diagnostics does not change a later value.
+
 `GraspingWorldLiveView` can display the same world or save a frame; it is unnecessary for headless runs.
 
 ```{eval-rst}
 .. autoclass:: qrobot_simulator.grasping_world.GraspingWorld
-   :members: demo, step, run_headless, run_robot_headless, sensor_readings
+   :members: demo, controlled, step, run_headless, run_robot_headless, sensor_readings
 
 .. autoclass:: qrobot_simulator.grasping_world.ClassicalGripper
 
@@ -58,6 +102,15 @@ print(world.correct_grips, world.missed_grips, world.empty_grips)
 
 .. autoclass:: qrobot_simulator.grasping_world.GraspingWorldLiveView
    :members: update, save, close
+
+.. autoclass:: qrobot_simulator.grasping_world.GraspingEncounter
+   :members: duration, velocity_at, is_valid_opportunity
+
+.. autoclass:: qrobot_simulator.grasping_world.MotionSegment
+
+.. autoclass:: qrobot_simulator.grasping_world.TimeInterval
+
+.. autoclass:: qrobot_simulator.grasping_world.ProximityDisturbance
 ```
 
 ## Bug world

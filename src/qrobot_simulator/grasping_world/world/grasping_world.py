@@ -33,6 +33,7 @@ class GraspingWorld:
     :param empty_grips: Closing transitions made without grippable prey.
     :param consumed_prey: Captured prey held until consumption completed.
     :param premature_releases: Captured prey released before consumption completed.
+    :param seed: Seed controlling random ball movement.
     """
 
     arena: GraspingArena
@@ -48,6 +49,7 @@ class GraspingWorld:
     empty_grips: int = 0
     consumed_prey: int = 0
     premature_releases: int = 0
+    seed: int | None = None
     grip_response_times: list[float] = field(default_factory=list)
     _inside_visit: bool = False
     _visit_gripped: bool = False
@@ -66,10 +68,10 @@ class GraspingWorld:
         prey_config: BallPreyConfig = BALL_PREY_CONFIG,
         prey: BallPrey | None = None,
     ) -> GraspingWorld:
-        """Create the configured arena, robot, and randomly placed ball prey.
+        """Create the interactive world with randomly wandering prey.
 
         :param gripper: Configured gripper to place in the world.
-        :param seed: Optional seed for reproducible prey movement.
+        :param seed: Optional seed for reproducible random prey movement.
         :param prey: Optional configured prey instance; otherwise one is sampled.
         :returns: Initialized world with its first sensor snapshot.
         """
@@ -83,7 +85,15 @@ class GraspingWorld:
         )
         selected_prey_config = ball.config
         arena = GraspingArena(config.arena_width, config.arena_height, config.arena_cell_size)
-        world = cls(arena, gripper, ball, config, selected_prey_config, _rng=rng)
+        world = cls(
+            arena=arena,
+            gripper=gripper,
+            ball=ball,
+            config=config,
+            prey_config=selected_prey_config,
+            seed=seed,
+            _rng=rng,
+        )
         ball.schedule_motion_change(world.elapsed, rng)
         world._update_ball_position()
         world.readings = world.sensor_readings()
@@ -146,7 +156,7 @@ class GraspingWorld:
         return self
 
     def run_robot_headless(self, duration: float, dt: float = 0.01) -> GraspingWorld:
-        """Run either gripper through the same headless world interface."""
+        """Run any gripper through the same headless world interface."""
         if duration <= 0 or dt <= 0:
             raise ValueError("duration and dt must be positive")
         self.gripper.prepare_headless(self.readings)
@@ -160,14 +170,15 @@ class GraspingWorld:
 
         :returns: Proximity and touch readings keyed by sensor name.
         """
+        proximity = (
+            proximity_reading(
+                self.ball.distance, self.config.near_distance, self.config.far_distance
+            )
+            if self.ball.present
+            else 0.0
+        )
         return {
-            "proximity": (
-                proximity_reading(
-                    self.ball.distance, self.config.near_distance, self.config.far_distance
-                )
-                if self.ball.present
-                else 0.0
-            ),
+            "proximity": proximity,
             "touch": touch_reading(self.touch_pressed),
         }
 
@@ -240,8 +251,8 @@ class GraspingWorld:
     def _respawn_ball(self) -> None:
         """Spawn new prey after consumed prey is absent and the jaws open."""
         self.ball.caught = False
-        self.ball.present = True
         self._consumption_started_at = None
+        self.ball.present = True
         self.ball.distance = self._rng.uniform(*self.prey_config.respawn_distance_range)
         self.ball.velocity = self._rng.uniform(*self.prey_config.initial_velocity_range)
         self._inside_visit = False

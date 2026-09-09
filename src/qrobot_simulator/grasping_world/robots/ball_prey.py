@@ -65,6 +65,15 @@ class BallPrey:
         else:
             self._near_since = None
 
+        self.advance(dt, minimum_distance, closed_barrier)
+
+    def advance(
+        self,
+        dt: float,
+        minimum_distance: float,
+        closed_barrier: float | None,
+    ) -> None:
+        """Advance the current velocity without applying the random policy."""
         self.distance += self.velocity * dt
         lower_bound = max(minimum_distance, closed_barrier or minimum_distance)
         if self.distance < lower_bound:
