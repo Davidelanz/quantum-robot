@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class BaseGripperConfig:
-    """Configure geometry and actuation shared by both grippers."""
+    """Configure geometry and actuation shared by all grippers."""
 
     x: float = 2.0
     y: float = 3.0
@@ -31,12 +31,20 @@ class QuantumGripperConfig(BaseGripperConfig):
 
 
 @dataclass(frozen=True)
-class ClassicalGripperConfig(BaseGripperConfig):
-    """Configure only the deterministic controller algorithm."""
+class ReactiveGripperConfig(BaseGripperConfig):
+    """Configure the gripper that reacts only to its latest sensor sample."""
 
     proximity_threshold: float = 0.5
-    confirmation_time: float = 0.3
-    grasp_time: float = 2.5
+    contact_threshold: float = 0.5
+
+
+@dataclass(frozen=True)
+class ClassicalGripperConfig(BaseGripperConfig):
+    """Set how often and how long the classical brain averages each sensor."""
+
+    sampling_period: float = 0.1
+    proximity_tau: int = 10
+    empty_gripper_tau: int = 50
 
 
 @dataclass(frozen=True)
@@ -60,5 +68,6 @@ class BallPreyConfig:
 
 BASE_GRIPPER_CONFIG = BaseGripperConfig()
 QUANTUM_GRIPPER_CONFIG = QuantumGripperConfig()
+REACTIVE_GRIPPER_CONFIG = ReactiveGripperConfig()
 CLASSICAL_GRIPPER_CONFIG = ClassicalGripperConfig()
 BALL_PREY_CONFIG = BallPreyConfig()

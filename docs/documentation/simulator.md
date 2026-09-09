@@ -12,10 +12,12 @@ histories become robot actions. Each world separates four concerns:
 3. the brain returns normalized actuator values;
 4. an optional live view renders state without participating in the simulation.
 
-This common boundary allows each world to run either a classical robot or a quantum
-robot. Headless methods use the same world dynamics without constructing Matplotlib
-figures. Quantum robots additionally require a running Redis server for communication
-among independently scheduled qUnits.
+This common boundary allows each world to run a classical or quantum robot. Headless
+methods use the same world dynamics without constructing Matplotlib figures. Quantum
+robots additionally require a running Redis server for communication among
+independently scheduled qUnits. Each simulator also has a separate `analysis` package
+for controlled inputs and recorded measurements; these tools observe the simulation
+without becoming part of the world or robot behavior.
 
 Install the simulator dependencies and start either interactive example with:
 
@@ -33,9 +35,9 @@ interaction and the perceptual and cognitive layers.
 ## Grasping world
 
 The grasping world contains a stationary gripper and a blue ball moving along its
-sensor axis. `ClassicalGripper` applies a deterministic temporal policy.
-`QuantumGripper` integrates proximity and touch histories through a qBrain. Both
-can be passed to `GraspingWorld.demo()` and executed through the same method:
+sensor axis. `ReactiveGripper` uses only the latest readings. `ClassicalGripper`
+averages fixed temporal windows, while `QuantumGripper` processes equal-duration
+histories through its qBrain. All three use the same world interface:
 
 ```python
 from qrobot_simulator.grasping_world import ClassicalGripper, GraspingWorld
@@ -46,6 +48,10 @@ world.run_robot_headless(duration=20.0, dt=0.05)
 print(world.correct_grips, world.missed_grips, world.empty_grips)
 ```
 
+`GraspingWorld.demo()` keeps the ball's random movement for interactive use. The
+[grasping analysis API](grasping_analysis.md) provides predefined ball visits and
+raw recording when the same situation must be measured across different brains.
+
 `GraspingWorldLiveView` can display the same world or save a frame; it is unnecessary for headless runs.
 
 ```{eval-rst}
@@ -54,10 +60,13 @@ print(world.correct_grips, world.missed_grips, world.empty_grips)
 
 .. autoclass:: qrobot_simulator.grasping_world.ClassicalGripper
 
+.. autoclass:: qrobot_simulator.grasping_world.ReactiveGripper
+
 .. autoclass:: qrobot_simulator.grasping_world.QuantumGripper
 
 .. autoclass:: qrobot_simulator.grasping_world.GraspingWorldLiveView
    :members: update, save, close
+
 ```
 
 ## Bug world

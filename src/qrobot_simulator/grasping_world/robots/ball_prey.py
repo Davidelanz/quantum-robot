@@ -15,6 +15,7 @@ class BallPrey:
     :param distance: Distance from the ultrasonic sensor in centimetres.
     :param velocity: Signed velocity in centimetres per second.
     :param caught: Whether the gripper is currently holding the ball.
+    :param present: Whether the prey remains physically present in the world.
     :param radius: Display radius in arena units.
     :param color: Matplotlib-compatible display color.
     """
@@ -24,6 +25,7 @@ class BallPrey:
     distance: float
     velocity: float
     caught: bool = False
+    present: bool = field(default=True, kw_only=True)
     radius: float = BALL_PREY_CONFIG.radius
     color: str = BALL_PREY_CONFIG.color
     config: BallPreyConfig = BALL_PREY_CONFIG
@@ -63,6 +65,15 @@ class BallPrey:
         else:
             self._near_since = None
 
+        self.advance(dt, minimum_distance, closed_barrier)
+
+    def advance(
+        self,
+        dt: float,
+        minimum_distance: float,
+        closed_barrier: float | None,
+    ) -> None:
+        """Advance the current velocity without applying the random policy."""
         self.distance += self.velocity * dt
         lower_bound = max(minimum_distance, closed_barrier or minimum_distance)
         if self.distance < lower_bound:

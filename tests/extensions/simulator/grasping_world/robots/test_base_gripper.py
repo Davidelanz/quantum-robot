@@ -1,8 +1,11 @@
 """Shared gripper-to-brain interface used by the physical world."""
 
+import pytest
+
 from qrobot_simulator.grasping_world.robots.base_gripper import BaseGripperBrain
-from qrobot_simulator.grasping_world.robots.config import QuantumGripperConfig
+from qrobot_simulator.grasping_world.robots.classical_gripper import ClassicalGripper
 from qrobot_simulator.grasping_world.robots.quantum_gripper import QuantumGripper
+from qrobot_simulator.grasping_world.robots.reactive_gripper import ReactiveGripper
 
 
 class FixedBrain(BaseGripperBrain):
@@ -30,10 +33,11 @@ class FixedBrain(BaseGripperBrain):
         return {"fixed_activation": self.activation}
 
 
-def test_quantum_gripper_accepts_a_complete_alternative_brain() -> None:
-    """Brain injection bypasses qBrain construction while preserving world I/O."""
+@pytest.mark.parametrize("gripper_type", [ReactiveGripper, ClassicalGripper, QuantumGripper])
+def test_every_gripper_uses_the_same_sensor_and_action_interface(gripper_type: type) -> None:
+    """Every physical robot delegates the same readings and normalized action."""
     brain = FixedBrain(0.8)
-    gripper = QuantumGripper(config=QuantumGripperConfig(), brain=brain)
+    gripper = gripper_type(brain=brain)
     readings = {"proximity": 0.4, "touch": 1.0}
 
     # The base class owns sensor/action delegation and physical thresholding;

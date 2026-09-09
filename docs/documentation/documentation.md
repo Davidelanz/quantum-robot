@@ -6,8 +6,9 @@
 models
 bursts
 qunits
-visualization
-simulator
-dashboard
 logger
+visualization
+dashboard
+simulator
+grasping_analysis
 ```

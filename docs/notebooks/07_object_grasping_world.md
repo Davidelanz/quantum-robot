@@ -18,8 +18,8 @@ kernelspec:
 ```
 
 A stationary gripper combines proximity with contact feedback while a ball moves
-stochastically along its sensor axis. The same world accepts either a
-`ClassicalGripper` or a `QuantumGripper`.
+stochastically along its sensor axis. The same world accepts a `ReactiveGripper`,
+`ClassicalGripper`, or `QuantumGripper`.
 
 ```{image} ./07_imgs/grasping_live_world.png
 :alt: Two-dimensional grasping world with sensor regions and qBrain signals
@@ -31,7 +31,7 @@ The simulation isolates a single perception-to-action problem. A blue ball moves
 toward and away from the stationary gripper. The gripper must close while the ball
 is between its jaws, use the internal touch sensor to recognize a successful catch,
 and reopen in time for the next approach. The world records catches, missed visits,
-empty closures, and response times. It supplies both grippers with the same sensor
+empty closures, and response times. It supplies all three grippers with the same sensor
 interface and applies their commands to the same physical interaction.
 
 ## Setup
@@ -43,9 +43,9 @@ green portion is the space enclosed by the jaws. The touch pads lie inside the
 jaws, so they report contact only after a closure reaches the ball.
 
 The sensor limits below define the distance normalization, while the grippable
-distance marks how far the jaws can reach. The captured-ball holding time is how
-long a successful catch remains between the closed jaws before the ball is removed
-and a new approach begins. Ball speed determines how quickly this geometry changes.
+distance marks how far the jaws can reach. The prey consumption time is how long
+a successful catch must remain between the closed jaws before the prey disappears.
+Ball speed determines how quickly this geometry changes.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -54,13 +54,14 @@ from qrobot_simulator.grasping_world.robots.config import (
     BALL_PREY_CONFIG,
     CLASSICAL_GRIPPER_CONFIG,
     QUANTUM_GRIPPER_CONFIG,
+    REACTIVE_GRIPPER_CONFIG,
 )
 from qrobot_simulator.grasping_world.world.config import WORLD_CONFIG
 
 setup = {
     "sensor near / far (cm)": f"{WORLD_CONFIG.near_distance:g} / {WORLD_CONFIG.far_distance:g}",
     "grippable distance (cm)": WORLD_CONFIG.grippable_distance,
-    "captured-ball holding time (s)": WORLD_CONFIG.digestion_time,
+    "prey consumption time (s)": WORLD_CONFIG.consumption_time,
     "ball maximum speed (cm/s)": BALL_PREY_CONFIG.max_speed,
 }
 pd.DataFrame.from_dict(setup, orient="index", columns=["value"])
@@ -91,24 +92,48 @@ fig.tight_layout()
 plt.show()
 ```
 
-## Classical gripper
+## Reactive gripper
 
-Both grippers see only normalized proximity and touch; neither reads the ball's
+All grippers see only normalized proximity and touch; none reads the ball's
 position directly. They return one normalized command, where values above the
 gripper threshold close the jaws.
 
-`ClassicalGripperBrain` confirms sustained proximity before closing. It opens
-immediately after an empty closure, but holds a captured ball for the configured
-interval. Its explicit timers provide a deterministic comparison for the qBrain.
+`ReactiveGripperBrain` is the no-memory reference. It closes as soon as the current
+proximity reading crosses its threshold. While closed, current touch contact keeps
+the jaws closed; an empty touch reading opens them. A single brief or corrupted
+sample can therefore cause it to react.
+
+```{code-cell} ipython3
+pd.DataFrame.from_dict(
+    {
+        "proximity threshold": REACTIVE_GRIPPER_CONFIG.proximity_threshold,
+        "touch-contact threshold": REACTIVE_GRIPPER_CONFIG.contact_threshold,
+        "jaw activation threshold": REACTIVE_GRIPPER_CONFIG.gripper_threshold,
+    },
+    orient="index",
+    columns=["value"],
+)
+```
+
+## Classical gripper
+
+`ClassicalGripperBrain` is the deterministic temporal comparison. It divides each
+sensor stream into fixed, non-overlapping windows and computes the arithmetic mean
+of every completed window. The proximity and empty-gripper means then enter the
+same strict mean threshold used by the quantum actuator. Its sampling period and
+window lengths equal those of the two qUnits, separating temporal memory from the
+AngularModel and its stochastic measurement.
 
 Its timing and decision thresholds are printed from `ClassicalGripperConfig`:
 
 ```{code-cell} ipython3
 pd.DataFrame.from_dict(
     {
-        "proximity threshold": CLASSICAL_GRIPPER_CONFIG.proximity_threshold,
-        "continuous confirmation time (s)": CLASSICAL_GRIPPER_CONFIG.confirmation_time,
-        "successful-grasp hold time (s)": CLASSICAL_GRIPPER_CONFIG.grasp_time,
+        "sampling period (s)": CLASSICAL_GRIPPER_CONFIG.sampling_period,
+        "proximity window (s)": CLASSICAL_GRIPPER_CONFIG.sampling_period
+        * CLASSICAL_GRIPPER_CONFIG.proximity_tau,
+        "empty-gripper window (s)": CLASSICAL_GRIPPER_CONFIG.sampling_period
+        * CLASSICAL_GRIPPER_CONFIG.empty_gripper_tau,
         "jaw activation threshold": CLASSICAL_GRIPPER_CONFIG.gripper_threshold,
     },
     orient="index",
@@ -129,9 +154,9 @@ Code(getsource(ClassicalGripperBrain), language="python")
 ## Quantum gripper
 
 `QuantumGripperBrain` queries a short proximity history qUnit and a longer empty-gripper
-history qUnit. Both qUnit's binary bursts feed one actuator; its strict mean threshold behaves
-as an AND condition. The unequal windows let approach evidence change faster than
-contact feedback.
+history qUnit. Both measured bursts feed one actuator, which closes when their mean
+exceeds its threshold. The shorter proximity window lets the robot respond to an
+approaching ball sooner than the longer touch window responds to contact.
 
 Its sampling, temporal windows, queries, and actuator threshold are taken from
 `QuantumGripperConfig`:
@@ -166,10 +191,9 @@ HTML(architecture.to_html(include_plotlyjs="cdn", full_html=False, config={"resp
 
 Blue nodes form the sensor and perceptual path; the green node is the actuator.
 The arrows identify which outputs become inputs to the next unit. The graph itself
-reports the configured models, queries, periods, and wiring. A close command occurs
-when the proximity burst says that the ball is near and the empty-gripper burst
-says that the jaws are available. After capture, touch changes and the longer model
-retains that feedback before reopening the gripper.
+reports the configured models, queries, periods, and wiring. The proximity burst
+rises when recent readings resemble a nearby ball. The empty-gripper burst falls
+as contact readings accumulate. Their combination supplies the jaw command.
 
 ## Simulated interaction
 
@@ -179,14 +203,21 @@ remaining indefinitely under the gripper. Arena boundaries and closed jaws const
 its motion.
 
 When the jaws close around the ball, the ball is held and the touch input changes.
-The **captured-ball holding time** is the simulated interval for which a caught ball
-remains between the closed jaws. At its end, the ball is removed and respawned farther
-away, representing completion of one capture and resetting the world for another
-approach. Closing without
+The **prey consumption time** is the simulated chewing interval for which a caught
+ball remains between the closed jaws. At its end the consumed ball disappears, making
+the touch sensor report an empty gripper. The brain must then open the jaws; only that
+opening makes a new ball appear farther away. Opening before consumption releases the
+same ball and lets it escape. Closing without
 the ball counts as an **empty grip**. A visit ending inside the jaws counts as a
 **correct grip**, while an uncaught visit counts as a **missed grip**. Response time
 is measured from entry into the grippable region until capture. The renderer shows
 this world state and the current brain signals without affecting either one.
+
+The random motion is useful for seeing the complete interaction. Controlled
+measurements use the separate `qrobot_simulator.grasping_world.analysis` package,
+which can present one predefined ball visit to each robot and record its readings,
+commands, physical events, and response times. The experiment repository uses those
+records for repeated trials and statistics; they are not part of this demo tutorial.
 
 ## Run the example
 
@@ -196,9 +227,10 @@ With Redis listening on `localhost:6379`:
 python examples/grasping_world.py --gripper quantum
 ```
 
-Use `--gripper classical` for `ClassicalGripper`, `--seed` to replay
-motion, and `--speed` to accelerate the scheduled qBrain up to the limit reported
-by `--help`. A bounded headless run can save its final frame:
+Use `--gripper reactive`, `--gripper classical`, or `--gripper quantum` to select
+the brain. A fixed `--seed` repeats the random ball motion, while `--speed`
+accelerates the scheduled qBrain up to the limit reported by `--help`. A bounded
+headless run can save its final frame:
 
 ```bash
 python examples/grasping_world.py --gripper quantum --duration 10 --seed 7 --no-show \
@@ -207,9 +239,10 @@ python examples/grasping_world.py --gripper quantum --duration 10 --seed 7 --no-
 
 ## Fixed headless comparison
 
-Ten paired trials expose both grippers to the same initial conditions and random
-motion. This is a descriptive implementation check rather than a parameter search
-or a claim of statistical superiority. The cell prints the experimental setup.
+Ten paired trials expose the classical and quantum grippers to the same initial
+conditions and random motion. This is a descriptive implementation check rather
+than a parameter search or a claim of statistical superiority. The cell prints the
+experimental setup.
 
 ```{code-cell} ipython3
 :tags: [hide-input]

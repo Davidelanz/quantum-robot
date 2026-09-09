@@ -31,6 +31,9 @@ class GraspingWorld:
     :param correct_grips: Closing transitions that caught prey.
     :param missed_grips: Grippable visits that ended uncaught.
     :param empty_grips: Closing transitions made without grippable prey.
+    :param consumed_prey: Captured prey held until consumption completed.
+    :param premature_releases: Captured prey released before consumption completed.
+    :param seed: Seed controlling random ball movement.
     """
 
     arena: GraspingArena
@@ -44,10 +47,13 @@ class GraspingWorld:
     correct_grips: int = 0
     missed_grips: int = 0
     empty_grips: int = 0
+    consumed_prey: int = 0
+    premature_releases: int = 0
+    seed: int | None = None
     grip_response_times: list[float] = field(default_factory=list)
     _inside_visit: bool = False
     _visit_gripped: bool = False
-    _caught_at: float | None = None
+    _consumption_started_at: float | None = None
     _visit_started_at: float | None = None
     _rng: Random = field(default_factory=Random, repr=False)
 
@@ -62,10 +68,10 @@ class GraspingWorld:
         prey_config: BallPreyConfig = BALL_PREY_CONFIG,
         prey: BallPrey | None = None,
     ) -> GraspingWorld:
-        """Create the configured arena, robot, and randomly placed ball prey.
+        """Create the interactive world with randomly wandering prey.
 
         :param gripper: Configured gripper to place in the world.
-        :param seed: Optional seed for reproducible prey movement.
+        :param seed: Optional seed for reproducible random prey movement.
         :param prey: Optional configured prey instance; otherwise one is sampled.
         :returns: Initialized world with its first sensor snapshot.
         """
@@ -79,7 +85,15 @@ class GraspingWorld:
         )
         selected_prey_config = ball.config
         arena = GraspingArena(config.arena_width, config.arena_height, config.arena_cell_size)
-        world = cls(arena, gripper, ball, config, selected_prey_config, _rng=rng)
+        world = cls(
+            arena=arena,
+            gripper=gripper,
+            ball=ball,
+            config=config,
+            prey_config=selected_prey_config,
+            seed=seed,
+            _rng=rng,
+        )
         ball.schedule_motion_change(world.elapsed, rng)
         world._update_ball_position()
         world.readings = world.sensor_readings()
@@ -98,6 +112,7 @@ class GraspingWorld:
         ball_was_inside = self._ball_is_grippable()
         self.gripper.apply_activation(gripper_activation)
         self.elapsed += dt
+        self._complete_consumption_if_due()
         self._handle_gripper_transition(was_closed, ball_was_inside)
         self._advance_ball(dt)
         self._update_visit_counter()
@@ -141,7 +156,7 @@ class GraspingWorld:
         return self
 
     def run_robot_headless(self, duration: float, dt: float = 0.01) -> GraspingWorld:
-        """Run either gripper through the same headless world interface."""
+        """Run any gripper through the same headless world interface."""
         if duration <= 0 or dt <= 0:
             raise ValueError("duration and dt must be positive")
         self.gripper.prepare_headless(self.readings)
@@ -155,37 +170,49 @@ class GraspingWorld:
 
         :returns: Proximity and touch readings keyed by sensor name.
         """
-        return {
-            "proximity": proximity_reading(
+        proximity = (
+            proximity_reading(
                 self.ball.distance, self.config.near_distance, self.config.far_distance
-            ),
+            )
+            if self.ball.present
+            else 0.0
+        )
+        return {
+            "proximity": proximity,
             "touch": touch_reading(self.touch_pressed),
         }
 
-    # Grip, digestion, and scoring internals
+    # Grip, consumption, release, and scoring internals
 
     def _handle_gripper_transition(self, was_closed: bool, ball_was_inside: bool) -> None:
-        """Score and apply a newly issued closing command."""
+        """Apply the physical consequence of a jaw-state transition."""
         if self.gripper.gripper_closed and not was_closed:
             if ball_was_inside:
                 self._catch_ball()
             else:
                 self.empty_grips += 1
+        elif was_closed and not self.gripper.gripper_closed:
+            if self.ball.caught:
+                self._release_unconsumed_prey()
+            elif not self.ball.present:
+                self._respawn_ball()
 
     def _catch_ball(self) -> None:
-        """Mark the ball caught and start the digestion interval."""
+        """Mark the prey caught and start its consumption interval."""
         self.correct_grips += 1
         self.ball.caught = True
-        self._caught_at = self.elapsed
+        self._consumption_started_at = self.elapsed
         self._inside_visit = True
         self._visit_gripped = True
         if self._visit_started_at is not None:
             self.grip_response_times.append(self.elapsed - self._visit_started_at)
 
     def _advance_ball(self, dt: float) -> None:
-        """Hold caught prey or advance a free ball."""
+        """Hold caught prey, wait while absent, or advance free prey."""
         if self.ball.caught:
-            self._hold_or_digest_ball()
+            self.ball.velocity = 0.0
+            return
+        if not self.ball.present:
             return
         closed_barrier = self.config.grippable_distance if self.gripper.gripper_closed else None
         self.ball.step(
@@ -197,20 +224,35 @@ class GraspingWorld:
             near_limit=self.config.grippable_distance,
         )
 
-    def _hold_or_digest_ball(self) -> None:
-        """Hold caught prey still and respawn it after digestion."""
-        if self._caught_at is None:
+    def _complete_consumption_if_due(self) -> None:
+        """Remove prey after uninterrupted contact for the configured interval."""
+        if not self.ball.caught:
+            return
+        if self._consumption_started_at is None:
             raise RuntimeError("caught ball has no capture time")
-        if self.elapsed - self._caught_at >= self.config.digestion_time:
-            self._respawn_ball()
-        else:
-            self.gripper.gripper_closed = True
-            self.ball.velocity = 0.0
+        if self.elapsed - self._consumption_started_at < self.config.consumption_time:
+            return
+
+        # Disappearance removes contact but leaves the jaw command untouched.
+        # The brain must observe the empty gripper and open it itself.
+        self.ball.caught = False
+        self.ball.present = False
+        self.ball.velocity = 0.0
+        self._consumption_started_at = None
+        self.consumed_prey += 1
+
+    def _release_unconsumed_prey(self) -> None:
+        """Let prey escape when the robot opens before consumption completes."""
+        self.ball.caught = False
+        self._consumption_started_at = None
+        self.premature_releases += 1
+        self.ball.velocity = max(self.prey_config.escape_speed, abs(self.ball.velocity))
 
     def _respawn_ball(self) -> None:
-        """Replace eaten prey at a random far position."""
+        """Spawn new prey after consumed prey is absent and the jaws open."""
         self.ball.caught = False
-        self._caught_at = None
+        self._consumption_started_at = None
+        self.ball.present = True
         self.ball.distance = self._rng.uniform(*self.prey_config.respawn_distance_range)
         self.ball.velocity = self._rng.uniform(*self.prey_config.initial_velocity_range)
         self._inside_visit = False
@@ -234,7 +276,9 @@ class GraspingWorld:
 
     def _ball_is_grippable(self) -> bool:
         """Return whether prey lies inside the configured jaw interval."""
-        return self.config.minimum_distance <= self.ball.distance <= self.config.grippable_distance
+        return self.ball.present and (
+            self.config.minimum_distance <= self.ball.distance <= self.config.grippable_distance
+        )
 
     def _update_ball_position(self) -> None:
         """Convert sensor distance to the ball's horizontal display position."""
