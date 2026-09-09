@@ -33,9 +33,9 @@ interaction and the perceptual and cognitive layers.
 ## Grasping world
 
 The grasping world contains a stationary gripper and a blue ball moving along its
-sensor axis. `ClassicalGripper` applies a deterministic temporal policy.
-`QuantumGripper` integrates proximity and touch histories through a qBrain. Both
-can be passed to `GraspingWorld.demo()` and executed through the same method:
+sensor axis. `ReactiveGripper` uses only the latest readings. `ClassicalGripper`
+averages fixed temporal windows, while `QuantumGripper` processes equal-duration
+histories through its qBrain. All three use the same world interface:
 
 ```python
 from qrobot_simulator.grasping_world import ClassicalGripper, GraspingWorld
@@ -83,12 +83,12 @@ world = GraspingWorld.controlled(ClassicalGripper(), encounter, seed=7)
 world.run_robot_headless(duration=encounter.duration, dt=0.05)
 ```
 
-An experiment creates two fresh worlds from the same encounter and seed: one with
-`ClassicalGripper` and one with `QuantumGripper`. Each robot therefore sees the
-same ball visit and the same sensor disturbance. Differences in their responses
-can then be attributed to their brains rather than to one receiving an easier
-random trajectory. Noise is derived from the seed and simulated time, so rendering
-or reading a sensor for diagnostics does not change a later value.
+An experiment creates three fresh worlds from the same encounter and seed: one for
+each gripper. Every robot therefore sees the same ball visit and sensor disturbance.
+Differences in their responses can then be attributed to their brains rather than
+to one receiving an easier random trajectory. Noise is derived from the seed and
+simulated time, so rendering or reading a sensor for diagnostics does not change a
+later value.
 
 `GraspingWorldLiveView` can display the same world or save a frame; it is unnecessary for headless runs.
 
@@ -97,6 +97,8 @@ or reading a sensor for diagnostics does not change a later value.
    :members: demo, controlled, step, run_headless, run_robot_headless, sensor_readings
 
 .. autoclass:: qrobot_simulator.grasping_world.ClassicalGripper
+
+.. autoclass:: qrobot_simulator.grasping_world.ReactiveGripper
 
 .. autoclass:: qrobot_simulator.grasping_world.QuantumGripper
 

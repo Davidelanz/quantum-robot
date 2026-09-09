@@ -6,9 +6,9 @@ import pytest
 
 from qrobot_simulator.grasping_world.robots.ball_prey import BallPrey
 from qrobot_simulator.grasping_world.robots.classical_gripper import ClassicalGripper
+from qrobot_simulator.grasping_world.robots.reactive_gripper import ReactiveGripper
 from qrobot_simulator.grasping_world.world.grasping_world import GraspingWorld
 from qrobot_simulator.grasping_world.robots.config import BALL_PREY_CONFIG
-from qrobot_simulator.grasping_world.robots.config import CLASSICAL_GRIPPER_CONFIG
 from qrobot_simulator.grasping_world.world.config import WORLD_CONFIG
 
 
@@ -33,9 +33,9 @@ def test_world_runs_a_classical_gripper_without_an_adapter() -> None:
     assert world.elapsed == pytest.approx(0.05)
 
 
-def test_classical_gripper_closure_is_scored_as_a_catch() -> None:
+def test_robot_closure_is_scored_as_a_catch() -> None:
     """A grippable ball links controller closure to contact and score state."""
-    gripper = ClassicalGripper(config=replace(CLASSICAL_GRIPPER_CONFIG, confirmation_time=0.1))
+    gripper = ReactiveGripper()
     world = GraspingWorld.demo(gripper=gripper, seed=4)
 
     # Place stationary prey inside the jaws to isolate the closing transition
@@ -92,21 +92,16 @@ def test_opening_before_consumption_releases_the_same_prey() -> None:
 
 def test_opening_at_consumption_completion_counts_as_successful() -> None:
     """A release at the completed chewing boundary is not premature."""
-    robot_config = replace(
-        CLASSICAL_GRIPPER_CONFIG,
-        confirmation_time=0.1,
-        grasp_time=0.3,
-    )
     world_config = replace(WORLD_CONFIG, consumption_time=0.3)
-    world = GraspingWorld.demo(ClassicalGripper(robot_config), seed=7, config=world_config)
+    world = GraspingWorld.demo(ClassicalGripper(), seed=7, config=world_config)
     world.ball.distance = 10.0
     world.ball.velocity = 0.0
-    world.readings = world.sensor_readings()
 
-    # The classical brain opens after exactly the same interval required for
-    # consumption. The world completes consumption before processing that
-    # opening transition, then spawns the next prey behind open jaws.
-    world.run_robot_headless(duration=0.4, dt=0.1)
+    # Consumption is processed before a simultaneous opening transition. The
+    # opening therefore respawns prey instead of being recorded as premature.
+    world.step(1.0, 0.1)
+    world.step(1.0, 0.2)
+    world.step(0.0, 0.1)
 
     assert world.consumed_prey == 1
     assert world.premature_releases == 0

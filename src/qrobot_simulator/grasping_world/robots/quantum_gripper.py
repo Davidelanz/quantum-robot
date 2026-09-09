@@ -15,7 +15,14 @@ QUnits = dict[str, QUnit]
 
 
 class QuantumGripperBrain(BaseGripperBrain):
-    """Bridge common readings and actions to independently scheduled qUnits."""
+    """Control the jaws with quantum-like histories of proximity and touch.
+
+    A short-history qUnit detects whether the ball has remained near. A
+    longer-history qUnit distinguishes an empty gripper from accumulated contact.
+    Their measured outputs jointly determine whether the jaws close or open.
+    This produces the same sensor-to-action structure as the classical gripper,
+    while replacing arithmetic averages with the AngularModel and measurement.
+    """
 
     def __init__(
         self,
@@ -134,7 +141,7 @@ class QuantumGripperBrain(BaseGripperBrain):
 
 
 class QuantumGripper(BaseGripper):
-    """Physical gripper driven by an injectable quantum or alternative brain."""
+    """Gripper controlled by the AngularModel-based qBrain."""
 
     def __init__(
         self,

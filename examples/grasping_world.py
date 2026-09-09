@@ -1,4 +1,4 @@
-"""Run a classical or quantum gripper in the two-dimensional grasping world.
+"""Run a reactive, classical, or quantum gripper in the grasping world.
 
 Warning: ``qrobot_simulator`` is experimental. This example implements the
 object-grasping research scenario with simplified two-dimensional kinematics,
@@ -6,11 +6,9 @@ sensing, and contact rules; its simulator interfaces may change between minor
 releases.
 
 A blue ball wanders between near and far destinations in front of a stationary
-brown gripper. The classical version applies a deterministic timed policy; the
-quantum version feeds independently timed qUnits and a Redis-connected actuator.
-
-Reference: D. Lanza, "Quantum-like Modeling of Cognitive Architectures for Robotics",
-Zenodo, 2020, https://doi.org/10.5281/zenodo.22068511.
+brown gripper. The reactive version uses the latest readings, the classical
+version integrates fixed temporal windows, and the quantum version feeds
+independently timed qUnits and a Redis-connected actuator.
 """
 
 import argparse
@@ -26,6 +24,7 @@ from qrobot_simulator.grasping_world import (
     GraspingWorld,
     GraspingWorldLiveView,
     QuantumGripper,
+    ReactiveGripper,
 )
 from qrobot_simulator.grasping_world.robots.base_gripper import BaseGripper
 
@@ -49,9 +48,9 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--gripper",
-        choices=("classical", "quantum"),
+        choices=("reactive", "classical", "quantum"),
         default="quantum",
-        help="Controller used by the stationary gripper.",
+        help="Brain used by the stationary gripper.",
     )
     parser.add_argument(
         "--duration",
@@ -177,8 +176,10 @@ def main() -> None:
         except ConnectionError as exc:
             raise RuntimeError("Redis must be running on localhost:6379") from exc
         gripper: BaseGripper = QuantumGripper(redis_config, args.speed)
-    else:
+    elif args.gripper == "classical":
         gripper = ClassicalGripper()
+    else:
+        gripper = ReactiveGripper()
 
     world = GraspingWorld.demo(gripper, seed=args.seed)
     # A headless run constructs no Matplotlib objects unless a final rendered

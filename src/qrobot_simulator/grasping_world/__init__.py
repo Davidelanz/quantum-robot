@@ -3,6 +3,7 @@
 from .rendering.liveview import GraspingWorldLiveView
 from .robots.classical_gripper import ClassicalGripper
 from .robots.quantum_gripper import QuantumGripper
+from .robots.reactive_gripper import ReactiveGripper
 from .world.grasping_world import GraspingWorld
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "GraspingWorld",
     "GraspingWorldLiveView",
     "QuantumGripper",
+    "ReactiveGripper",
 ]
