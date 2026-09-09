@@ -213,6 +213,12 @@ the ball counts as an **empty grip**. A visit ending inside the jaws counts as a
 is measured from entry into the grippable region until capture. The renderer shows
 this world state and the current brain signals without affecting either one.
 
+The random motion is useful for seeing the complete interaction. Controlled
+measurements use the separate `qrobot_simulator.grasping_world.analysis` package,
+which can present one predefined ball visit to each robot and record its readings,
+commands, physical events, and response times. The experiment repository uses those
+records for repeated trials and statistics; they are not part of this demo tutorial.
+
 ## Run the example
 
 With Redis listening on `localhost:6379`:
