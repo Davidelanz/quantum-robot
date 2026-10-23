@@ -74,7 +74,7 @@ docs = [
     "plotly>=6.0",
 ]
 lint = [
-    "black>=25.0",
+    "black>=26.10.1",
     "build>=1.2",
     "jupytext>=1.17",
     "ruff>=0.14",
